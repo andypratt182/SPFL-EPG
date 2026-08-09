@@ -7,12 +7,15 @@ The EPG generator uses:
 
     get_fixtures(team)
 
-This module deliberately knows nothing about ESPN, BBC, Fixture
-Download, or any other external source.
+This module deliberately knows nothing about ESPN, BBC,
+Fixture Download, SportMonks, or any other external source.
 
 All fixture data comes from:
 
     data/fixtures.json
+
+The external fixture source is handled separately by the
+data layer.
 
 This means the fixture source can be replaced later without
 changing generator.py or xmltv.py.
@@ -22,7 +25,6 @@ import json
 import re
 from datetime import datetime, timedelta
 from pathlib import Path
-
 from zoneinfo import ZoneInfo
 
 
@@ -37,8 +39,8 @@ FIXTURE_DAYS = 24
 
 def normalise_team_name(name: str) -> str:
     """
-    Normalise team names so small naming differences do not prevent
-    fixtures from being matched.
+    Normalise team names so small naming differences do not
+    prevent fixtures from being matched.
     """
 
     if not name:
@@ -92,7 +94,23 @@ def _load_fixture_data() -> list[dict]:
         )
         return []
 
-    return data.get("fixtures", [])
+    if not isinstance(data, dict):
+        print(
+            "WARNING: fixture data file does not "
+            "contain a JSON object"
+        )
+        return []
+
+    fixtures = data.get("fixtures", [])
+
+    if not isinstance(fixtures, list):
+        print(
+            "WARNING: fixture data 'fixtures' "
+            "value is not a list"
+        )
+        return []
+
+    return fixtures
 
 
 def _parse_kickoff(value):
@@ -115,7 +133,7 @@ def _parse_kickoff(value):
 
         return kickoff.astimezone(UK_TZ)
 
-    except ValueError:
+    except (ValueError, TypeError):
         return None
 
 
@@ -123,8 +141,8 @@ def get_fixtures(team: dict) -> list[dict]:
     """
     Public interface used by generator.py.
 
-    Returns fixtures for one team in the format expected by the
-    existing EPG system:
+    Returns fixtures for one team in the format expected by
+    the existing EPG system:
 
         {
             "home": str,
