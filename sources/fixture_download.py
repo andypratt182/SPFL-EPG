@@ -519,11 +519,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-Important: I would not run this version yet without checking one thing. The earlier Fixture Download investigation was based on its football data, but the exact current endpoint/JSON structure needs to match what this adapter expects. The code above deliberately reports the response instead of silently pretending it found fixtures.
-
-Commit this replacement and run Test Fixture Download. Then paste the output beginning with:
-
-FIXTURE DOWNLOAD SOURCE ADAPTER
-
-That output will tell us exactly what Fixture Download is returning from GitHub Actions, and we can make the adapter fit the real response rather than guessing at its API.
