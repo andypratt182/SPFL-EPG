@@ -1,16 +1,16 @@
 """
 data_layer.py
 
-Small data layer between external fixture sources and the EPG.
+Small source-independent data layer for SPFL fixture data.
 
-External sources should write normalised fixture data through
-this module.
-
-The rest of the EPG only reads:
+Source adapters write normalised fixture data to:
 
     data/fixtures.json
 
-This keeps the EPG independent from the actual fixture source.
+The rest of the EPG system reads that file through fixtures.py.
+
+This keeps external fixture sources completely separate from
+the EPG generation code.
 """
 
 import json
@@ -27,8 +27,9 @@ def save_fixtures(fixtures: list[dict]) -> None:
     """
     Save normalised fixtures to data/fixtures.json.
 
-    Existing data is replaced only after the new fixture list
-    has been validated and successfully written.
+    Existing fixture data is replaced with the newly downloaded
+    dataset. This is intentional because the source adapter is
+    responsible for providing the current fixture list.
     """
 
     DATA_DIR.mkdir(
@@ -36,53 +37,15 @@ def save_fixtures(fixtures: list[dict]) -> None:
         exist_ok=True,
     )
 
-    normalised = []
-
-    for fixture in fixtures:
-
-        required = (
-            "home",
-            "away",
-            "kickoff",
-        )
-
-        if not all(
-            fixture.get(field)
-            for field in required
-        ):
-            continue
-
-        normalised.append(
-            {
-                "home": str(
-                    fixture["home"]
-                ),
-                "away": str(
-                    fixture["away"]
-                ),
-                "kickoff": str(
-                    fixture["kickoff"]
-                ),
-                "competition": str(
-                    fixture.get(
-                        "competition",
-                        "Unknown",
-                    )
-                ),
-            }
-        )
-
-    payload = {
+    output = {
         "generated_at": datetime.now(
             timezone.utc
         ).isoformat(),
-        "fixtures": normalised,
+        "fixtures": fixtures,
     }
 
-    temporary_file = (
-        FIXTURES_FILE.with_suffix(
-            ".tmp"
-        )
+    temporary_file = FIXTURES_FILE.with_suffix(
+        ".tmp"
     )
 
     with open(
@@ -90,29 +53,24 @@ def save_fixtures(fixtures: list[dict]) -> None:
         "w",
         encoding="utf-8",
     ) as f:
-
         json.dump(
-            payload,
+            output,
             f,
             indent=2,
             ensure_ascii=False,
         )
 
-        f.write("\n")
-
     temporary_file.replace(
         FIXTURES_FILE
-    )
-
-    print(
-        f"Saved {len(normalised)} fixtures "
-        f"to {FIXTURES_FILE}"
     )
 
 
 def load_fixtures() -> list[dict]:
     """
-    Load the current normalised fixture data.
+    Load normalised fixtures from data/fixtures.json.
+
+    Returns an empty list if the file does not exist
+    or cannot be read.
     """
 
     if not FIXTURES_FILE.exists():
@@ -125,12 +83,11 @@ def load_fixtures() -> list[dict]:
             "r",
             encoding="utf-8",
         ) as f:
-
             data = json.load(f)
 
         return data.get(
             "fixtures",
-            [],
+            []
         )
 
     except (
