@@ -52,18 +52,59 @@ def add_programme(
 
 
 def parse_kickoff(timestamp):
+    """
+    Convert fixture kickoff data into a timezone-aware UTC datetime.
 
-    return datetime.strptime(
-        timestamp,
-        "%Y%m%d%H%M%S +0000",
-    ).replace(
-        tzinfo=timezone.utc
+    The new data layer stores kickoff as a datetime object.
+
+    The older EPG code stored kickoff as a string in the format:
+
+        YYYYMMDDHHMMSS +0000
+
+    This function deliberately supports both formats so the
+    XMLTV layer remains compatible with existing data.
+    """
+
+    # ---------------------------------------------------------
+    # New data-layer format
+    # ---------------------------------------------------------
+
+    if isinstance(timestamp, datetime):
+
+        if timestamp.tzinfo is None:
+
+            timestamp = timestamp.replace(
+                tzinfo=UK_TZ
+            )
+
+        return timestamp.astimezone(
+            timezone.utc
+        )
+
+    # ---------------------------------------------------------
+    # Existing string format
+    # ---------------------------------------------------------
+
+    if isinstance(timestamp, str):
+
+        return datetime.strptime(
+            timestamp,
+            "%Y%m%d%H%M%S +0000",
+        ).replace(
+            tzinfo=timezone.utc
+        )
+
+    raise TypeError(
+        "Unsupported kickoff type: "
+        f"{type(timestamp).__name__}"
     )
 
 
 def format_kickoff(timestamp):
 
-    utc_time = parse_kickoff(timestamp)
+    utc_time = parse_kickoff(
+        timestamp
+    )
 
     return utc_time.astimezone(
         UK_TZ
@@ -73,6 +114,20 @@ def format_kickoff(timestamp):
 
 
 def xml_time(dt):
+
+    # ---------------------------------------------------------
+    # XMLTV timestamps are written in UTC.
+    # ---------------------------------------------------------
+
+    if dt.tzinfo is None:
+
+        dt = dt.replace(
+            tzinfo=timezone.utc
+        )
+
+    dt = dt.astimezone(
+        timezone.utc
+    )
 
     return dt.strftime(
         "%Y%m%d%H%M%S"
@@ -95,6 +150,7 @@ def get_next_match(
         )
 
         if kickoff > after_time:
+
             return match
 
     return None
@@ -168,10 +224,6 @@ def create_next_game_programme(
 
         # -------------------------------------------------
         # Next Game title
-        #
-        # Example:
-        #
-        # Next Game: Rangers vs Hibernian | Sunday 9th
         # -------------------------------------------------
 
         title = (
@@ -268,12 +320,18 @@ def create_xmltv(
     create_channel_entries(tv)
 
     # -----------------------------------------------------
-    # Sort all fixtures by kick-off time
+    # Sort all fixtures by kick-off time.
+    #
+    # parse_kickoff() allows this to work with both the
+    # old string format and the new datetime format.
     # -----------------------------------------------------
 
     fixtures = sorted(
         fixtures,
-        key=lambda x: x["kickoff"]
+        key=lambda x:
+            parse_kickoff(
+                x["kickoff"]
+            )
     )
 
     # -----------------------------------------------------
@@ -419,4 +477,4 @@ def create_xmltv(
         filename,
         encoding="utf-8",
         xml_declaration=True
-                )
+    )
