@@ -279,7 +279,7 @@ def create_next_game_programme(
         )
 
         # ----------------------------------------------------
-        # KEEP EXISTING TITLE EXACTLY AS REQUESTED
+        # KEEP EXISTING TITLE
         # ----------------------------------------------------
 
         title = (
@@ -290,7 +290,7 @@ def create_next_game_programme(
         )
 
         # ----------------------------------------------------
-        # CLEANER NEXT GAME DESCRIPTION
+        # NEXT GAME DESCRIPTION
         # ----------------------------------------------------
 
         competition = next_match.get(
@@ -310,14 +310,56 @@ def create_next_game_programme(
         if not venue:
             venue = "Venue TBC"
 
-        description = (
-            f"{next_match['home']} vs "
-            f"{next_match['away']}\n"
-            f"Competition: {competition}\n"
-            f"Venue: {venue}\n"
-            f"Kick-off: "
-            f"{format_kickoff(next_match['kickoff'])}"
+        # ----------------------------------------------------
+        # Get the team's display name from SPFL_TEAMS.
+        #
+        # This means:
+        #   Rangers TV -> Rangers
+        #   Hearts TV  -> Hearts
+        #   Celtic TV  -> Celtic
+        # ----------------------------------------------------
+
+        team = SPFL_TEAMS.get(
+            channel_id,
+            {}
         )
+
+        team_name = team.get(
+            "name",
+            channel_id
+        )
+
+        if team_name.endswith(" TV"):
+            team_name = team_name[:-3].strip()
+
+        # ----------------------------------------------------
+        # Determine whether the channel team is home or away.
+        # ----------------------------------------------------
+
+        home = next_match["home"]
+        away = next_match["away"]
+
+        if team_name.lower() == home.lower():
+
+            description = (
+                f"{team_name} take on "
+                f"{away} in the "
+                f"{competition} at "
+                f"{venue}. "
+                f"Kick-off is scheduled for "
+                f"{local_kickoff.strftime('%-I:%M %p')}."
+            )
+
+        else:
+
+            description = (
+                f"{team_name} face "
+                f"{home} in the "
+                f"{competition} at "
+                f"{venue}. "
+                f"Kick-off is scheduled for "
+                f"{local_kickoff.strftime('%-I:%M %p')}."
+            )
 
     else:
 
@@ -477,10 +519,12 @@ def create_xmltv(
         )
 
         if kickoff is None:
+
             print(
                 "WARNING: Ignoring fixture with "
                 f"invalid kickoff: {fixture}"
             )
+
             continue
 
         fixture = dict(fixture)
@@ -532,6 +576,7 @@ def create_xmltv(
             if fixture.get(
                 "channel_id"
             ) != channel_id:
+
                 continue
 
             kickoff = fixture[
@@ -677,4 +722,4 @@ def create_xmltv(
 
     print(
         f"XMLTV written to {filename}"
-    )
+        )
