@@ -31,16 +31,10 @@ from urllib.error import HTTPError, URLError
 #     python sources/fixture_download.py
 # ---------------------------------------------------------
 
-BASE_DIR = Path(
-    __file__
-).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 if str(BASE_DIR) not in sys.path:
-
-    sys.path.insert(
-        0,
-        str(BASE_DIR)
-    )
+    sys.path.insert(0, str(BASE_DIR))
 
 
 from data_layer import save_fixtures
@@ -67,6 +61,16 @@ MAX_RETRIES = 3
 
 # ---------------------------------------------------------
 # Team slug conversion
+#
+# The EPG uses the names we want displayed to users.
+# Fixture Download has its own URL naming convention.
+#
+# For example:
+#
+#     Hearts
+#         ↓
+#     heart-of-midlothian
+#
 # ---------------------------------------------------------
 
 TEAM_SLUGS = {
@@ -75,12 +79,18 @@ TEAM_SLUGS = {
     "Dundee": "dundee",
     "Dundee United": "dundee-united",
     "Falkirk": "falkirk",
-    "Heart of Midlothian": "heart-of-midlothian",
+
+    # Hearts is displayed as "Hearts" in the EPG,
+    # but Fixture Download uses "heart-of-midlothian".
+    "Hearts": "heart-of-midlothian",
+
     "Hibernian": "hibernian",
     "Kilmarnock": "kilmarnock",
     "Motherwell": "motherwell",
     "Rangers": "rangers",
+    "St Johnstone": "st-johnstone",
     "St. Johnstone": "st-johnstone",
+    "St Mirren": "st-mirren",
     "St. Mirren": "st-mirren",
 }
 
@@ -92,16 +102,11 @@ TEAM_SLUGS = {
 def download_json(url: str):
 
     headers = {
-        "User-Agent":
-            "SPFL-EPG/1.0",
-        "Accept":
-            "application/json",
+        "User-Agent": "SPFL-EPG/1.0",
+        "Accept": "application/json",
     }
 
-    for attempt in range(
-        1,
-        MAX_RETRIES + 1
-    ):
+    for attempt in range(1, MAX_RETRIES + 1):
 
         print(
             f"    Request attempt "
@@ -130,14 +135,9 @@ def download_json(url: str):
                     "utf-8"
                 )
 
-            data = json.loads(
-                body
-            )
+            data = json.loads(body)
 
-            if not isinstance(
-                data,
-                list
-            ):
+            if not isinstance(data, list):
 
                 print(
                     "    Response JSON was not a list."
@@ -152,18 +152,18 @@ def download_json(url: str):
 
             return data
 
-        except HTTPError as e:
+        except HTTPError as error:
 
             print(
                 f"    HTTP error: "
-                f"{e.code}"
+                f"{error.code}"
             )
 
-        except URLError as e:
+        except URLError as error:
 
             print(
                 f"    URL error: "
-                f"{e.reason}"
+                f"{error.reason}"
             )
 
         except TimeoutError:
@@ -178,10 +178,10 @@ def download_json(url: str):
                 "    Response was not valid JSON."
             )
 
-        except Exception as e:
+        except Exception as error:
 
             print(
-                f"    Unexpected error: {e}"
+                f"    Unexpected error: {error}"
             )
 
         if attempt < MAX_RETRIES:
@@ -192,9 +192,7 @@ def download_json(url: str):
                 f"    Retrying in {delay}s..."
             )
 
-            time.sleep(
-                delay
-            )
+            time.sleep(delay)
 
     return []
 
@@ -217,7 +215,6 @@ def convert_kickoff(
     """
 
     if not date_value:
-
         return None
 
     try:
@@ -281,7 +278,6 @@ def normalise_fixture(
     )
 
     if not home or not away:
-
         return None
 
     kickoff = convert_kickoff(
@@ -289,22 +285,38 @@ def normalise_fixture(
     )
 
     if kickoff is None:
-
         return None
+
+    # -----------------------------------------------------
+    # Keep the official EPG naming convention.
+    #
+    # Fixture Download may return:
+    #
+    #     Heart of Midlothian
+    #
+    # but the EPG should display:
+    #
+    #     Hearts
+    #
+    # -----------------------------------------------------
+
+    if home.strip() == "Heart of Midlothian":
+        home = "Hearts"
+
+    if away.strip() == "Heart of Midlothian":
+        away = "Hearts"
 
     # -----------------------------------------------------
     # Fixture Download calls the venue "Location".
     #
     # Store it as "stadium" because that is the field
-    # consumed by fixtures.py and xmltv.py.
+    # consumed by fixtures.py and the XMLTV generator.
     # -----------------------------------------------------
 
     stadium = (
         location.strip()
-        if isinstance(
-            location,
-            str
-        ) and location.strip()
+        if isinstance(location, str)
+        and location.strip()
         else "Venue TBC"
     )
 
@@ -366,22 +378,16 @@ def main():
 
     for channel_id, team in SPFL_TEAMS.items():
 
-        team_name = get_team_name(
-            team
-        )
+        team_name = get_team_name(team)
 
-        slug = TEAM_SLUGS.get(
-            team_name
-        )
+        slug = TEAM_SLUGS.get(team_name)
 
         print()
         print(
             "--------------------------------"
         )
 
-        print(
-            team_name
-        )
+        print(team_name)
 
         print(
             "--------------------------------"
@@ -404,9 +410,7 @@ def main():
             f"URL: {url}"
         )
 
-        raw_fixtures = download_json(
-            url
-        )
+        raw_fixtures = download_json(url)
 
         if not raw_fixtures:
 
@@ -423,7 +427,6 @@ def main():
             )
 
             if fixture is None:
-
                 continue
 
             # -------------------------------------------------
@@ -475,9 +478,7 @@ def main():
     if not fixtures:
 
         print()
-        print(
-            "ERROR:"
-        )
+        print("ERROR:")
 
         print(
             "Fixture Download returned zero "
@@ -511,11 +512,10 @@ def main():
     # Save data.
     # -----------------------------------------------------
 
-    save_fixtures(
-        fixtures
-    )
+    save_fixtures(fixtures)
 
     print()
+
     print(
         "Fixture data saved successfully"
     )
