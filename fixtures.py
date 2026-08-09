@@ -7,12 +7,15 @@ The EPG generator uses:
 
     get_fixtures(team)
 
+This module deliberately knows nothing about ESPN, BBC,
+Fixture Download, or any other external source.
+
 All fixture data comes from:
 
     data/fixtures.json
 
-The source adapter is responsible for downloading and
-normalising the data. This module only loads and filters it.
+This means the fixture source can be replaced later without
+changing generator.py or xmltv.py.
 """
 
 import json
@@ -26,7 +29,12 @@ from zoneinfo import ZoneInfo
 UK_TZ = ZoneInfo("Europe/London")
 
 BASE_DIR = Path(__file__).resolve().parent
-FIXTURES_FILE = BASE_DIR / "data" / "fixtures.json"
+
+FIXTURES_FILE = (
+    BASE_DIR /
+    "data" /
+    "fixtures.json"
+)
 
 # Number of days ahead to include.
 FIXTURE_DAYS = 24
@@ -34,8 +42,22 @@ FIXTURE_DAYS = 24
 
 def normalise_team_name(name: str) -> str:
     """
-    Normalise team names so small naming differences do not
+    Normalise team names so differences between sources do not
     prevent fixtures from being matched.
+
+    Examples:
+
+        Hearts
+        Heart of Midlothian
+
+    are treated as the same team.
+
+    Likewise:
+
+        Rangers FC
+        Rangers Football Club
+
+    are treated as the same team.
     """
 
     if not name:
@@ -43,29 +65,116 @@ def normalise_team_name(name: str) -> str:
 
     name = name.lower().strip()
 
+    # ---------------------------------------------------------
+    # Remove punctuation.
+    #
+    # St. Mirren -> St Mirren
+    # ---------------------------------------------------------
+
     name = re.sub(
         r"[^\w\s]",
         " ",
         name,
     )
 
+    # ---------------------------------------------------------
+    # Remove common club suffixes.
+    # ---------------------------------------------------------
+
     for suffix in (
         " football club",
         " fc",
     ):
+
         if name.endswith(suffix):
+
             name = name[
                 : -len(suffix)
             ].strip()
 
-    return " ".join(
+    # ---------------------------------------------------------
+    # Collapse multiple spaces.
+    # ---------------------------------------------------------
+
+    name = " ".join(
         name.split()
+    )
+
+    # ---------------------------------------------------------
+    # Known team aliases.
+    #
+    # The value is the canonical name used for matching.
+    # ---------------------------------------------------------
+
+    aliases = {
+
+        # Rangers
+        "rangers":
+            "rangers",
+
+        # Celtic
+        "celtic":
+            "celtic",
+
+        # Aberdeen
+        "aberdeen":
+            "aberdeen",
+
+        # Dundee
+        "dundee":
+            "dundee",
+
+        # Dundee United
+        "dundee united":
+            "dundee united",
+
+        # Hearts
+        "hearts":
+            "heart of midlothian",
+
+        "heart of midlothian":
+            "heart of midlothian",
+
+        # Hibernian
+        "hibs":
+            "hibernian",
+
+        "hibernian":
+            "hibernian",
+
+        # Kilmarnock
+        "kilmarnock":
+            "kilmarnock",
+
+        # Motherwell
+        "motherwell":
+            "motherwell",
+
+        # Falkirk
+        "falkirk":
+            "falkirk",
+
+        # St Johnstone
+        "st johnstone":
+            "st johnstone",
+
+        "st johnstones":
+            "st johnstone",
+
+        # St Mirren
+        "st mirren":
+            "st mirren",
+    }
+
+    return aliases.get(
+        name,
+        name
     )
 
 
 def _load_fixture_data() -> list[dict]:
     """
-    Load fixtures from data/fixtures.json.
+    Load fixtures from the normalised data file.
     """
 
     if not FIXTURES_FILE.exists():
@@ -101,7 +210,7 @@ def _load_fixture_data() -> list[dict]:
     if not isinstance(data, dict):
 
         print(
-            "WARNING: fixture data has invalid format"
+            "WARNING: fixture data is not a JSON object"
         )
 
         return []
@@ -111,7 +220,10 @@ def _load_fixture_data() -> list[dict]:
         []
     )
 
-    if not isinstance(fixtures, list):
+    if not isinstance(
+        fixtures,
+        list
+    ):
 
         print(
             "WARNING: fixture data does not contain "
@@ -125,137 +237,94 @@ def _load_fixture_data() -> list[dict]:
 
 def _parse_kickoff(value):
     """
-    Convert a stored ISO timestamp into a
-    timezone-aware datetime.
+    Convert stored ISO timestamp into a timezone-aware
+    datetime.
+
+    Supports:
+
+        2026-08-09T15:00:00+00:00
+
+        2026-08-09T15:00:00Z
+
+        2026-08-09 15:00:00Z
+
+    and timezone-naive values.
     """
 
     if not value:
         return None
 
-    if isinstance(value, datetime):
+    # ---------------------------------------------------------
+    # The data layer normally stores strings.
+    #
+    # This additional check makes the function safe if a
+    # datetime object is passed in directly.
+    # ---------------------------------------------------------
 
-        kickoff = value
+    if isinstance(
+        value,
+        datetime
+    ):
 
-    elif isinstance(value, str):
+        if value.tzinfo is None:
 
-        try:
-
-            kickoff = datetime.fromisoformat(
-                value.replace(
-                    "Z",
-                    "+00:00"
-                )
+            value = value.replace(
+                tzinfo=UK_TZ
             )
 
-        except ValueError:
-
-            return None
-
-    else:
-
-        return None
-
-    if kickoff.tzinfo is None:
-
-        kickoff = kickoff.replace(
-            tzinfo=UK_TZ
+        return value.astimezone(
+            UK_TZ
         )
 
-    return kickoff.astimezone(
-        UK_TZ
-    )
+    try:
+
+        value = value.strip()
+
+        # -----------------------------------------------------
+        # Convert trailing Z to an ISO timezone.
+        # -----------------------------------------------------
+
+        value = value.replace(
+            "Z",
+            "+00:00"
+        )
+
+        kickoff = datetime.fromisoformat(
+            value
+        )
+
+        # -----------------------------------------------------
+        # If no timezone was supplied, assume UK time.
+        # -----------------------------------------------------
+
+        if kickoff.tzinfo is None:
+
+            kickoff = kickoff.replace(
+                tzinfo=UK_TZ
+            )
+
+        return kickoff.astimezone(
+            UK_TZ
+        )
+
+    except (
+        ValueError,
+        TypeError,
+        AttributeError,
+    ):
+
+        return None
 
 
 def get_fixtures(team: dict) -> list[dict]:
     """
     Public interface used by generator.py.
 
-    Returns fixtures for one team in the format expected
-    by the existing EPG system.
-    """
+    Returns fixtures for one team in the format expected by
+    the existing EPG system:
 
-    team_name = team["name"]
-
-    if team_name.endswith(" TV"):
-
-        team_name = team_name[:-3]
-
-    target = normalise_team_name(
-        team_name
-    )
-
-    now = datetime.now(
-        UK_TZ
-    )
-
-    window_end = (
-        now
-        + timedelta(
-            days=FIXTURE_DAYS
-        )
-    )
-
-    fixtures = []
-
-    for fixture in _load_fixture_data():
-
-        home = fixture.get(
-            "home",
-            ""
-        )
-
-        away = fixture.get(
-            "away",
-            ""
-        )
-
-        if (
-            normalise_team_name(home) != target
-            and
-            normalise_team_name(away) != target
-        ):
-
-            continue
-
-        kickoff = _parse_kickoff(
-            fixture.get("kickoff")
-        )
-
-        if kickoff is None:
-
-            continue
-
-        if not (
-            now
-            <= kickoff
-            <= window_end
-        ):
-
-            continue
-
-        fixtures.append(
-            {
-                "home": home,
-
-                "away": away,
-
-                "kickoff": kickoff,
-
-                "competition": fixture.get(
-                    "competition",
-                    "Unknown",
-                ),
-
-                "stadium": fixture.get(
-                    "stadium",
-                    "Venue TBC",
-                ),
-            }
-        )
-
-    fixtures.sort(
-        key=lambda fixture:
-        fixture["kickoff"]
-    )
-
-    return fixtures
+        {
+            "home": str,
+            "away": str,
+            "kickoff": datetime,
+            "competition": str,
