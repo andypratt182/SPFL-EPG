@@ -22,30 +22,68 @@ jobs:
 
     steps:
 
+      # ------------------------------------------------------------
+      # Checkout repository
+      # ------------------------------------------------------------
+
       - name: Checkout repository
         uses: actions/checkout@v5
+
+
+      # ------------------------------------------------------------
+      # Setup Python
+      # ------------------------------------------------------------
 
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
+
+      # ------------------------------------------------------------
+      # Install dependencies
+      # ------------------------------------------------------------
+
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
 
+
+      # ------------------------------------------------------------
+      # Update fixture data
+      #
+      # Fixture Download is the current source adapter.
+      # This updates data/fixtures.json before the EPG
+      # generator runs.
+      # ------------------------------------------------------------
+
       - name: Update fixture data
         run: |
-          python sources/espn.py
+          python sources/fixture_download.py
+
+
+      # ------------------------------------------------------------
+      # Generate XMLTV
+      # ------------------------------------------------------------
 
       - name: Generate XMLTV
         run: |
           python generator.py
 
+
+      # ------------------------------------------------------------
+      # Upload GitHub Pages artifact
+      # ------------------------------------------------------------
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: ./output
+
+
+      # ------------------------------------------------------------
+      # Deploy GitHub Pages
+      # ------------------------------------------------------------
 
       - name: Deploy Pages
         id: deployment
