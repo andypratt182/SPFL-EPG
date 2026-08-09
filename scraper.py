@@ -1,25 +1,54 @@
 """
-Rangers-only ESPN regional API diagnostic.
+scraper.py
 
-Makes exactly three requests:
+Fixture source adapter for ESPN.
 
-1. Scottish Premiership
-2. Scottish Cup
-3. Scottish League Cup
+GitHub Actions cannot reliably access ESPN's API, so this module is
+designed to be used by a local/manual data collection process rather
+than by the EPG generator itself.
 
-This is a diagnostic only. It does not modify fixtures.py,
-generator.py, or any EPG output.
+The important part is the normalised fixture format returned by the
+source:
+
+{
+    "home": "Rangers",
+    "away": "Dundee United",
+    "kickoff": "2026-07-31T19:00:00Z",
+    "competition": "Scottish Premiership",
+    "source_id": "401878416"
+}
+
+fixtures.py consumes the normalised data and does not need to know
+where it came from.
 """
+
+import json
+from datetime import datetime
+from pathlib import Path
 
 import requests
 
 
-RANGERS_ID = 257
+BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = BASE_DIR / "data"
+FIXTURES_FILE = DATA_DIR / "fixtures.json"
 
-# Regional ESPN API host.
+
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/124.0 Safari/537.36"
+    ),
+    "Accept": "application/json,text/plain,*/*",
+    "Accept-Language": "en-GB,en;q=0.9",
+}
+
+
 ESPN_BASE_URL = (
-    "https://africa.espn.com/apis/site/v2/sports/soccer"
+    "https://site.api.espn.com/apis/site/v2/sports/soccer"
 )
+
 
 COMPETITIONS = {
     "Scottish Premiership": "sco.1",
@@ -27,181 +56,161 @@ COMPETITIONS = {
     "Scottish League Cup": "sco.league_cup",
 }
 
-HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/139.0.0.0 Safari/537.36"
-    ),
-    "Accept": "application/json, text/plain, */*",
-    "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
-    "Referer": "https://www.espn.com/",
-    "Origin": "https://www.espn.com",
-    "Sec-Fetch-Dest": "empty",
-    "Sec-Fetch-Mode": "cors",
-    "Sec-Fetch-Site": "same-site",
-}
 
-TIMEOUT = 20
+REQUEST_TIMEOUT = 20
 
 
-def test_competition(
-    session,
-    competition_name,
-    competition_code,
-):
+def fetch_team_competition_fixtures(
+    team_name: str,
+    espn_id: int,
+    competition: str,
+) -> list[dict]:
+    """
+    Fetch fixtures for one team and one competition from ESPN.
+
+    Returns normalised fixture dictionaries.
+    """
+
+    if competition not in COMPETITIONS:
+        raise ValueError(
+            f"Unknown competition: {competition}"
+        )
+
+    league = COMPETITIONS[competition]
+
     url = (
         f"{ESPN_BASE_URL}/"
-        f"{competition_code}/"
-        f"teams/{RANGERS_ID}/schedule"
+        f"{league}/teams/{espn_id}/schedule"
     )
 
-    print()
-    print("--------------------------------")
-    print(competition_name)
-    print("--------------------------------")
-    print(f"URL: {url}")
+    response = requests.get(
+        url,
+        headers=HEADERS,
+        timeout=REQUEST_TIMEOUT,
+    )
 
-    try:
-        response = session.get(
-            url,
-            headers=HEADERS,
-            timeout=TIMEOUT,
-        )
+    response.raise_for_status()
 
-        print(f"HTTP status: {response.status_code}")
+    data = response.json()
 
-        if response.status_code != 200:
-            print("REQUEST FAILED")
+    return parse_espn_events(
+        data.get("events", []),
+        competition,
+    )
 
-            print(
-                "Response preview:"
+
+def parse_espn_events(
+    events: list[dict],
+    competition: str,
+) -> list[dict]:
+    """
+    Convert ESPN events into our source-independent format.
+    """
+
+    fixtures = []
+
+    for event in events:
+        try:
+            event_id = str(event["id"])
+            kickoff = event.get("date")
+
+            competitors = (
+                event
+                .get("competitions", [{}])[0]
+                .get("competitors", [])
             )
 
-            print(
-                response.text[:500]
+            home = None
+            away = None
+
+            for competitor in competitors:
+                team = competitor.get("team", {})
+                name = (
+                    team.get("displayName")
+                    or team.get("name")
+                )
+
+                if not name:
+                    continue
+
+                if competitor.get("homeAway") == "home":
+                    home = name
+
+                elif competitor.get("homeAway") == "away":
+                    away = name
+
+            if not home or not away:
+                continue
+
+            fixtures.append(
+                {
+                    "home": home,
+                    "away": away,
+                    "kickoff": kickoff,
+                    "competition": competition,
+                    "source_id": event_id,
+                }
             )
 
-            return False
+        except (KeyError, IndexError, TypeError):
+            continue
 
-        data = response.json()
+    return fixtures
 
-        print(
-            f"JSON status: "
-            f"{data.get('status')}"
+
+def save_fixtures(fixtures: list[dict]) -> None:
+    """
+    Save normalised fixtures to data/fixtures.json.
+    """
+
+    DATA_DIR.mkdir(exist_ok=True)
+
+    payload = {
+        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "fixtures": fixtures,
+    }
+
+    with open(
+        FIXTURES_FILE,
+        "w",
+        encoding="utf-8",
+    ) as f:
+        json.dump(
+            payload,
+            f,
+            indent=2,
+            ensure_ascii=False,
         )
-
-        season = data.get("season", {})
-
-        print(
-            f"Season: "
-            f"{season.get('displayName')}"
-        )
-
-        team = data.get("team", {})
-
-        print(
-            f"Team: "
-            f"{team.get('displayName')}"
-        )
-
-        events = data.get(
-            "events",
-            []
-        )
-
-        print(
-            f"Events returned: "
-            f"{len(events)}"
-        )
-
-        for event in events:
-
-            print(
-                f"  {event.get('date')} | "
-                f"{event.get('name')} | "
-                f"{event.get('shortName')}"
-            )
-
-        return True
-
-    except requests.RequestException as exc:
-
-        print(
-            f"REQUEST ERROR: {exc}"
-        )
-
-        return False
-
-    except ValueError as exc:
-
-        print(
-            f"INVALID JSON: {exc}"
-        )
-
-        return False
-
-
-def main():
-
-    print("==============================")
-    print("ESPN REGIONAL API TEST")
-    print("==============================")
 
     print(
-        f"Testing Rangers "
-        f"(ESPN ID {RANGERS_ID})"
+        f"Saved {len(fixtures)} fixtures to "
+        f"{FIXTURES_FILE}"
     )
 
-    print(
-        f"Endpoint host: {ESPN_BASE_URL}"
-    )
 
-    session = requests.Session()
+def load_fixtures() -> list[dict]:
+    """
+    Load normalised fixtures from data/fixtures.json.
+    """
 
-    successful = 0
+    if not FIXTURES_FILE.exists():
+        return []
 
-    for competition_name, competition_code in COMPETITIONS.items():
+    with open(
+        FIXTURES_FILE,
+        "r",
+        encoding="utf-8",
+    ) as f:
+        data = json.load(f)
 
-        if test_competition(
-            session,
-            competition_name,
-            competition_code,
-        ):
-            successful += 1
-
-    print()
-    print("==============================")
-    print("TEST RESULT")
-    print("==============================")
-
-    print(
-        f"Successful requests: "
-        f"{successful}/3"
-    )
-
-    if successful == 3:
-
-        print(
-            "SUCCESS: regional ESPN API "
-            "is accessible from GitHub Actions."
-        )
-
-    elif successful > 0:
-
-        print(
-            "PARTIAL SUCCESS: some regional "
-            "ESPN endpoints are accessible."
-        )
-
-    else:
-
-        print(
-            "FAILURE: regional ESPN API "
-            "is also inaccessible from "
-            "GitHub Actions."
-        )
+    return data.get("fixtures", [])
 
 
 if __name__ == "__main__":
-    main()
+    print("Fixture source adapter")
+    print()
+    print("This module provides the ESPN source adapter.")
+    print(
+        "GitHub Actions should consume data/fixtures.json "
+        "rather than call ESPN directly."
+    )
