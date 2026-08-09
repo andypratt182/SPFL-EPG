@@ -1,0 +1,3 @@
+"""
+External fixture source adapters.
+"""
