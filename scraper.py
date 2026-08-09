@@ -1,214 +1,324 @@
 """
 scraper.py
 
-Pulls fixtures for a single SPFL club directly from its ESPN team
-fixtures page - no API key required.
+Fetches SPFL club fixtures directly from ESPN's JSON schedule endpoints.
 
-Data source:
-    https://africa.espn.com/football/team/fixtures/_/id/{ESPN_ID}/{slug}
+No API key is required.
 
-This page lists that club's full upcoming schedule across all
-competitions (Premiership, Scottish Cup, League Cup, European
-competition, etc.), grouped under month headings, as a simple table:
-    DATE | MATCH | TIME | COMPETITION | TV
+Competitions:
+    Scottish Premiership -> sco.1
+    Scottish Cup         -> sco.tennents
+    Scottish League Cup  -> sco.cis
 
-Because we fetch one page PER TEAM (using the ESPN ID mapped in
-espn_team_ids.py), there's no need to fuzzy-match team names against
-a big combined list - every fixture on a team's page already belongs
-to that team.
+The public interface is intentionally unchanged so that fixtures.py,
+generator.py and xmltv.py do not need to change.
 
-NOTE: this was built against ESPN's page structure as observed in
-August 2026. If parsing stops finding fixtures, run with debug=True
-(see fetch_team_fixtures below) - it prints the raw extracted text so
-the parsing rules below can be adjusted against real output.
+Returns fixtures in the format expected by fixtures.py:
+
+    {
+        "home": str,
+        "away": str,
+        "kickoff": datetime | None,
+        "competition": str,
+    }
 """
 
-import re
 import time
-from datetime import datetime, date
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import requests
-from bs4 import BeautifulSoup
-from zoneinfo import ZoneInfo
+
 
 UK_TZ = ZoneInfo("Europe/London")
 
-BASE_URL = "https://africa.espn.com/football/team/fixtures/_/id"
+BASE_URL = (
+    "https://site.api.espn.com/apis/site/v2/sports/soccer"
+)
 
-WANTED_COMPETITIONS = {
-    "Scottish Premiership",
-    "Scottish Cup",
-    "Scottish League Cup",
-}
+# ESPN competition identifiers.
+COMPETITIONS = (
+    "sco.1",          # Scottish Premiership
+    "sco.tennents",   # Scottish Cup
+    "sco.cis",        # Scottish League Cup
+)
 
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/124.0 Safari/537.36"
-    )
+    ),
+    "Accept": "application/json",
 }
 
 REQUEST_TIMEOUT = 20
-REQUEST_DELAY_SECONDS = 1.0  # be polite between team requests
 
-MONTHS = {
-    "Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6,
-    "Jul": 7, "Aug": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12,
-}
-
-_MONTH_HEADER_RE = re.compile(
-    r"^(January|February|March|April|May|June|July|August|September|"
-    r"October|November|December),\s*(\d{4})$"
-)
-_DATE_ROW_RE = re.compile(
-    r"^(Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s*(\d{1,2})\s*"
-    r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)$"
-)
-_TIME_RE = re.compile(r"^\d{1,2}:\d{2}\s*(AM|PM)$", re.IGNORECASE)
+# Delay between ESPN requests.
+REQUEST_DELAY_SECONDS = 1.0
 
 
-def fetch_team_fixtures(team_name: str, espn_id: int, debug: bool = False) -> list[dict]:
+def _parse_kickoff(value: str | None) -> datetime | None:
     """
-    Fetch and parse the fixtures table for a single team.
-    Returns a list of dicts:
-        {
-            "home": str,
-            "away": str,
-            "kickoff": datetime | None,   # None if ESPN shows "TBD"
-            "competition": str,
-        }
+    Convert ESPN's UTC ISO timestamp into a Europe/London datetime.
+
+    Example:
+        2026-07-31T19:00Z
+
+    becomes a timezone-aware datetime in UK_TZ.
     """
-    slug = team_name.lower().replace(" ", "-")
-    url = f"{BASE_URL}/{espn_id}/{slug}"
-    response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+    if not value:
+        return None
+
+    try:
+        # ESPN normally supplies timestamps ending in Z.
+        if value.endswith("Z"):
+            value = value[:-1] + "+00:00"
+
+        dt = datetime.fromisoformat(value)
+
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=ZoneInfo("UTC"))
+
+        return dt.astimezone(UK_TZ)
+
+    except ValueError:
+        print(f"WARNING: unable to parse ESPN date: {value}")
+        return None
+
+
+def _get_competitor_team(competitor: dict) -> str | None:
+    """
+    Extract the display name of a team from an ESPN competitor object.
+    """
+    team = competitor.get("team") or {}
+
+    return (
+        team.get("displayName")
+        or team.get("shortDisplayName")
+        or team.get("name")
+    )
+
+
+def fetch_team_competition_fixtures(
+    team_name: str,
+    espn_id: int,
+    competition_id: str,
+    debug: bool = False,
+) -> list[dict]:
+    """
+    Fetch fixtures for one team from one ESPN competition.
+
+    Returns:
+        [
+            {
+                "home": str,
+                "away": str,
+                "kickoff": datetime | None,
+                "competition": str,
+                "_espn_id": str,
+            }
+        ]
+    """
+
+    url = (
+        f"{BASE_URL}/{competition_id}"
+        f"/teams/{espn_id}/schedule"
+    )
+
+    print(f"  Fetching {competition_id} for {team_name}...")
+
+    response = requests.get(
+        url,
+        headers=HEADERS,
+        timeout=REQUEST_TIMEOUT,
+    )
+
     response.raise_for_status()
 
-    soup = BeautifulSoup(response.text, "html.parser")
-    body = soup.find("body")
-    if body is None:
-        return []
+    try:
+        data = response.json()
+    except ValueError as exc:
+        raise RuntimeError(
+            f"ESPN returned invalid JSON for {team_name} "
+            f"({competition_id})"
+        ) from exc
 
-    lines = [line.strip() for line in body.get_text("\n").split("\n")]
-    lines = [line for line in lines if line]
+    if data.get("status") != "success":
+        raise RuntimeError(
+            f"ESPN returned unsuccessful status for "
+            f"{team_name} ({competition_id}): "
+            f"{data.get('status')}"
+        )
+
+    events = data.get("events") or []
 
     if debug:
-        print(f"\n--- DEBUG: extracted text for {team_name} (first 4000 chars) ---")
-        print("\n".join(lines)[:4000])
-        print("--- END DEBUG ---\n")
+        print(
+            f"    ESPN returned {len(events)} event(s)"
+        )
 
-    return _parse_lines(lines, team_name)
-
-
-def _parse_lines(lines: list[str], team_name: str) -> list[dict]:
     fixtures = []
-    current_year = date.today().year
-    i = 0
-    n = len(lines)
 
-    while i < n:
-        line = lines[i]
+    for event in events:
+        event_id = event.get("id")
 
-        month_match = _MONTH_HEADER_RE.match(line)
-        if month_match:
-            current_year = int(month_match.group(2))
-            i += 1
+        if not event_id:
+            print(
+                f"WARNING: ESPN event without ID for "
+                f"{team_name} ({competition_id})"
+            )
             continue
 
-        date_match = _DATE_ROW_RE.match(line)
-        if date_match:
-            day = int(date_match.group(2))
-            month_abbr = date_match.group(3)
-            month = MONTHS[month_abbr]
+        date_value = event.get("date")
 
-            # Expected shape following a date row:
-            #   home_team
-            #   v
-            #   away_team
-            #   time (or "TBD")
-            #   competition
-            #   [tv line(s) - ignored]
-            if i + 5 >= n:
-                break  # not enough lines left to form a full fixture
+        kickoff = _parse_kickoff(date_value)
 
-            home = lines[i + 1]
-            separator = lines[i + 2]
-            away = lines[i + 3]
-            time_str = lines[i + 4]
-            competition = lines[i + 5]
+        competitions = event.get("competitions") or []
 
-            if separator != "v":
-                # Doesn't match expected shape - skip just this date line
-                # and keep scanning rather than aborting the whole parse.
-                i += 1
+        if not competitions:
+            print(
+                f"WARNING: ESPN event {event_id} has no "
+                f"competition data"
+            )
+            continue
+
+        competition = competitions[0]
+
+        competitors = competition.get("competitors") or []
+
+        if len(competitors) < 2:
+            print(
+                f"WARNING: ESPN event {event_id} has fewer "
+                f"than two competitors"
+            )
+            continue
+
+        home = None
+        away = None
+
+        for competitor in competitors:
+            home_away = competitor.get("homeAway")
+            name = _get_competitor_team(competitor)
+
+            if not name:
                 continue
 
-            kickoff = None
-            if _TIME_RE.match(time_str):
-                try:
-                    parsed_time = datetime.strptime(time_str.upper(), "%I:%M %p")
-                    kickoff = datetime(
-                        current_year, month, day,
-                        parsed_time.hour, parsed_time.minute,
-                        tzinfo=UK_TZ,
-                    )
-                except ValueError:
-                    kickoff = None
+            if home_away == "home":
+                home = name
+            elif home_away == "away":
+                away = name
 
-            if competition in WANTED_COMPETITIONS:
-                fixtures.append(
-                    {
-                        "home": home,
-                        "away": away,
-                        "kickoff": kickoff,
-                        "competition": competition,
-                    }
-                )
-
-            i += 6  # advance past this fixture's block
+        if not home or not away:
+            print(
+                f"WARNING: unable to determine home/away teams "
+                f"for ESPN event {event_id}"
+            )
             continue
 
-        i += 1
+        # Prefer ESPN's own league name.
+        league = data.get("league") or {}
+
+        competition_name = (
+            league.get("name")
+            or event.get("season", {}).get("displayName")
+            or competition_id
+        )
+
+        fixtures.append(
+            {
+                "home": home,
+                "away": away,
+                "kickoff": kickoff,
+                "competition": competition_name,
+                "_espn_id": str(event_id),
+            }
+        )
 
     return fixtures
 
 
-def fetch_all_teams(team_espn_ids: dict, debug_first: bool = False) -> dict:
+def fetch_team_fixtures(
+    team_name: str,
+    espn_id: int,
+    debug: bool = False,
+) -> list[dict]:
     """
-    team_espn_ids: dict mapping team_name -> espn_id (int or None)
-    Returns dict mapping team_name -> list of fixture dicts.
-    Skips (with a warning) any team whose ID is None or whose request fails.
+    Fetch all supported competitions for one team.
+
+    Returns a combined, de-duplicated list of fixtures.
     """
-    results = {}
-    first = True
-    for team_name, espn_id in team_espn_ids.items():
-        if espn_id is None:
-            print(f"WARNING: no ESPN id set for {team_name} - skipping. "
-                  f"Fill it in in espn_team_ids.py")
-            results[team_name] = []
-            continue
+
+    all_fixtures = []
+    seen_event_ids = set()
+
+    for index, competition_id in enumerate(COMPETITIONS):
 
         try:
-            fixtures = fetch_team_fixtures(team_name, espn_id, debug=(debug_first and first))
-            first = False
-            print(f"{team_name}: found {len(fixtures)} fixture(s)")
-            results[team_name] = fixtures
-        except requests.RequestException as e:
-            print(f"WARNING: failed to fetch fixtures for {team_name}: {e}")
-            results[team_name] = []
+            fixtures = fetch_team_competition_fixtures(
+                team_name=team_name,
+                espn_id=espn_id,
+                competition_id=competition_id,
+                debug=debug,
+            )
 
-        time.sleep(REQUEST_DELAY_SECONDS)
+            for fixture in fixtures:
+                event_id = fixture.pop("_espn_id", None)
 
-    return results
+                if event_id and event_id in seen_event_ids:
+                    continue
+
+                if event_id:
+                    seen_event_ids.add(event_id)
+
+                all_fixtures.append(fixture)
+
+        except requests.RequestException as exc:
+            raise RuntimeError(
+                f"Failed to fetch ESPN data for "
+                f"{team_name} ({competition_id}): {exc}"
+            ) from exc
+
+        except RuntimeError:
+            raise
+
+        # Don't sleep after the final request.
+        if index < len(COMPETITIONS) - 1:
+            time.sleep(REQUEST_DELAY_SECONDS)
+
+    all_fixtures.sort(
+        key=lambda fixture: (
+            fixture["kickoff"] is None,
+            fixture["kickoff"],
+        )
+    )
+
+    return all_fixtures
 
 
-if __name__ == "__main__":
-    # Quick manual test / debug entry point: python scraper.py
-    from espn_team_ids import ESPN_TEAM_IDS
+def fetch_all_teams(
+    team_espn_ids: dict,
+    debug_first: bool = False,
+) -> dict:
+    """
+    Fetch all supported fixtures for every team.
 
-    all_fixtures = fetch_all_teams(ESPN_TEAM_IDS, debug_first=True)
-    total = sum(len(v) for v in all_fixtures.values())
-    print(f"\nTotal fixtures found across all teams: {total}")
-    for team, fixtures in all_fixtures.items():
-        for fx in fixtures[:3]:
-            print(team, fx)
+    team_espn_ids:
+        Dictionary mapping team name -> ESPN team ID.
+
+    Returns:
+        {
+            "Rangers": [
+                {
+                    "home": "...",
+                    "away": "...",
+                    "kickoff": datetime | None,
+                    "competition": "..."
+                }
+            ],
+            ...
+        }
+
+    A failed ESPN request raises an exception rather than silently
+    returning an empty list. This prevents GitHub Actions from
+    accidentally publishing an empty/broken EPG.
