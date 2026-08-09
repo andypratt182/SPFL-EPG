@@ -26,12 +26,12 @@ ESPN_TEAM_IDS = {
     "Celtic": 256,
     "Dundee": 261,
     "Dundee United": 264,
-    "Falkirk": None,  # TODO: fill in - see instructions above
+    "Falkirk": 254,
     "Heart of Midlothian": 262,
     "Hibernian": 258,
-    "Kilmarnock": None,  # TODO: fill in
+    "Kilmarnock": 260,
     "Motherwell": 266,
     "Rangers": 257,
-    "St Johnstone": None,  # TODO: fill in
-    "St Mirren": None,  # TODO: fill in
+    "St Johnstone": 267,
+    "St Mirren": 250,
 }
