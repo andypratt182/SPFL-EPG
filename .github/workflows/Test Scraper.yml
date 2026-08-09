@@ -1,18 +1,16 @@
-# .github/workflows/test-scraper.yml
-
-name: Test Fixture Data Layer
+name: Test Fixture Source
 
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
+
   test:
+
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout repository
         uses: actions/checkout@v5
 
@@ -25,6 +23,6 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Test fixture data layer
+      - name: Test ESPN source
         run: |
-          python data_layer.py
+          python sources/espn.py
