@@ -26,6 +26,9 @@ def add_programme(
     title,
     description
 ):
+    """
+    Add a programme entry to the XMLTV document.
+    """
 
     if stop <= start:
         return
@@ -53,27 +56,21 @@ def add_programme(
 
 def parse_kickoff(timestamp):
     """
-    Convert fixture kickoff data into a timezone-aware UTC datetime.
+    Convert fixture kickoff data into a UTC datetime.
 
-    The new data layer stores kickoff as a datetime object.
+    Supports both:
 
-    The older EPG code stored kickoff as a string in the format:
+        datetime objects
 
-        YYYYMMDDHHMMSS +0000
+    and existing XMLTV-style strings:
 
-    This function deliberately supports both formats so the
-    XMLTV layer remains compatible with existing data.
+        20260809150000 +0000
     """
-
-    # ---------------------------------------------------------
-    # New data-layer format
-    # ---------------------------------------------------------
 
     if isinstance(timestamp, datetime):
 
         if timestamp.tzinfo is None:
-
-            timestamp = timestamp.replace(
+            return timestamp.replace(
                 tzinfo=UK_TZ
             )
 
@@ -81,30 +78,26 @@ def parse_kickoff(timestamp):
             timezone.utc
         )
 
-    # ---------------------------------------------------------
-    # Existing string format
-    # ---------------------------------------------------------
+    if not timestamp:
+        return None
 
-    if isinstance(timestamp, str):
-
-        return datetime.strptime(
-            timestamp,
-            "%Y%m%d%H%M%S +0000",
-        ).replace(
-            tzinfo=timezone.utc
-        )
-
-    raise TypeError(
-        "Unsupported kickoff type: "
-        f"{type(timestamp).__name__}"
+    return datetime.strptime(
+        timestamp,
+        "%Y%m%d%H%M%S +0000",
+    ).replace(
+        tzinfo=timezone.utc
     )
 
 
 def format_kickoff(timestamp):
+    """
+    Format kickoff for human-readable EPG descriptions.
+    """
 
-    utc_time = parse_kickoff(
-        timestamp
-    )
+    utc_time = parse_kickoff(timestamp)
+
+    if utc_time is None:
+        return "Kick-off time TBC"
 
     return utc_time.astimezone(
         UK_TZ
@@ -114,13 +107,11 @@ def format_kickoff(timestamp):
 
 
 def xml_time(dt):
-
-    # ---------------------------------------------------------
-    # XMLTV timestamps are written in UTC.
-    # ---------------------------------------------------------
+    """
+    Convert datetime to XMLTV UTC timestamp.
+    """
 
     if dt.tzinfo is None:
-
         dt = dt.replace(
             tzinfo=timezone.utc
         )
@@ -139,6 +130,9 @@ def get_next_match(
     channel_id,
     after_time
 ):
+    """
+    Find the next fixture for a particular channel.
+    """
 
     for match in fixtures:
 
@@ -149,8 +143,10 @@ def get_next_match(
             match["kickoff"]
         )
 
-        if kickoff > after_time:
+        if kickoff is None:
+            continue
 
+        if kickoff > after_time:
             return match
 
     return None
@@ -163,6 +159,11 @@ def create_next_game_programme(
     stop,
     fixtures
 ):
+    """
+    Create the Next Game programme.
+
+    The title format is deliberately kept unchanged.
+    """
 
     next_match = get_next_match(
         fixtures,
@@ -179,7 +180,7 @@ def create_next_game_programme(
         )
 
         # -------------------------------------------------
-        # Create the correct ordinal suffix
+        # Create ordinal suffix
         #
         # 1st, 2nd, 3rd, 4th...
         # 11th, 12th and 13th are exceptions.
@@ -208,22 +209,50 @@ def create_next_game_programme(
         )
 
         # -------------------------------------------------
+        # Venue
+        #
+        # Fixture Download supplies the stadium/venue.
+        # Fall back to Venue TBC if unavailable.
+        # -------------------------------------------------
+
+        venue = (
+            next_match.get("stadium")
+            or next_match.get("venue")
+            or "Venue TBC"
+        )
+
+        # -------------------------------------------------
         # Next Game description
         # -------------------------------------------------
 
+        channel_name = (
+            SPFL_TEAMS
+            .get(channel_id, {})
+            .get("name", "this channel")
+        )
+
         description = (
             f"{next_match['home']} vs "
-            f"{next_match['away']}\n"
+            f"{next_match['away']}\n\n"
             f"Competition: "
             f"{next_match['competition']}\n"
             f"Venue: "
-            f"{next_match.get('stadium', 'Venue TBC')}\n"
+            f"{venue}\n"
             f"Kick-off: "
-            f"{format_kickoff(next_match['kickoff'])}"
+            f"{format_kickoff(next_match['kickoff'])}\n\n"
+            f"The next scheduled fixture for "
+            f"{channel_name}."
         )
 
         # -------------------------------------------------
         # Next Game title
+        #
+        # IMPORTANT:
+        # Keep this exactly as it was.
+        #
+        # Example:
+        #
+        # Next Game: Rangers vs Hibernian | Sunday 9th
         # -------------------------------------------------
 
         title = (
@@ -236,7 +265,8 @@ def create_next_game_programme(
     else:
 
         description = (
-            "No upcoming fixture"
+            "There are currently no upcoming "
+            "fixtures scheduled."
         )
 
         title = "Next Game"
@@ -252,6 +282,9 @@ def create_next_game_programme(
 
 
 def create_channel_entries(tv):
+    """
+    Create XMLTV channel definitions.
+    """
 
     for channel_id, team in SPFL_TEAMS.items():
 
@@ -308,6 +341,11 @@ def create_xmltv(
     fixtures,
     filename
 ):
+    """
+    Create the complete XMLTV EPG.
+
+    Generates a 240-hour rolling EPG window.
+    """
 
     tv = ET.Element(
         "tv",
@@ -317,21 +355,21 @@ def create_xmltv(
         }
     )
 
+    # -----------------------------------------------------
+    # Channels
+    # -----------------------------------------------------
+
     create_channel_entries(tv)
 
     # -----------------------------------------------------
-    # Sort all fixtures by kick-off time.
-    #
-    # parse_kickoff() allows this to work with both the
-    # old string format and the new datetime format.
+    # Sort fixtures by kickoff
     # -----------------------------------------------------
 
     fixtures = sorted(
         fixtures,
-        key=lambda x:
-            parse_kickoff(
-                x["kickoff"]
-            )
+        key=lambda x: parse_kickoff(
+            x["kickoff"]
+        )
     )
 
     # -----------------------------------------------------
@@ -364,9 +402,10 @@ def create_xmltv(
     for channel_id in SPFL_TEAMS:
 
         channel_matches = [
-            f
-            for f in fixtures
-            if f.get("channel_id") == channel_id
+            fixture
+            for fixture in fixtures
+            if fixture.get("channel_id")
+            == channel_id
         ]
 
         current = epg_start
@@ -376,6 +415,9 @@ def create_xmltv(
             kickoff = parse_kickoff(
                 match["kickoff"]
             )
+
+            if kickoff is None:
+                continue
 
             match_end = (
                 kickoff +
@@ -390,8 +432,7 @@ def create_xmltv(
                 continue
 
             # -------------------------------------------------
-            # Stop processing once we are beyond the EPG
-            # window.
+            # Stop once outside the EPG window
             # -------------------------------------------------
 
             if kickoff >= epg_end:
@@ -425,6 +466,12 @@ def create_xmltv(
                 epg_end
             )
 
+            venue = (
+                match.get("stadium")
+                or match.get("venue")
+                or "Venue TBC"
+            )
+
             add_programme(
                 tv,
                 channel_id,
@@ -439,7 +486,7 @@ def create_xmltv(
                 (
                     f"{match['competition']}\n"
                     f"Venue: "
-                    f"{match.get('stadium', 'Venue TBC')}\n"
+                    f"{venue}\n"
                     f"Kick-off: "
                     f"{format_kickoff(match['kickoff'])}"
                 )
@@ -468,13 +515,15 @@ def create_xmltv(
     # Save XMLTV file
     # ---------------------------------------------------------
 
-    Path(filename).parent.mkdir(
+    output_path = Path(filename)
+
+    output_path.parent.mkdir(
         parents=True,
         exist_ok=True
     )
 
     ET.ElementTree(tv).write(
-        filename,
+        output_path,
         encoding="utf-8",
         xml_declaration=True
-    )
+        )
