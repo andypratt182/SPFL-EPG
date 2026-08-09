@@ -1,165 +1,198 @@
 """
 fixtures.py
 
-Drop-in replacement for the old SportMonks-based fixtures.py.
-Same public interface (get_fixtures(team) -> list[dict]) so
-generator.py and xmltv.py do not need to change.
+Source-independent fixture interface.
 
-Data flow:
-    scraper.py + espn_team_ids.py -> one ESPN fixtures page fetched
-        per team, already filtered to that team's own matches
-    overrides.json -> manual additions / corrections you maintain
-    fixtures.py -> merges both, returns fixtures in the shape
-        generator.py expects:
-            {
-                "home": str,
-                "away": str,
-                "kickoff": datetime,
-                "competition": str,
-            }
+The EPG generator uses:
+
+    get_fixtures(team)
+
+This module deliberately knows nothing about ESPN, BBC, Fixture
+Download, or any other external source.
+
+All fixture data comes from:
+
+    data/fixtures.json
+
+This means the fixture source can be replaced later without
+changing generator.py or xmltv.py.
 """
 
 import json
 import re
+from datetime import datetime, timedelta
 from pathlib import Path
-from datetime import datetime, timedelta, date
 
 from zoneinfo import ZoneInfo
 
-import scraper
-from espn_team_ids import ESPN_TEAM_IDS
 
 UK_TZ = ZoneInfo("Europe/London")
 
-# How many days ahead of today to include fixtures for.
+BASE_DIR = Path(__file__).resolve().parent
+FIXTURES_FILE = BASE_DIR / "data" / "fixtures.json"
+
+# Number of days ahead to include.
 FIXTURE_DAYS = 24
-
-OVERRIDES_PATH = Path(__file__).parent / "overrides.json"
-
-# Module-level cache: scrape every team once per run, no matter how
-# many times get_fixtures() is called.
-_all_team_fixtures_cache = None
 
 
 def normalise_team_name(name: str) -> str:
+    """
+    Normalise team names so small naming differences do not prevent
+    fixtures from being matched.
+    """
+
     if not name:
         return ""
+
     name = name.lower().strip()
-    name = re.sub(r"[^\w\s]", " ", name)
-    for suffix in (" football club", " fc"):
+
+    name = re.sub(
+        r"[^\w\s]",
+        " ",
+        name,
+    )
+
+    for suffix in (
+        " football club",
+        " fc",
+    ):
         if name.endswith(suffix):
-            name = name[: -len(suffix)].strip()
-    return " ".join(name.split())
+            name = name[
+                : -len(suffix)
+            ].strip()
+
+    return " ".join(
+        name.split()
+    )
 
 
-def _load_overrides() -> list[dict]:
+def _load_fixture_data() -> list[dict]:
     """
-    overrides.json format - a flat list of fixture objects you maintain
-    by hand, e.g.:
-
-    [
-      {
-        "home": "Celtic",
-        "away": "Rangers",
-        "kickoff": "2026-09-05T15:00:00",
-        "competition": "Scottish Premiership"
-      }
-    ]
-
-    Use this for fixtures the scraper missed, got wrong, or for
-    postponed/rearranged matches before ESPN updates their page.
+    Load fixtures from the normalised data file.
     """
-    if not OVERRIDES_PATH.exists():
+
+    if not FIXTURES_FILE.exists():
+        print(
+            f"WARNING: fixture data file not found: "
+            f"{FIXTURES_FILE}"
+        )
         return []
 
-    with open(OVERRIDES_PATH, "r", encoding="utf-8") as f:
-        raw_overrides = json.load(f)
+    try:
+        with open(
+            FIXTURES_FILE,
+            "r",
+            encoding="utf-8",
+        ) as f:
+            data = json.load(f)
 
-    parsed = []
-    for entry in raw_overrides:
-        try:
-            kickoff = datetime.fromisoformat(entry["kickoff"])
-            if kickoff.tzinfo is None:
-                kickoff = kickoff.replace(tzinfo=UK_TZ)
-            parsed.append(
-                {
-                    "home": entry["home"],
-                    "away": entry["away"],
-                    "kickoff": kickoff,
-                    "competition": entry["competition"],
-                }
+    except (OSError, json.JSONDecodeError) as e:
+        print(
+            f"WARNING: unable to read fixture data: {e}"
+        )
+        return []
+
+    return data.get("fixtures", [])
+
+
+def _parse_kickoff(value):
+    """
+    Convert stored ISO timestamp into a timezone-aware datetime.
+    """
+
+    if not value:
+        return None
+
+    try:
+        kickoff = datetime.fromisoformat(
+            value.replace("Z", "+00:00")
+        )
+
+        if kickoff.tzinfo is None:
+            kickoff = kickoff.replace(
+                tzinfo=UK_TZ
             )
-        except (KeyError, ValueError) as e:
-            print(f"WARNING: skipping malformed override entry {entry}: {e}")
 
-    return parsed
+        return kickoff.astimezone(UK_TZ)
 
-
-def _get_all_team_fixtures() -> dict:
-    """
-    Scrapes ESPN for every team in ESPN_TEAM_IDS and caches the
-    result for the rest of this run.
-    """
-    global _all_team_fixtures_cache
-    if _all_team_fixtures_cache is not None:
-        return _all_team_fixtures_cache
-
-    print()
-    print("==============================")
-    print("FETCHING FIXTURES FROM ESPN")
-    print("==============================")
-
-    _all_team_fixtures_cache = scraper.fetch_all_teams(ESPN_TEAM_IDS, debug_first=False)
-    return _all_team_fixtures_cache
+    except ValueError:
+        return None
 
 
 def get_fixtures(team: dict) -> list[dict]:
     """
-    Same interface as the old SportMonks version:
-    returns upcoming fixtures (within FIXTURE_DAYS) for a single team
-    (as defined in SPFL_TEAMS), in the format generator.py expects.
+    Public interface used by generator.py.
+
+    Returns fixtures for one team in the format expected by the
+    existing EPG system:
+
+        {
+            "home": str,
+            "away": str,
+            "kickoff": datetime,
+            "competition": str,
+        }
     """
+
     team_name = team["name"]
+
     if team_name.endswith(" TV"):
         team_name = team_name[:-3]
 
-    all_team_fixtures = _get_all_team_fixtures()
-
-    # ESPN_TEAM_IDS keys should match SPFL_TEAMS names (minus " TV").
-    # Fall back to a normalised match in case of minor spelling
-    # differences between the two files.
-    raw_fixtures = all_team_fixtures.get(team_name)
-    if raw_fixtures is None:
-        target = normalise_team_name(team_name)
-        for key, fixtures in all_team_fixtures.items():
-            if normalise_team_name(key) == target:
-                raw_fixtures = fixtures
-                break
-    raw_fixtures = raw_fixtures or []
+    target = normalise_team_name(
+        team_name
+    )
 
     now = datetime.now(UK_TZ)
-    window_end = now + timedelta(days=FIXTURE_DAYS)
 
-    matches = []
-    for fx in raw_fixtures:
-        if fx.get("kickoff") is None:
-            continue  # no confirmed time yet - add via overrides.json once known
-        if not (now <= fx["kickoff"] <= window_end):
+    window_end = (
+        now
+        + timedelta(days=FIXTURE_DAYS)
+    )
+
+    fixtures = []
+
+    for fixture in _load_fixture_data():
+
+        home = fixture.get("home", "")
+        away = fixture.get("away", "")
+
+        if (
+            normalise_team_name(home) != target
+            and
+            normalise_team_name(away) != target
+        ):
             continue
-        matches.append(
+
+        kickoff = _parse_kickoff(
+            fixture.get("kickoff")
+        )
+
+        if kickoff is None:
+            continue
+
+        if not (
+            now
+            <= kickoff
+            <= window_end
+        ):
+            continue
+
+        fixtures.append(
             {
-                "home": fx["home"],
-                "away": fx["away"],
-                "kickoff": fx["kickoff"],
-                "competition": fx["competition"],
+                "home": home,
+                "away": away,
+                "kickoff": kickoff,
+                "competition": fixture.get(
+                    "competition",
+                    "Unknown",
+                ),
             }
         )
 
-    # Apply overrides: add any override fixture involving this team.
-    for ov in _load_overrides():
-        if normalise_team_name(ov["home"]) == normalise_team_name(team_name) or \
-           normalise_team_name(ov["away"]) == normalise_team_name(team_name):
-            matches.append(ov)
+    fixtures.sort(
+        key=lambda fixture:
+        fixture["kickoff"]
+    )
 
-    matches.sort(key=lambda m: m["kickoff"])
-    return matches
+    return fixtures
