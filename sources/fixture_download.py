@@ -3,73 +3,287 @@ sources/fixture_download.py
 
 Fixture Download source adapter.
 
-This version first tests the actual JSON export endpoint for
-Rangers / Scottish Premiership before expanding to all teams.
+Fetches football fixtures from Fixture Download's JSON endpoints
+and stores them in data/fixtures.json.
+
+The rest of the EPG does not need to know where the fixtures came
+from.
+
+Current supported competition:
+    Scottish Premiership 2026/27
 """
 
+import json
 import sys
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
 
 
-# ------------------------------------------------------------
-# Make repository root available to Python
-# ------------------------------------------------------------
+# ---------------------------------------------------------------------
+# Project paths
+# ---------------------------------------------------------------------
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-from data_layer import save_fixtures
+DATA_DIR = BASE_DIR / "data"
+FIXTURES_FILE = DATA_DIR / "fixtures.json"
 
 
-# ------------------------------------------------------------
-# Configuration
-# ------------------------------------------------------------
+# ---------------------------------------------------------------------
+# Fixture Download configuration
+# ---------------------------------------------------------------------
 
-BASE_URL = "https://fixturedownload.com"
+BASE_URL = "https://fixturedownload.com/view/json"
 
-REQUEST_TIMEOUT = 30
-
-HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 "
-        "(Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 "
-        "(KHTML, like Gecko) "
-        "Chrome/131.0.0.0 Safari/537.36"
-    ),
-    "Accept": (
-        "application/json,"
-        "text/plain,"
-        "*/*"
-    ),
-    "Accept-Language": "en-GB,en;q=0.9",
+COMPETITIONS = {
+    "Scottish Premiership": {
+        "slug": "scottish-premiership-2026",
+    },
 }
 
 
-# ------------------------------------------------------------
-# Test configurations
-# ------------------------------------------------------------
+# ---------------------------------------------------------------------
+# Teams
+# ---------------------------------------------------------------------
 
-TESTS = [
-    {
-        "name": "Rangers - Scottish Premiership",
-        "url": (
-            f"{BASE_URL}/"
-            "football/scottish-premiership/"
-            "rangers"
-        ),
-    },
+TEAMS = [
+    "Aberdeen",
+    "Celtic",
+    "Dundee",
+    "Dundee United",
+    "Falkirk",
+    "Heart of Midlothian",
+    "Hibernian",
+    "Kilmarnock",
+    "Motherwell",
+    "Rangers",
+    "St. Johnstone",
+    "St. Mirren",
 ]
 
 
-# ------------------------------------------------------------
+# ---------------------------------------------------------------------
+# HTTP session
+# ---------------------------------------------------------------------
+
+SESSION = requests.Session()
+
+SESSION.headers.update(
+    {
+        "User-Agent": (
+            "Mozilla/5.0 "
+            "(X11; Linux x86_64) "
+            "AppleWebKit/537.36 "
+            "(KHTML, like Gecko) "
+            "Chrome/131.0.0.0 "
+            "Safari/537.36"
+        ),
+        "Accept": (
+            "application/json,"
+            "text/plain,"
+            "*/*"
+        ),
+        "Accept-Language": "en-GB,en;q=0.9",
+        "Referer": "https://fixturedownload.com/",
+    }
+)
+
+
+# ---------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------
+
+def team_slug(team_name: str) -> str:
+    """
+    Convert a team name into Fixture Download's URL slug.
+    """
+
+    replacements = {
+        "St. ": "st-",
+        " ": "-",
+    }
+
+    value = team_name.strip().lower()
+
+    for old, new in replacements.items():
+        value = value.replace(old.lower(), new)
+
+    return value
+
+
+def fetch_json(url: str):
+    """
+    Fetch JSON with a small retry mechanism.
+    """
+
+    for attempt in range(1, 4):
+
+        print(
+            f"    Request attempt {attempt}/3"
+        )
+
+        try:
+
+            response = SESSION.get(
+                url,
+                timeout=30,
+            )
+
+            print(
+                f"    HTTP status: "
+                f"{response.status_code}"
+            )
+
+            if response.status_code != 200:
+
+                print(
+                    "    Response preview:"
+                )
+
+                print(
+                    response.text[:500]
+                )
+
+            else:
+
+                try:
+
+                    return response.json()
+
+                except ValueError:
+
+                    print(
+                        "    Response was not valid JSON."
+                    )
+
+                    print(
+                        "    Content-Type:",
+                        response.headers.get(
+                            "Content-Type"
+                        ),
+                    )
+
+                    print(
+                        "    Response preview:"
+                    )
+
+                    print(
+                        response.text[:500]
+                    )
+
+        except requests.RequestException as exc:
+
+            print(
+                f"    Request error: {exc}"
+            )
+
+        if attempt < 3:
+
+            delay = attempt * 2
+
+            print(
+                f"    Retrying in {delay}s..."
+            )
+
+            time.sleep(delay)
+
+    return None
+
+
+def parse_fixture(item: dict, competition: str):
+    """
+    Convert Fixture Download JSON into the internal data format.
+    """
+
+    home = item.get("HomeTeam")
+    away = item.get("AwayTeam")
+    date_utc = item.get("DateUtc")
+
+    if not home or not away or not date_utc:
+        return None
+
+    try:
+
+        kickoff = datetime.fromisoformat(
+            date_utc.replace(
+                "Z",
+                "+00:00",
+            )
+        )
+
+        if kickoff.tzinfo is None:
+            kickoff = kickoff.replace(
+                tzinfo=timezone.utc,
+            )
+
+        kickoff = kickoff.astimezone(
+            timezone.utc
+        )
+
+    except ValueError:
+
+        print(
+            f"    Could not parse date: "
+            f"{date_utc}"
+        )
+
+        return None
+
+    return {
+        "home": home,
+        "away": away,
+        "kickoff": kickoff.isoformat(),
+        "competition": competition,
+    }
+
+
+def save_fixtures(fixtures: list[dict]):
+    """
+    Save the normalised fixture data.
+
+    Existing data is replaced only after the complete source
+    collection succeeds.
+    """
+
+    DATA_DIR.mkdir(
+        exist_ok=True
+    )
+
+    output = {
+        "generated_at": datetime.now(
+            timezone.utc
+        ).isoformat(),
+        "fixtures": fixtures,
+    }
+
+    temporary_file = FIXTURES_FILE.with_suffix(
+        ".tmp"
+    )
+
+    with open(
+        temporary_file,
+        "w",
+        encoding="utf-8",
+    ) as f:
+
+        json.dump(
+            output,
+            f,
+            indent=2,
+            ensure_ascii=False,
+        )
+
+    temporary_file.replace(
+        FIXTURES_FILE
+    )
+
+
+# ---------------------------------------------------------------------
 # Main
-# ------------------------------------------------------------
+# ---------------------------------------------------------------------
 
 def main():
 
@@ -78,135 +292,196 @@ def main():
     )
 
     print(
-        "FIXTURE DOWNLOAD JSON TEST"
+        "FIXTURE DOWNLOAD SOURCE ADAPTER"
     )
 
     print(
         "=============================="
     )
 
-    session = requests.Session()
-    session.headers.update(HEADERS)
+    print(
+        f"Teams configured: {len(TEAMS)}"
+    )
 
     all_fixtures = []
 
-    for test in TESTS:
+    for competition, config in COMPETITIONS.items():
 
-        print()
+        competition_slug = config["slug"]
+
+        print(
+            "\n--------------------------------"
+        )
+
+        print(
+            f"Competition: {competition}"
+        )
+
+        print(
+            f"Competition slug: "
+            f"{competition_slug}"
+        )
+
         print(
             "--------------------------------"
         )
 
-        print(
-            test["name"]
-        )
+        for team in TEAMS:
 
-        print(
-            "--------------------------------"
-        )
+            slug = team_slug(team)
 
-        url = test["url"]
-
-        print(
-            f"URL: {url}"
-        )
-
-        try:
-
-            response = session.get(
-                url,
-                timeout=REQUEST_TIMEOUT,
-            )
-
-        except requests.RequestException as exc:
-
-            print(
-                f"REQUEST ERROR: {exc}"
-            )
-
-            continue
-
-        print(
-            f"HTTP status: "
-            f"{response.status_code}"
-        )
-
-        print(
-            f"Content-Type: "
-            f"{response.headers.get('content-type')}"
-        )
-
-        print()
-
-        print(
-            "Response preview:"
-        )
-
-        print(
-            response.text[:1000]
-        )
-
-        print()
-
-        if response.status_code != 200:
-
-            print(
-                "REQUEST FAILED"
-            )
-
-            continue
-
-        try:
-
-            data = response.json()
-
-        except ValueError:
-
-            print(
-                "Response is not JSON."
-            )
-
-            continue
-
-        print(
-            "JSON response received."
-        )
-
-        print(
-            f"Python type: "
-            f"{type(data).__name__}"
-        )
-
-        if isinstance(data, list):
-
-            print(
-                f"Records: {len(data)}"
-            )
-
-        elif isinstance(data, dict):
-
-            print(
-                "Top-level keys:"
+            url = (
+                f"{BASE_URL}/"
+                f"{competition_slug}/"
+                f"{slug}"
             )
 
             print(
-                list(data.keys())
+                f"\n{team}"
             )
 
-        # We are only testing the endpoint at this stage.
-        # Do not attempt to save unverified data.
+            print(
+                f"URL: {url}"
+            )
 
-    print()
+            data = fetch_json(
+                url
+            )
+
+            if data is None:
+
+                print(
+                    "    REQUEST FAILED"
+                )
+
+                continue
+
+            if not isinstance(
+                data,
+                list,
+            ):
+
+                print(
+                    "    Unexpected JSON structure:"
+                )
+
+                print(
+                    str(data)[:500]
+                )
+
+                continue
+
+            print(
+                f"    JSON fixtures returned: "
+                f"{len(data)}"
+            )
+
+            for item in data:
+
+                fixture = parse_fixture(
+                    item,
+                    competition,
+                )
+
+                if fixture is None:
+                    continue
+
+                all_fixtures.append(
+                    fixture
+                )
+
+                print(
+                    f"    {fixture['kickoff']} "
+                    f"- "
+                    f"{fixture['home']} "
+                    f"vs "
+                    f"{fixture['away']}"
+                )
+
+    # -------------------------------------------------------------
+    # Remove duplicates
+    # -------------------------------------------------------------
+
+    unique = {}
+
+    for fixture in all_fixtures:
+
+        key = (
+            fixture["kickoff"],
+            fixture["home"],
+            fixture["away"],
+            fixture["competition"],
+        )
+
+        unique[key] = fixture
+
+    all_fixtures = list(
+        unique.values()
+    )
+
+    all_fixtures.sort(
+        key=lambda fixture:
+        fixture["kickoff"]
+    )
+
+    print(
+        "\n=============================="
+    )
+
+    print(
+        f"TOTAL UNIQUE FIXTURES: "
+        f"{len(all_fixtures)}"
+    )
+
     print(
         "=============================="
     )
 
-    print(
-        "TEST COMPLETE"
+    # -------------------------------------------------------------
+    # Safety check
+    # -------------------------------------------------------------
+    #
+    # Do NOT destroy an existing fixture file if the source has
+    # suddenly returned zero fixtures.
+    #
+
+    if not all_fixtures:
+
+        print(
+            "\nERROR:"
+        )
+
+        print(
+            "Fixture Download returned "
+            "zero usable fixtures."
+        )
+
+        print(
+            "Existing data/fixtures.json "
+            "has NOT been replaced."
+        )
+
+        sys.exit(1)
+
+    # -------------------------------------------------------------
+    # Save
+    # -------------------------------------------------------------
+
+    save_fixtures(
+        all_fixtures
     )
 
     print(
-        "=============================="
+        f"\nSaved fixture data to:"
+    )
+
+    print(
+        FIXTURES_FILE
+    )
+
+    print(
+        "\nFixture Download adapter "
+        "completed successfully."
     )
 
 
