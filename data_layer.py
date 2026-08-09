@@ -1,11 +1,9 @@
 """
 data_layer.py
 
-Fixture data ingestion layer.
+Fixture data ingestion and storage layer.
 
-This module sits between external fixture sources and the EPG.
-
-External source
+External fixture source
         ↓
     data_layer.py
         ↓
@@ -15,9 +13,11 @@ data/fixtures.json
         ↓
     generator.py
 
-The EPG itself never communicates with an external fixture provider.
+The EPG does not communicate directly with any external fixture
+provider.
 
-The source can therefore be replaced later without changing the EPG.
+This allows the fixture source to be replaced later without
+changing the EPG generation system.
 """
 
 import json
@@ -43,15 +43,15 @@ def ensure_data_directory():
 
 def normalise_fixture(fixture: dict) -> dict | None:
     """
-    Validate and normalise one fixture.
+    Validate and normalise a fixture.
 
-    Expected internal format:
+    Internal fixture format:
 
         {
-            "home": "...",
-            "away": "...",
-            "kickoff": "...",
-            "competition": "..."
+            "home": "Rangers",
+            "away": "Celtic",
+            "kickoff": "2026-08-15T12:30:00Z",
+            "competition": "Scottish Premiership"
         }
 
     Returns None if the fixture is invalid.
@@ -88,8 +88,8 @@ def normalise_fixture(fixture: dict) -> dict | None:
     if not kickoff:
         return None
 
-    # Make sure the timestamp is valid.
     try:
+
         parsed = datetime.fromisoformat(
             kickoff.replace(
                 "Z",
@@ -102,11 +102,9 @@ def normalise_fixture(fixture: dict) -> dict | None:
                 tzinfo=timezone.utc,
             )
 
-        # Store consistently as UTC ISO-8601.
         kickoff = (
-            parsed.astimezone(
-                timezone.utc
-            )
+            parsed
+            .astimezone(timezone.utc)
             .isoformat()
             .replace(
                 "+00:00",
@@ -115,10 +113,12 @@ def normalise_fixture(fixture: dict) -> dict | None:
         )
 
     except ValueError:
+
         print(
             "WARNING: invalid kickoff "
             f"timestamp: {kickoff}"
         )
+
         return None
 
     return {
@@ -132,12 +132,21 @@ def normalise_fixture(fixture: dict) -> dict | None:
     }
 
 
-def save_fixtures(fixtures: list[dict]):
+def save_fixtures(
+    fixtures: list[dict],
+):
     """
-    Safely write normalised fixtures to fixtures.json.
+    Safely save normalised fixtures.
 
-    The existing file is replaced only after the new data has
-    successfully been prepared.
+    The existing fixtures.json structure is preserved:
+
+        {
+            "generated_at": "...",
+            "fixtures": [...]
+        }
+
+    The file is replaced atomically so a failed write cannot leave
+    a partially written fixtures.json.
     """
 
     ensure_data_directory()
@@ -159,13 +168,15 @@ def save_fixtures(fixtures: list[dict]):
     )
 
     output = {
-        "updated": datetime.now(
-            timezone.utc
-        )
-        .isoformat()
-        .replace(
-            "+00:00",
-            "Z",
+        "generated_at": (
+            datetime.now(
+                timezone.utc
+            )
+            .isoformat()
+            .replace(
+                "+00:00",
+                "Z",
+            )
         ),
         "fixtures": normalised,
     }
@@ -204,13 +215,16 @@ def save_fixtures(fixtures: list[dict]):
 
 def load_fixtures() -> list[dict]:
     """
-    Load the current normalised fixture data.
-
-    This is primarily useful for testing and for future data-source
-    implementations.
+    Load the current fixture store.
     """
 
     if not FIXTURES_FILE.exists():
+
+        print(
+            f"WARNING: fixture file not found: "
+            f"{FIXTURES_FILE}"
+        )
+
         return []
 
     try:
@@ -229,7 +243,7 @@ def load_fixtures() -> list[dict]:
     ) as exc:
 
         print(
-            "WARNING: unable to load "
+            f"WARNING: unable to load "
             f"{FIXTURES_FILE}: {exc}"
         )
 
@@ -237,13 +251,18 @@ def load_fixtures() -> list[dict]:
 
     fixtures = data.get(
         "fixtures",
-        []
+        [],
     )
 
     if not isinstance(
         fixtures,
         list,
     ):
+        print(
+            "WARNING: 'fixtures' is not "
+            "a list."
+        )
+
         return []
 
     return fixtures
@@ -251,20 +270,22 @@ def load_fixtures() -> list[dict]:
 
 def test_data_layer():
     """
-    Basic self-test.
+    Run a safe self-test.
 
-    This deliberately does not contact ESPN.
+    This does NOT contact ESPN.
 
-    It verifies that the data layer can create, write and read the
-    normalised fixture store.
+    It tests fixture validation without modifying the real
+    fixtures.json file.
     """
 
     print(
         "=============================="
     )
+
     print(
         "TESTING FIXTURE DATA LAYER"
     )
+
     print(
         "=============================="
     )
@@ -280,23 +301,33 @@ def test_data_layer():
         ),
     }
 
-    # Keep the test fixture in memory only.
-    normalised = normalise_fixture(
+    result = normalise_fixture(
         test_fixture
     )
 
-    if normalised is None:
+    if result is None:
+
         raise RuntimeError(
-            "Data-layer self-test failed: "
-            "fixture could not be normalised."
+            "Data-layer self-test failed."
         )
 
     print(
-        "Fixture normalisation: OK"
+        "Fixture validation: OK"
     )
 
     print(
-        "Data layer is ready."
+        "Normalised fixture:"
+    )
+
+    print(
+        json.dumps(
+            result,
+            indent=2,
+        )
+    )
+
+    print(
+        "Data layer test passed."
     )
 
 
