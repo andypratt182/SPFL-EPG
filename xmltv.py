@@ -290,8 +290,11 @@ def create_next_game_programme(
         )
 
         # ----------------------------------------------------
-        # CLEANER NEXT GAME DESCRIPTION
+        # IMPROVED NEXT GAME DESCRIPTION
         # ----------------------------------------------------
+
+        home = next_match["home"]
+        away = next_match["away"]
 
         competition = next_match.get(
             "competition",
@@ -310,14 +313,36 @@ def create_next_game_programme(
         if not venue:
             venue = "Venue TBC"
 
-        description = (
-            f"{next_match['home']} vs "
-            f"{next_match['away']}\n"
-            f"Competition: {competition}\n"
-            f"Venue: {venue}\n"
-            f"Kick-off: "
-            f"{format_kickoff(next_match['kickoff'])}"
+        kickoff_time = local_kickoff.strftime(
+            "%-I:%M %p"
         )
+
+        if home == next_match.get(
+            "home"
+        ):
+            pass
+
+        description = (
+            f"{home} take on {away} "
+            f"in the {competition} "
+            f"at {venue}. "
+            f"Kick-off is scheduled for "
+            f"{kickoff_time}."
+        )
+
+        # ----------------------------------------------------
+        # Use "face" for Hearts as requested.
+        # ----------------------------------------------------
+
+        if home == "Hearts":
+
+            description = (
+                f"{home} face {away} "
+                f"in the {competition} "
+                f"at {venue}. "
+                f"Kick-off is scheduled for "
+                f"{kickoff_time}."
+            )
 
     else:
 
@@ -419,28 +444,8 @@ def create_live_programme(
     if not venue:
         venue = "Venue TBC"
 
-    # --------------------------------------------------------
-    # LIVE MATCH DESCRIPTION
-    # --------------------------------------------------------
-
-    team = SPFL_TEAMS.get(
-        channel_id,
-        {}
-    )
-
-    team_name = team.get(
-        "name",
-        channel_id
-    )
-
-    if team_name.endswith(" TV"):
-        team_name = team_name[:-3].strip()
-
-    home = match["home"]
-    away = match["away"]
-
     kickoff = parse_kickoff(
-        match["kickoff"]
+        match.get("kickoff")
     )
 
     if kickoff is not None:
@@ -457,29 +462,15 @@ def create_live_programme(
 
         kickoff_time = "TBC"
 
-    if team_name.lower() == home.lower():
-
-        description = (
-            f"Live coverage of "
-            f"{team_name} taking on "
-            f"{away} in the "
-            f"{competition} at "
-            f"{venue}. "
-            f"Kick-off is at "
-            f"{kickoff_time}."
-        )
-
-    else:
-
-        description = (
-            f"Live coverage of "
-            f"{team_name} facing "
-            f"{home} in the "
-            f"{competition} at "
-            f"{venue}. "
-            f"Kick-off is at "
-            f"{kickoff_time}."
-        )
+    description = (
+        f"Live coverage of "
+        f"{match['home']} taking on "
+        f"{match['away']} "
+        f"in the {competition} "
+        f"at {venue}. "
+        f"Kick-off is at "
+        f"{kickoff_time}."
+    )
 
     title = (
         f"⚽ "
@@ -530,12 +521,10 @@ def create_xmltv(
         )
 
         if kickoff is None:
-
             print(
                 "WARNING: Ignoring fixture with "
                 f"invalid kickoff: {fixture}"
             )
-
             continue
 
         fixture = dict(fixture)
@@ -732,4 +721,4 @@ def create_xmltv(
 
     print(
         f"XMLTV written to {filename}"
-        )
+            )
