@@ -253,7 +253,6 @@ def create_next_game_programme(
     stop,
     fixtures
 ):
-
     next_match = get_next_match(
         fixtures,
         channel_id,
@@ -279,7 +278,7 @@ def create_next_game_programme(
         )
 
         # ----------------------------------------------------
-        # KEEP EXISTING TITLE EXACTLY AS REQUESTED
+        # KEEP EXISTING TITLE
         # ----------------------------------------------------
 
         title = (
@@ -290,7 +289,7 @@ def create_next_game_programme(
         )
 
         # ----------------------------------------------------
-        # IMPROVED NEXT GAME DESCRIPTION
+        # DESCRIPTION
         # ----------------------------------------------------
 
         home = next_match["home"]
@@ -301,10 +300,12 @@ def create_next_game_programme(
             "Competition TBC"
         )
 
-       venue = next_match.get(
-           "venue"
-       )
+        # Fixtur.es venue
+        venue = next_match.get(
+            "venue"
+        )
 
+        # Fallbacks for compatibility
         if not venue:
             venue = next_match.get(
                 "stadium"
@@ -322,11 +323,6 @@ def create_next_game_programme(
             "%-I:%M %p"
         )
 
-        if home == next_match.get(
-            "home"
-        ):
-            pass
-
         description = (
             f"{home} take on {away} "
             f"in the {competition} "
@@ -336,7 +332,7 @@ def create_next_game_programme(
         )
 
         # ----------------------------------------------------
-        # Use "face" for Hearts as requested.
+        # Use "face" for Hearts
         # ----------------------------------------------------
 
         if home == "Hearts":
@@ -365,7 +361,6 @@ def create_next_game_programme(
         title,
         description
     )
-
 
 # ============================================================
 # CHANNELS
