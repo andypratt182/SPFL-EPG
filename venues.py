@@ -1,41 +1,58 @@
-import json
-import re
-import unicodedata
 from pathlib import Path
+import json
 
 
 # ============================================================
 # VENUE DATA
 # ============================================================
 
-VENUES_FILE = (
-    Path(__file__).resolve().parent
-    / "data"
-    / "venues.json"
-)
+BASE_DIR = Path(__file__).resolve().parent
+DATA_FILE = BASE_DIR / "data" / "venues.json"
 
 
-# Fixtur.es names that cannot be resolved by normal text
-# normalisation alone.
-TEAM_ALIASES = {
-    "fk shkendija 79": "kf shkendija",
-    "shkendija": "kf shkendija",
-    "shkëndija": "kf shkendija",
-    "fk shkëndija": "kf shkendija",
-}
+def _load_venues():
+    """
+    Load venue data from data/venues.json.
 
+    The JSON file is deliberately kept under data/ so venue
+    information can be expanded without changing this module.
+    """
+
+    if not DATA_FILE.exists():
+        raise FileNotFoundError(
+            f"Venue data file not found: {DATA_FILE}"
+        )
+
+    try:
+        with DATA_FILE.open(
+            "r",
+            encoding="utf-8",
+        ) as file:
+            data = json.load(file)
+
+    except json.JSONDecodeError as error:
+        raise RuntimeError(
+            f"Invalid venue JSON: {DATA_FILE}"
+        ) from error
+
+    if not isinstance(data, dict):
+        raise RuntimeError(
+            f"Venue data must be a JSON object: {DATA_FILE}"
+        )
+
+    return data
+
+
+VENUES = _load_venues()
+
+
+# ============================================================
+# NAME NORMALISATION
+# ============================================================
 
 def _normalise_name(name):
     """
-    Create a forgiving lookup key for team names.
-
-    Handles:
-        - accents
-        - punctuation
-        - FC / F.C.
-        - Football Club
-        - Fixtur.es competition suffixes
-        - whitespace differences
+    Normalise a team name sufficiently for venue lookup.
     """
 
     if not name:
@@ -43,146 +60,120 @@ def _normalise_name(name):
 
     value = str(name).strip()
 
-    # Remove Fixtur.es competition suffixes.
-    value = re.sub(
-        r"\s+\[(?:EL|CL|Conf)\]\s*$",
-        "",
-        value,
-        flags=re.IGNORECASE,
+    # Remove competition suffixes used by Fixtur.es.
+    value = value.replace("[CL]", "")
+    value = value.replace("[EL]", "")
+    value = value.replace("[Conf]", "")
+
+    # Remove common football-club suffixes.
+    replacements = (
+        (" Football Club", ""),
+        (" F.C.", ""),
+        (" FC", ""),
     )
 
-    # Remove accents for matching.
-    value = unicodedata.normalize(
-        "NFKD",
-        value,
-    )
+    for suffix, replacement in replacements:
+        if value.lower().endswith(suffix.lower()):
+            value = value[: -len(suffix)] + replacement
 
-    value = "".join(
-        char
-        for char in value
-        if not unicodedata.combining(char)
-    )
+    value = " ".join(value.split())
 
-    value = value.lower()
-
-    # Normalise Football Club / FC / F.C.
-    value = re.sub(
-        r"\bfootball\s+club\b",
-        "",
-        value,
-    )
-
-    value = re.sub(
-        r"\bf\.?c\.?\b",
-        "",
-        value,
-    )
-
-    # Remove punctuation.
-    value = re.sub(
-        r"[^a-z0-9]+",
-        " ",
-        value,
-    )
-
-    return " ".join(value.split())
-
-
-def _load_venues():
-    """
-    Load venues.json and build a normalised lookup table.
-    """
-
-    if not VENUES_FILE.exists():
-        raise FileNotFoundError(
-            f"Venue data file not found: {VENUES_FILE}"
-        )
-
-    with VENUES_FILE.open(
-        "r",
-        encoding="utf-8",
-    ) as handle:
-        records = json.load(handle)
-
-    venues = {}
-
-    for record in records:
-
-        if not isinstance(record, dict):
-            continue
-
-        team = record.get("team")
-        stadium = record.get("stadium")
-
-        if not team or not stadium:
-            continue
-
-        venues[
-            _normalise_name(team)
-        ] = stadium
-
-    return venues
-
-
-VENUES = _load_venues()
+    return value.strip().lower()
 
 
 # ============================================================
-# ALIASES
-# ============================================================
-
-for alias, canonical in TEAM_ALIASES.items():
-
-    venue = VENUES.get(
-        _normalise_name(canonical)
-    )
-
-    if venue:
-        VENUES[
-            _normalise_name(alias)
-        ] = venue
-
-
-# ============================================================
-# PUBLIC API
+# VENUE LOOKUP
 # ============================================================
 
 def get_venue(team_name):
     """
     Return the stadium for a team.
 
-    Returns None when the team isn't present in venues.json.
+    Returns:
+        Stadium name
+        or "Venue TBC" if no venue is known.
     """
 
     if not team_name:
-        return None
+        return "Venue TBC"
 
-    return VENUES.get(
-        _normalise_name(team_name)
-    )
+    # First try exact name.
+    if team_name in VENUES:
+        venue = VENUES[team_name]
+
+        if isinstance(venue, str) and venue.strip():
+            return venue.strip()
+
+        if isinstance(venue, dict):
+            stadium = venue.get("stadium")
+
+            if stadium:
+                return str(stadium).strip()
+
+    # Then use normalised matching.
+    wanted = _normalise_name(team_name)
+
+    for name, venue in VENUES.items():
+
+        if _normalise_name(name) != wanted:
+            continue
+
+        if isinstance(venue, str):
+            if venue.strip():
+                return venue.strip()
+
+        elif isinstance(venue, dict):
+            stadium = venue.get("stadium")
+
+            if stadium:
+                return str(stadium).strip()
+
+    return "Venue TBC"
 
 
 # ============================================================
-# DIRECT TEST
+# OPTIONAL HELPER
+# ============================================================
+
+def has_venue(team_name):
+    """
+    Return True if a known venue exists for the team.
+    """
+
+    return get_venue(team_name) != "Venue TBC"
+
+
+# ============================================================
+# OPTIONAL DIRECT TEST
 # ============================================================
 
 if __name__ == "__main__":
 
-    tests = (
+    print("=" * 60)
+    print("VENUE DATABASE TEST")
+    print("=" * 60)
+
+    test_teams = [
         "Rangers",
-        "Rangers FC",
+        "Celtic",
+        "Aberdeen",
+        "Dundee",
+        "Dundee United",
+        "Hearts",
         "Hibernian",
-        "Hibernian F.C.",
-        "FK Shkendija 79",
-        "KF Shkëndija",
+        "Kilmarnock",
+        "Motherwell",
+        "Falkirk",
+        "St Johnstone",
+        "St Mirren",
         "Jagiellonia Białystok",
-    )
+        "LASK Linz",
+        "Benfica",
+        "FK Shkendija 79",
+        "HJK Helsinki",
+    ]
 
-    for team in tests:
-
-        venue = get_venue(team)
-
+    for team in test_teams:
         print(
-            f"{team}: "
-            f"{venue or 'Venue TBC'}"
+            f"{team:30} -> {get_venue(team)}"
         )
