@@ -56,6 +56,33 @@ from sources.fixtur_es import (  # noqa: E402
 
 
 # ============================================================
+# DIAGNOSTIC-ONLY COMPETITION FEED EXTENSIONS
+# ============================================================
+#
+# Keep the existing competition configuration from sources.fixtur_es.py
+# intact. This diagnostic additionally loads the three UEFA competition
+# feeds required for authoritative UEFA classification.
+#
+# This mapping is local to this inspection tool only.
+# sources/fixtur_es.py is deliberately not modified.
+#
+AUDIT_COMPETITION_CALENDARS = dict(COMPETITION_CALENDARS)
+
+AUDIT_COMPETITION_CALENDARS.update(
+    {
+        "Champions League":
+            "https://ics.fixtur.es/v2/league/champions-league.ics",
+
+        "Europa League":
+            "https://ics.fixtur.es/v2/league/europa-league.ics",
+
+        "UEFA Conference League":
+            "https://ics.fixtur.es/v2/league/uefa-conference-league.ics",
+    }
+)
+
+
+# ============================================================
 # CONFIGURATION
 # ============================================================
 
@@ -1037,6 +1064,11 @@ def load_competition_calendars():
     )
 
     print(
+        f"Competition feeds configured: "
+        f"{len(AUDIT_COMPETITION_CALENDARS)}"
+    )
+
+    print(
         "=" * 70
     )
 
@@ -1049,7 +1081,7 @@ def load_competition_calendars():
     total_season_events = 0
     failures = 0
 
-    for competition, url in COMPETITION_CALENDARS.items():
+    for competition, url in AUDIT_COMPETITION_CALENDARS.items():
 
         print()
         print(competition)
