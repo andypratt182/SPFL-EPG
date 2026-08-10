@@ -1,4 +1,3 @@
-```python
 import sys
 from pathlib import Path
 from collections import Counter
@@ -213,4 +212,3 @@ def main():
 if __name__ == "__main__":
 
     main()
-```
