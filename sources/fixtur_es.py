@@ -947,6 +947,8 @@ def parse_event(
         lines,
         "LOCATION",
     )
+
+    venue = location or get_venue(home)
     
     if not summary or not dtstart:
         return None
@@ -1016,7 +1018,7 @@ def parse_event(
         "kickoff": kickoff,
         "end": end,
         "competition": competition,
-        "venue": location,
+        "venue": venue,
         "source": "fixtur.es",
         "source_type": source_type,
         "source_name": source_name,
