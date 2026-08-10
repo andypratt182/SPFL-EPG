@@ -1914,11 +1914,8 @@ def run_audit(
     )
 
     print(
-        f"Potential competition issues: "
-        f"{len(classifications.get(
-            'POTENTIALLY MISSING COMPETITION CLASSIFICATION',
-            [],
-        ))}"
+        "Potential competition issues: "
+        f"{len(classifications.get('POTENTIALLY MISSING COMPETITION CLASSIFICATION', []))}"
     )
 
     print(
