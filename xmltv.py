@@ -431,14 +431,13 @@ def create_live_programme(
         "Competition TBC"
     )
 
-    venue = match.get(
-        "stadium"
-    )
+    venue = match.get("venue")
 
     if not venue:
-        venue = match.get(
-            "location"
-        )
+        venue = match.get("stadium")
+
+    if not venue:
+        venue = match.get("location")
 
     if not venue:
         venue = "Venue TBC"
