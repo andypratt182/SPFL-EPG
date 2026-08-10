@@ -1820,6 +1820,17 @@ def run_audit(
     # Overall classification summary
     # --------------------------------------------------------
 
+    domestic_competitive_keys = {
+        key
+        for key, competitions in fixture_competitions.items()
+        if competitions & set(DOMESTIC_COMPETITIONS)
+    }
+
+    confirmed_domestic = (
+        set(team_fixtures.keys())
+        & domestic_competitive_keys
+    )
+
     print()
     print(
         "=" * 70
@@ -1840,19 +1851,7 @@ def run_audit(
 
     print(
         f"Domestic competitive matches confirmed: "
-        f"{sum("
-            len(
-                [
-                    key
-                    for key in team_fixtures
-                    if (
-                        key
-                        in set(competition_fixtures.keys())
-                    )
-                ]
-            )
-            for _ in [0]
-        )}"
+        f"{len(confirmed_domestic)}"
     )
 
     print()
