@@ -1,4 +1,3 @@
-```python
 from datetime import datetime
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -2273,4 +2272,3 @@ def build_fixtures():
 
 if __name__ == "__main__":
     get_all_fixtures()
-```
