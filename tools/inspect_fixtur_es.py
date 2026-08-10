@@ -1,211 +1,144 @@
 import sys
 from pathlib import Path
-from collections import Counter
 
-# Make the repository root importable when this script
-# is run from the tools directory.
+# Make the repository root importable.
 sys.path.insert(
     0,
     str(Path(__file__).resolve().parent.parent)
 )
 
-from sources.fixtur_es import get_all_fixtures
+from sources.fixtur_es import (
+    TEAM_CALENDARS,
+    build_team_feed_url,
+    download_ics,
+    parse_events,
+)
 
 
 def main():
 
     print()
     print("=" * 70)
-    print("FIXTUR.ES DATASET DIAGNOSTIC")
+    print("FIXTUR.ES RAW ICS FIELD INSPECTION")
     print("=" * 70)
-
-    fixtures = get_all_fixtures()
-
-    print()
-    print(
-        f"Total unique fixtures: {len(fixtures)}"
-    )
 
     # -----------------------------------------------------
-    # Competition summary
+    # Inspect the first few events from every team
     # -----------------------------------------------------
 
-    competition_counts = Counter()
-
-    for fixture in fixtures:
-
-        competition = fixture.get(
-            "competition"
-        )
-
-        if not competition:
-            competition = "Unknown"
-
-        competition_counts[
-            str(competition)
-        ] += 1
-
-    print()
-    print("=" * 70)
-    print("COMPETITION SUMMARY")
-    print("=" * 70)
-
-    for competition, count in (
-        competition_counts.most_common()
-    ):
-
-        print(
-            f"{count:5}  {competition}"
-        )
-
-    # -----------------------------------------------------
-    # Source team summary
-    # -----------------------------------------------------
-
-    team_counts = Counter()
-
-    for fixture in fixtures:
-
-        team = fixture.get(
-            "source_team"
-        )
-
-        if not team:
-            team = "Unknown"
-
-        team_counts[
-            str(team)
-        ] += 1
-
-    print()
-    print("=" * 70)
-    print("SOURCE TEAM SUMMARY")
-    print("=" * 70)
-
-    for team in sorted(
-        team_counts,
-        key=lambda value: str(value)
-    ):
-
-        print(
-            f"{team_counts[team]:5}  {team}"
-        )
-
-    # -----------------------------------------------------
-    # Competition examples
-    # -----------------------------------------------------
-
-    print()
-    print("=" * 70)
-    print("COMPETITION EXAMPLES")
-    print("=" * 70)
-
-    shown = set()
-
-    for fixture in fixtures:
-
-        competition = fixture.get(
-            "competition"
-        )
-
-        if not competition:
-            competition = "Unknown"
-
-        competition = str(
-            competition
-        )
-
-        if competition in shown:
-            continue
-
-        shown.add(
-            competition
-        )
+    for team_name, slug in TEAM_CALENDARS.items():
 
         print()
+        print("=" * 70)
+        print(f"TEAM: {team_name}")
         print(
-            f"[{competition}]"
+            f"URL: {build_team_feed_url(slug)}"
         )
+        print("=" * 70)
 
-        print(
-            f"  kickoff: "
-            f"{fixture.get('kickoff')}"
-        )
+        try:
 
-        print(
-            f"  match: "
-            f"{fixture.get('home')} "
-            f"vs "
-            f"{fixture.get('away')}"
-        )
-
-        print(
-            f"  source team: "
-            f"{fixture.get('source_team')}"
-        )
-
-        print(
-            f"  source id: "
-            f"{fixture.get('source_id')}"
-        )
-
-    # -----------------------------------------------------
-    # Unknown competitions
-    # -----------------------------------------------------
-
-    unknown = [
-        fixture
-        for fixture in fixtures
-        if (
-            not fixture.get("competition")
-            or fixture.get("competition")
-            == "Unknown"
-        )
-    ]
-
-    print()
-    print("=" * 70)
-    print("UNKNOWN COMPETITIONS")
-    print("=" * 70)
-
-    print(
-        f"Unknown fixtures: {len(unknown)}"
-    )
-
-    for fixture in unknown[:20]:
-
-        print(
-            f"{fixture.get('kickoff')} | "
-            f"{fixture.get('home')} vs "
-            f"{fixture.get('away')} | "
-            f"{fixture.get('source_team')}"
-        )
-
-    # -----------------------------------------------------
-    # Raw field inspection
-    # -----------------------------------------------------
-
-    print()
-    print("=" * 70)
-    print("RAW NORMALISED FIELDS")
-    print("=" * 70)
-
-    if fixtures:
-
-        fixture = fixtures[0]
-
-        for key in sorted(
-            fixture.keys()
-        ):
-
-            print(
-                f"{key}: "
-                f"{fixture.get(key)}"
+            ics_text = download_ics(
+                build_team_feed_url(slug)
             )
 
+            events = parse_events(
+                ics_text
+            )
+
+        except Exception as error:
+
+            print(
+                f"ERROR: {error}"
+            )
+
+            continue
+
+        print(
+            f"VEVENT records: {len(events)}"
+        )
+
+        # -------------------------------------------------
+        # Show first 3 complete raw events
+        # -------------------------------------------------
+
+        for index, event in enumerate(
+            events[:3],
+            start=1
+        ):
+
+            print()
+            print(
+                f"--- RAW EVENT {index} ---"
+            )
+
+            for key, value in event.items():
+
+                print(
+                    f"{key}: {value}"
+                )
+
+    # -----------------------------------------------------
+    # Property frequency analysis
+    # -----------------------------------------------------
+
     print()
     print("=" * 70)
-    print("DIAGNOSTIC COMPLETE")
+    print("PROPERTY FREQUENCY ANALYSIS")
+    print("=" * 70)
+
+    property_counts = {}
+
+    for team_name, slug in TEAM_CALENDARS.items():
+
+        print(
+            f"\nScanning {team_name}..."
+        )
+
+        try:
+
+            ics_text = download_ics(
+                build_team_feed_url(slug)
+            )
+
+            events = parse_events(
+                ics_text
+            )
+
+        except Exception as error:
+
+            print(
+                f"ERROR: {error}"
+            )
+
+            continue
+
+        for event in events:
+
+            for key in event:
+
+                if key not in property_counts:
+                    property_counts[key] = 0
+
+                property_counts[key] += 1
+
+    print()
+
+    for key, count in sorted(
+        property_counts.items(),
+        key=lambda item: (
+            -item[1],
+            item[0],
+        ),
+    ):
+
+        print(
+            f"{count:6}  {key}"
+        )
+
+    print()
+    print("=" * 70)
+    print("RAW ICS INSPECTION COMPLETE")
     print("=" * 70)
 
 
