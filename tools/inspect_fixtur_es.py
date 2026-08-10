@@ -1,4 +1,10 @@
-from collections import Counter, defaultdict
+import sys
+from pathlib import Path
+
+sys.path.insert(
+    0,
+    str(Path(__file__).resolve().parent.parent)
+)
 
 from sources.fixtur_es import get_all_fixtures
 
