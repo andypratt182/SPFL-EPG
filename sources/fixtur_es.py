@@ -6,6 +6,8 @@ from zoneinfo import ZoneInfo
 import re
 import time
 
+from venues import get_venue
+
 
 # ============================================================
 # FIXTUR.ES SOURCE CONFIGURATION
