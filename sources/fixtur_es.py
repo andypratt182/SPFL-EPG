@@ -234,6 +234,31 @@ TEAM_NAME_MAP = {
 }
 
 
+def clean_competition_suffix(name):
+    """
+    Remove Fixtur.es competition abbreviations appended
+    to team names, for example:
+
+        Jagiellonia Białystok [EL] -> Jagiellonia Białystok
+        LASK Linz [CL]             -> LASK Linz
+        HJK Helsinki [Conf]        -> HJK Helsinki
+    """
+
+    if not name:
+        return ""
+
+    name = str(name).strip()
+
+    name = re.sub(
+        r"\s+\[(?:EL|CL|Conf)\]\s*$",
+        "",
+        name,
+        flags=re.IGNORECASE,
+    )
+
+    return name.strip()
+
+
 def normalise_team_name(name):
     """
     Convert Fixtur.es team names into canonical SPFL names.
