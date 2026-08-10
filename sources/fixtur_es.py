@@ -1,3 +1,4 @@
+```python
 from datetime import datetime
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -65,10 +66,10 @@ TEAM_CALENDARS = {
 # A competition fixture must exactly match a fixture already
 # discovered from a team calendar using:
 #
-#     date
-#     time
-#     home
-#     away
+# date
+# time
+# home
+# away
 
 COMPETITION_CALENDARS = {
     "Scottish Premiership":
@@ -239,8 +240,9 @@ TEAM_NAME_MAP = {
 def clean_competition_suffix(name):
     """
     Remove Fixtur.es competition abbreviations appended
-    to team names, for example:
+    to team names.
 
+    Examples:
         Jagiellonia Białystok [EL] -> Jagiellonia Białystok
         LASK Linz [CL]             -> LASK Linz
         HJK Helsinki [Conf]        -> HJK Helsinki
@@ -943,15 +945,30 @@ def parse_event(
         lines,
         "DESCRIPTION",
     )
+
     location = property_value(
         lines,
         "LOCATION",
     )
 
-    venue = location or get_venue(home)
-    
+    # --------------------------------------------------------
+    # Basic validation.
+    # --------------------------------------------------------
+
     if not summary or not dtstart:
         return None
+
+    # --------------------------------------------------------
+    # Parse the fixture summary BEFORE attempting to look up
+    # the venue.
+    #
+    # This is important. Previously get_venue(home) was called
+    # before 'home' had been assigned, causing:
+    #
+    # UnboundLocalError:
+    # cannot access local variable 'home'
+    # where it is not associated with a value
+    # --------------------------------------------------------
 
     (
         home,
@@ -964,6 +981,18 @@ def parse_event(
 
     if not home or not away:
         return None
+
+    # --------------------------------------------------------
+    # Venue handling.
+    #
+    # Prefer the LOCATION supplied by Fixtur.es.
+    # If LOCATION is absent, use our venue database.
+    # --------------------------------------------------------
+
+    venue = (
+        location
+        or get_venue(home)
+    )
 
     raw_kickoff = dtstart.strip()
 
@@ -2244,3 +2273,4 @@ def build_fixtures():
 
 if __name__ == "__main__":
     get_all_fixtures()
+```
