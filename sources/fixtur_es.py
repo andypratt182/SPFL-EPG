@@ -11,30 +11,19 @@ import time
 # ============================================================
 
 TEAM_CALENDARS = {
-    "Rangers": "rangers",
-    "Celtic": "celtic",
-    "Aberdeen": "aberdeen",
-    "Dundee": "dundee",
-    "Dundee United": "dundee-united",
-    "Hearts": "hearts",
-    "Hibernian": "hibernian",
-    "Kilmarnock": "kilmarnock",
-    "Motherwell": "motherwell",
-    "Falkirk": "falkirk",
-    "St Johnstone": "st-johnstone",
-    "St Mirren": "st-mirren",
+    "Rangers": "https://ics.fixtur.es/v2/rangers.ics",
+    "Celtic": "https://ics.fixtur.es/v2/celtic.ics",
+    "Aberdeen": "https://ics.fixtur.es/v2/aberdeen.ics",
+    "Dundee": "https://ics.fixtur.es/v2/dundee.ics",
+    "Dundee United": "https://ics.fixtur.es/v2/dundee-united.ics",
+    "Hearts": "https://ics.fixtur.es/v2/hearts.ics",
+    "Hibernian": "https://ics.fixtur.es/v2/hibernian.ics",
+    "Kilmarnock": "https://ics.fixtur.es/v2/kilmarnock.ics",
+    "Motherwell": "https://ics.fixtur.es/v2/motherwell.ics",
+    "Falkirk": "https://ics.fixtur.es/v2/falkirk.ics",
+    "St Johnstone": "https://ics.fixtur.es/v2/st-johnstone.ics",
+    "St Mirren": "https://ics.fixtur.es/v2/st-mirren.ics",
 }
-
-
-def build_team_feed_url(slug: str) -> str:
-    """
-    Build the Fixtur.es ICS URL for a team.
-    """
-
-    return (
-        "https://ics.fixtur.es/v2/"
-        f"{slug}.ics"
-    )
 
 
 # Competition calendars confirmed by the Fixtur.es diagnostic.
