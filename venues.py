@@ -8,7 +8,11 @@ from pathlib import Path
 # VENUE DATA
 # ============================================================
 
-VENUES_FILE = Path(__file__).resolve().parent / "venues.json"
+VENUES_FILE = (
+    Path(__file__).resolve().parent
+    / "data"
+    / "venues.json"
+)
 
 
 # Fixtur.es names that cannot be resolved by normal text
