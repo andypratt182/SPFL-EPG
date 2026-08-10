@@ -1,4 +1,3 @@
-```python
 from __future__ import annotations
 
 import re
@@ -1375,4 +1374,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-```
