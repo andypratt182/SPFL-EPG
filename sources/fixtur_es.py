@@ -8,29 +8,65 @@ import time
 
 
 # ============================================================
-# FIxtur.es SOURCE CONFIGURATION
+# FIXTUR.ES SOURCE CONFIGURATION
 # ============================================================
 
+# Team calendars are the DISCOVERY AUTHORITY.
+#
+# These calendars are allowed to create fixtures in the
+# final fixture set.
+
 TEAM_CALENDARS = {
-    "Rangers": "https://ics.fixtur.es/v2/rangers.ics",
-    "Celtic": "https://ics.fixtur.es/v2/celtic.ics",
-    "Aberdeen": "https://ics.fixtur.es/v2/aberdeen.ics",
-    "Dundee": "https://ics.fixtur.es/v2/dundee-fc.ics",
-    "Dundee United": "https://ics.fixtur.es/v2/dundee-united.ics",
-    "Hearts": "https://ics.fixtur.es/v2/heart-of-midlothian.ics",
-    "Hibernian": "https://ics.fixtur.es/v2/hibernian.ics",
-    "Kilmarnock": "https://ics.fixtur.es/v2/kilmarnock.ics",
-    "Motherwell": "https://ics.fixtur.es/v2/motherwell.ics",
-    "Falkirk": "https://ics.fixtur.es/v2/falkirk.ics",
-    "St Johnstone": "https://ics.fixtur.es/v2/st-johnstone.ics",
-    "St Mirren": "https://ics.fixtur.es/v2/st-mirren.ics",
+    "Rangers":
+        "https://ics.fixtur.es/v2/rangers.ics",
+
+    "Celtic":
+        "https://ics.fixtur.es/v2/celtic.ics",
+
+    "Aberdeen":
+        "https://ics.fixtur.es/v2/aberdeen.ics",
+
+    "Dundee":
+        "https://ics.fixtur.es/v2/dundee-fc.ics",
+
+    "Dundee United":
+        "https://ics.fixtur.es/v2/dundee-united.ics",
+
+    "Hearts":
+        "https://ics.fixtur.es/v2/heart-of-midlothian.ics",
+
+    "Hibernian":
+        "https://ics.fixtur.es/v2/hibernian.ics",
+
+    "Kilmarnock":
+        "https://ics.fixtur.es/v2/kilmarnock.ics",
+
+    "Motherwell":
+        "https://ics.fixtur.es/v2/motherwell.ics",
+
+    "Falkirk":
+        "https://ics.fixtur.es/v2/falkirk.ics",
+
+    "St Johnstone":
+        "https://ics.fixtur.es/v2/st-johnstone.ics",
+
+    "St Mirren":
+        "https://ics.fixtur.es/v2/st-mirren.ics",
 }
 
 
-# Competition calendars are classification sources only.
+# Competition calendars are CLASSIFICATION SOURCES ONLY.
 #
 # They are NEVER allowed to introduce fixtures into the
 # discovered fixture set.
+#
+# A competition fixture must exactly match a fixture already
+# discovered from a team calendar using:
+#
+#     date
+#     time
+#     home
+#     away
 
 COMPETITION_CALENDARS = {
     "Scottish Premiership":
@@ -57,12 +93,6 @@ COMPETITION_CALENDARS = {
     "UEFA Conference League":
         "https://ics.fixtur.es/v2/league/europa-conference-league.ics",
 }
-
-
-# Kept separate so additional European competitions can be
-# added later without changing the importer architecture.
-
-EUROPEAN_COMPETITION_CALENDARS = {}
 
 
 # ============================================================
@@ -201,7 +231,6 @@ TEAM_NAME_MAP = {
     "st mirren f.c.": "St Mirren",
     "st. mirren f.c.": "St Mirren",
     "saint mirren": "St Mirren",
-    "saint mirren fc": "St Mirren",
 }
 
 
@@ -687,14 +716,14 @@ def is_placeholder_fixture(
     """
     Detect known Fixtur.es placeholder fixtures.
 
-    The raw ICS timestamp is deliberately inspected before
-    timezone conversion.
-
     Known placeholder pattern:
 
         00:00
         two SPFL teams
         no competition classification
+
+    Placeholder detection deliberately happens using the
+    raw ICS timestamp before timezone conversion.
 
     We deliberately do not infer UEFA competitions from dates.
     """
@@ -744,6 +773,7 @@ def is_placeholder_fixture(
 # ============================================================
 
 def parse_score_from_summary(summary):
+
     if not summary:
         return None, None
 
@@ -762,6 +792,7 @@ def parse_score_from_summary(summary):
 
 
 def remove_score_from_summary(summary):
+
     if not summary:
         return ""
 
@@ -1080,7 +1111,7 @@ def load_team_fixtures():
 
     print()
     print("=" * 70)
-    print("LOADING FIxtur.es TEAM CALENDARS")
+    print("LOADING FIXTUR.ES TEAM CALENDARS")
     print("=" * 70)
 
     for team, url in TEAM_CALENDARS.items():
@@ -1146,6 +1177,11 @@ def load_competition_fixtures(
 
     all_fixtures = []
 
+    print()
+    print("=" * 70)
+    print("LOADING COMPETITION CALENDARS")
+    print("=" * 70)
+
     for competition, url in calendars.items():
 
         print()
@@ -1204,6 +1240,7 @@ def load_competition_fixtures(
 def competition_type_for(
     competition
 ):
+
     if not competition:
         return "UNKNOWN"
 
@@ -1372,8 +1409,8 @@ def classify_fixture(
     # --------------------------------------------------------
     # Fixture involving a non-SPFL team.
     #
-    # Per project rules this is a FRIENDLY unless a competition
-    # calendar explicitly classified it.
+    # Per project rules this is a FRIENDLY unless a
+    # competition calendar explicitly classified it.
     # --------------------------------------------------------
 
     fixture[
@@ -2104,19 +2141,6 @@ def get_all_fixtures():
             COMPETITION_CALENDARS
         )
     )
-
-    # Optional additional European calendars.
-    if EUROPEAN_COMPETITION_CALENDARS:
-
-        european_fixtures = (
-            load_competition_fixtures(
-                EUROPEAN_COMPETITION_CALENDARS
-            )
-        )
-
-        competition_fixtures.extend(
-            european_fixtures
-        )
 
     # --------------------------------------------------------
     # STEP 6 + 7
