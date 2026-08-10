@@ -1,6 +1,10 @@
+```python
 import sys
 from pathlib import Path
+from collections import Counter
 
+# Make the repository root importable when this script
+# is run from the tools directory.
 sys.path.insert(
     0,
     str(Path(__file__).resolve().parent.parent)
@@ -10,137 +14,91 @@ from sources.fixtur_es import get_all_fixtures
 
 
 def main():
-    fixtures = get_all_fixtures()
 
     print()
     print("=" * 70)
     print("FIXTUR.ES DATASET DIAGNOSTIC")
     print("=" * 70)
 
-    print(f"Total unique fixtures: {len(fixtures)}")
+    fixtures = get_all_fixtures()
+
+    print()
+    print(
+        f"Total unique fixtures: {len(fixtures)}"
+    )
 
     # -----------------------------------------------------
     # Competition summary
     # -----------------------------------------------------
 
-    competitions = Counter(
-        fixture.get("competition", "Unknown")
-        for fixture in fixtures
-    )
+    competition_counts = Counter()
+
+    for fixture in fixtures:
+
+        competition = fixture.get(
+            "competition"
+        )
+
+        if not competition:
+            competition = "Unknown"
+
+        competition_counts[
+            str(competition)
+        ] += 1
 
     print()
     print("=" * 70)
     print("COMPETITION SUMMARY")
     print("=" * 70)
 
-    for competition, count in competitions.most_common():
-        print(f"{count:5}  {competition}")
+    for competition, count in (
+        competition_counts.most_common()
+    ):
+
+        print(
+            f"{count:5}  {competition}"
+        )
 
     # -----------------------------------------------------
-    # Team/source summary
+    # Source team summary
     # -----------------------------------------------------
 
-    teams = Counter(
-        fixture.get("source_team", "Unknown")
-        for fixture in fixtures
-    )
+    team_counts = Counter()
+
+    for fixture in fixtures:
+
+        team = fixture.get(
+            "source_team"
+        )
+
+        if not team:
+            team = "Unknown"
+
+        team_counts[
+            str(team)
+        ] += 1
 
     print()
     print("=" * 70)
     print("SOURCE TEAM SUMMARY")
     print("=" * 70)
 
-    for team, count in sorted(teams.items()):
-        print(f"{count:5}  {team}")
+    for team in sorted(
+        team_counts,
+        key=lambda value: str(value)
+    ):
 
-    # -----------------------------------------------------
-    # Examples by competition
-    # -----------------------------------------------------
-
-    examples = defaultdict(list)
-
-    for fixture in fixtures:
-
-        competition = fixture.get(
-            "competition",
-            "Unknown",
+        print(
+            f"{team_counts[team]:5}  {team}"
         )
 
-        if len(examples[competition]) < 5:
-            examples[competition].append(
-                fixture
-            )
+    # -----------------------------------------------------
+    # Competition examples
+    # -----------------------------------------------------
 
     print()
     print("=" * 70)
     print("COMPETITION EXAMPLES")
-    print("=" * 70)
-
-    for competition in sorted(examples):
-
-        print()
-        print(f"[{competition}]")
-
-        for fixture in examples[competition]:
-
-            print(
-                f"  {fixture.get('kickoff')} | "
-                f"{fixture.get('home')} - "
-                f"{fixture.get('away')}"
-            )
-
-    # -----------------------------------------------------
-    # Unknown competition records
-    # -----------------------------------------------------
-
-    unknown = [
-        fixture
-        for fixture in fixtures
-        if fixture.get("competition", "Unknown")
-        == "Unknown"
-    ]
-
-    print()
-    print("=" * 70)
-    print("UNKNOWN COMPETITION")
-    print("=" * 70)
-
-    print(
-        f"Unknown competition fixtures: "
-        f"{len(unknown)}"
-    )
-
-    for fixture in unknown[:20]:
-
-        print()
-        print(
-            f"{fixture.get('kickoff')} | "
-            f"{fixture.get('home')} - "
-            f"{fixture.get('away')}"
-        )
-
-        print(
-            f"  source_team: "
-            f"{fixture.get('source_team')}"
-        )
-
-        print(
-            f"  source_id: "
-            f"{fixture.get('source_id')}"
-        )
-
-        print(
-            f"  competition: "
-            f"{fixture.get('competition')}"
-        )
-
-    # -----------------------------------------------------
-    # Raw representative records
-    # -----------------------------------------------------
-
-    print()
-    print("=" * 70)
-    print("RAW REPRESENTATIVE RECORDS")
     print("=" * 70)
 
     shown = set()
@@ -148,27 +106,103 @@ def main():
     for fixture in fixtures:
 
         competition = fixture.get(
-            "competition",
-            "Unknown",
+            "competition"
+        )
+
+        if not competition:
+            competition = "Unknown"
+
+        competition = str(
+            competition
         )
 
         if competition in shown:
             continue
 
-        shown.add(competition)
+        shown.add(
+            competition
+        )
 
         print()
         print(
-            f"--- {competition} ---"
+            f"[{competition}]"
         )
 
-        for key, value in fixture.items():
-            print(
-                f"{key}: {value}"
-            )
+        print(
+            f"  kickoff: "
+            f"{fixture.get('kickoff')}"
+        )
 
-        if len(shown) >= 15:
-            break
+        print(
+            f"  match: "
+            f"{fixture.get('home')} "
+            f"vs "
+            f"{fixture.get('away')}"
+        )
+
+        print(
+            f"  source team: "
+            f"{fixture.get('source_team')}"
+        )
+
+        print(
+            f"  source id: "
+            f"{fixture.get('source_id')}"
+        )
+
+    # -----------------------------------------------------
+    # Unknown competitions
+    # -----------------------------------------------------
+
+    unknown = [
+        fixture
+        for fixture in fixtures
+        if (
+            not fixture.get("competition")
+            or fixture.get("competition")
+            == "Unknown"
+        )
+    ]
+
+    print()
+    print("=" * 70)
+    print("UNKNOWN COMPETITIONS")
+    print("=" * 70)
+
+    print(
+        f"Unknown fixtures: {len(unknown)}"
+    )
+
+    for fixture in unknown[:20]:
+
+        print(
+            f"{fixture.get('kickoff')} | "
+            f"{fixture.get('home')} vs "
+            f"{fixture.get('away')} | "
+            f"{fixture.get('source_team')}"
+        )
+
+    # -----------------------------------------------------
+    # Raw field inspection
+    # -----------------------------------------------------
+
+    print()
+    print("=" * 70)
+    print("RAW NORMALISED FIELDS")
+    print("=" * 70)
+
+    if fixtures:
+
+        fixture = fixtures[0]
+
+        for key in sorted(
+            fixture.keys()
+        ):
+
+            print(
+                f"{key}: "
+                f"{fixture.get(key)}"
+            )
 
     print()
     print("=" * 70)
@@ -177,4 +211,6 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
+```
