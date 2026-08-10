@@ -1,10 +1,22 @@
 from datetime import datetime
+from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
 import re
+import sys
 import time
+
+
+# ============================================================
+# PROJECT ROOT
+# ============================================================
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from venues import get_venue
 
@@ -12,11 +24,6 @@ from venues import get_venue
 # ============================================================
 # FIXTUR.ES SOURCE CONFIGURATION
 # ============================================================
-
-# Team calendars are the DISCOVERY AUTHORITY.
-#
-# These calendars are allowed to create fixtures in the
-# final fixture set.
 
 TEAM_CALENDARS = {
     "Rangers":
@@ -56,19 +63,6 @@ TEAM_CALENDARS = {
         "https://ics.fixtur.es/v2/st-mirren.ics",
 }
 
-
-# Competition calendars are CLASSIFICATION SOURCES ONLY.
-#
-# They are NEVER allowed to introduce fixtures into the
-# discovered fixture set.
-#
-# A competition fixture must exactly match a fixture already
-# discovered from a team calendar using:
-#
-# date
-# time
-# home
-# away
 
 COMPETITION_CALENDARS = {
     "Scottish Premiership":
@@ -159,33 +153,26 @@ SPFL_TEAMS = {
 # ============================================================
 
 TEAM_NAME_MAP = {
-
-    # Aberdeen
     "aberdeen": "Aberdeen",
     "aberdeen fc": "Aberdeen",
     "aberdeen f.c.": "Aberdeen",
 
-    # Celtic
     "celtic": "Celtic",
     "celtic fc": "Celtic",
     "celtic f.c.": "Celtic",
 
-    # Dundee
     "dundee": "Dundee",
     "dundee fc": "Dundee",
     "dundee f.c.": "Dundee",
 
-    # Dundee United
     "dundee united": "Dundee United",
     "dundee united fc": "Dundee United",
     "dundee united f.c.": "Dundee United",
 
-    # Falkirk
     "falkirk": "Falkirk",
     "falkirk fc": "Falkirk",
     "falkirk f.c.": "Falkirk",
 
-    # Hearts
     "hearts": "Hearts",
     "hearts fc": "Hearts",
     "hearts f.c.": "Hearts",
@@ -194,28 +181,23 @@ TEAM_NAME_MAP = {
     "heart of midlothian f.c.": "Hearts",
     "heart of midlothian football club": "Hearts",
 
-    # Hibernian
     "hibernian": "Hibernian",
     "hibernian fc": "Hibernian",
     "hibernian f.c.": "Hibernian",
 
-    # Kilmarnock
     "kilmarnock": "Kilmarnock",
     "kilmarnock fc": "Kilmarnock",
     "kilmarnock f.c.": "Kilmarnock",
 
-    # Motherwell
     "motherwell": "Motherwell",
     "motherwell fc": "Motherwell",
     "motherwell f.c.": "Motherwell",
 
-    # Rangers
     "rangers": "Rangers",
     "rangers fc": "Rangers",
     "rangers f.c.": "Rangers",
     "rangers football club": "Rangers",
 
-    # St Johnstone
     "st johnstone": "St Johnstone",
     "st. johnstone": "St Johnstone",
     "st johnstone fc": "St Johnstone",
@@ -225,7 +207,6 @@ TEAM_NAME_MAP = {
     "saint johnstone": "St Johnstone",
     "saint johnstone fc": "St Johnstone",
 
-    # St Mirren
     "st mirren": "St Mirren",
     "st. mirren": "St Mirren",
     "st mirren fc": "St Mirren",
@@ -237,44 +218,25 @@ TEAM_NAME_MAP = {
 
 
 def clean_competition_suffix(name):
-    """
-    Remove Fixtur.es competition abbreviations appended
-    to team names.
-
-    Examples:
-        Jagiellonia Białystok [EL] -> Jagiellonia Białystok
-        LASK Linz [CL]             -> LASK Linz
-        HJK Helsinki [Conf]        -> HJK Helsinki
-    """
-
     if not name:
         return ""
 
     name = str(name).strip()
 
-    name = re.sub(
+    return re.sub(
         r"\s+\[(?:EL|CL|Conf)\]\s*$",
         "",
         name,
         flags=re.IGNORECASE,
-    )
-
-    return name.strip()
+    ).strip()
 
 
 def normalise_team_name(name):
-    """
-    Convert Fixtur.es team names into canonical SPFL names.
-
-    Non-SPFL names are cleaned but otherwise preserved.
-    """
-
     if not name:
         return ""
 
     name = clean_competition_suffix(name)
 
-    # Remove common suffixes.
     name = re.sub(
         r"\s+football\s+club$",
         "",
@@ -296,7 +258,6 @@ def normalise_team_name(name):
         flags=re.IGNORECASE,
     )
 
-    # Remove TV suffix where present.
     name = re.sub(
         r"\s+tv$",
         "",
@@ -304,7 +265,6 @@ def normalise_team_name(name):
         flags=re.IGNORECASE,
     )
 
-    # Normalise St. / Saint.
     name = re.sub(
         r"\bst\.\s*",
         "St ",
@@ -319,15 +279,12 @@ def normalise_team_name(name):
         flags=re.IGNORECASE,
     )
 
-    # Normalise whitespace.
     name = " ".join(name.split())
 
-    lower = name.lower()
-
-    if lower in TEAM_NAME_MAP:
-        return TEAM_NAME_MAP[lower]
-
-    return name
+    return TEAM_NAME_MAP.get(
+        name.lower(),
+        name,
+    )
 
 
 def is_spfl_team(name):
@@ -335,22 +292,16 @@ def is_spfl_team(name):
 
 
 # ============================================================
-# STEP 1
-# DOWNLOAD ICS CALENDARS
+# DOWNLOAD ICS
 # ============================================================
 
 def download_ics(url):
-    """
-    Download an ICS calendar with retries.
-    """
-
     last_error = None
 
     for attempt in range(
         1,
         MAX_ATTEMPTS + 1,
     ):
-
         print(
             f"Request attempt "
             f"{attempt}/{MAX_ATTEMPTS}"
@@ -365,7 +316,6 @@ def download_ics(url):
         )
 
         try:
-
             with urlopen(
                 request,
                 timeout=30,
@@ -391,25 +341,19 @@ def download_ics(url):
             return text
 
         except HTTPError as error:
-
             last_error = error
-
             print(
                 f"HTTP error: {error.code}"
             )
 
         except URLError as error:
-
             last_error = error
-
             print(
                 f"URL error: {error}"
             )
 
         except Exception as error:
-
             last_error = error
-
             print(
                 f"Download error: {error}"
             )
@@ -424,15 +368,10 @@ def download_ics(url):
 
 
 # ============================================================
-# STEP 2
 # ICS PARSING
 # ============================================================
 
 def unfold_ics(text):
-    """
-    RFC5545 line unfolding.
-    """
-
     text = text.replace(
         "\r\n",
         "\n",
@@ -442,31 +381,19 @@ def unfold_ics(text):
     )
 
     lines = text.split("\n")
-
     unfolded = []
 
     for line in lines:
-
-        if (
-            line.startswith(" ")
-            or line.startswith("\t")
-        ):
-
+        if line.startswith((" ", "\t")):
             if unfolded:
                 unfolded[-1] += line[1:]
-
         else:
-
             unfolded.append(line)
 
     return unfolded
 
 
 def split_events(text):
-    """
-    Split an ICS document into VEVENT blocks.
-    """
-
     lines = unfold_ics(text)
 
     events = []
@@ -475,12 +402,10 @@ def split_events(text):
     for line in lines:
 
         if line.strip() == "BEGIN:VEVENT":
-
             current = []
             continue
 
         if line.strip() == "END:VEVENT":
-
             if current is not None:
                 events.append(current)
 
@@ -493,58 +418,28 @@ def split_events(text):
     return events
 
 
-def property_line(
-    lines,
-    property_name,
-):
-    """
-    Return the complete ICS property line.
-    """
-
+def property_line(lines, property_name):
     prefix = property_name.upper()
 
     for line in lines:
-
         upper = line.upper()
 
         if (
-            upper.startswith(
-                prefix + ":"
-            )
-            or
-            upper.startswith(
-                prefix + ";"
-            )
+            upper.startswith(prefix + ":")
+            or upper.startswith(prefix + ";")
         ):
-
             return line
 
     return None
 
 
-def property_value(
-    lines,
-    property_name,
-):
-    """
-    Return the first value for an ICS property.
-
-    Handles:
-
-        DTSTART:
-        DTSTART;TZID=Europe/London:
-        DTSTART;VALUE=DATE:
-    """
-
+def property_value(lines, property_name):
     line = property_line(
         lines,
         property_name,
     )
 
-    if not line:
-        return None
-
-    if ":" not in line:
+    if not line or ":" not in line:
         return None
 
     return line.split(
@@ -553,14 +448,7 @@ def property_value(
     )[1].strip()
 
 
-def property_parameters(
-    lines,
-    property_name,
-):
-    """
-    Return ICS parameters as a dictionary.
-    """
-
+def property_parameters(lines, property_name):
     line = property_line(
         lines,
         property_name,
@@ -589,9 +477,7 @@ def property_parameters(
             1,
         )
 
-        parameters[
-            key.upper()
-        ] = value
+        parameters[key.upper()] = value
 
     return parameters
 
@@ -601,72 +487,50 @@ def property_parameters(
 # ============================================================
 
 def parse_ics_datetime(value):
-    """
-    Parse common ICS datetime formats.
-    """
-
     if not value:
         return None
 
     value = value.strip()
 
-    # All-day date.
     if re.fullmatch(
         r"\d{8}",
         value,
     ):
-
         try:
-
             return datetime.strptime(
                 value,
                 "%Y%m%d",
             )
-
         except ValueError:
-
             return None
 
-    # UTC timestamp.
     if value.endswith("Z"):
-
         try:
-
             return datetime.strptime(
                 value,
                 "%Y%m%dT%H%M%SZ",
             ).replace(
                 tzinfo=UTC_TZ
             )
-
         except ValueError:
-
             return None
 
-    # Local timestamp.
     for fmt in (
         "%Y%m%dT%H%M%S",
         "%Y%m%dT%H%M",
     ):
-
         try:
-
             return datetime.strptime(
                 value,
                 fmt,
             )
-
         except ValueError:
-
             pass
 
-    # ISO fallback.
     try:
-
         normalised = value
 
         if normalised.endswith("Z"):
-
             normalised = (
                 normalised[:-1]
                 + "+00:00"
@@ -677,22 +541,14 @@ def parse_ics_datetime(value):
         )
 
     except ValueError:
-
         return None
 
 
 def localise_kickoff(kickoff):
-    """
-    Convert a datetime to Europe/London.
-
-    Naive Fixtur.es timestamps are assumed to be UK local time.
-    """
-
     if kickoff is None:
         return None
 
     if kickoff.tzinfo is None:
-
         kickoff = kickoff.replace(
             tzinfo=UK_TZ
         )
@@ -703,21 +559,14 @@ def localise_kickoff(kickoff):
 
 
 # ============================================================
-# STEP 3
-# SEASON FILTERING AND PLACEHOLDER REJECTION
+# SEASON FILTER
 # ============================================================
 
 def is_in_2026_27_season(kickoff):
-    """
-    Explicitly restrict fixtures to 2026/27.
-    """
-
     if kickoff is None:
         return False
 
-    local = localise_kickoff(
-        kickoff
-    )
+    local = localise_kickoff(kickoff)
 
     start = SEASON_START.replace(
         tzinfo=UK_TZ
@@ -734,6 +583,10 @@ def is_in_2026_27_season(kickoff):
     )
 
 
+# ============================================================
+# PLACEHOLDER DETECTION
+# ============================================================
+
 def is_placeholder_fixture(
     raw_kickoff,
     kickoff,
@@ -741,21 +594,6 @@ def is_placeholder_fixture(
     away,
     competition,
 ):
-    """
-    Detect known Fixtur.es placeholder fixtures.
-
-    Known placeholder pattern:
-
-        00:00
-        two SPFL teams
-        no competition classification
-
-    Placeholder detection deliberately happens using the
-    raw ICS timestamp before timezone conversion.
-
-    We deliberately do not infer UEFA competitions from dates.
-    """
-
     if kickoff is None:
         return False
 
@@ -787,13 +625,10 @@ def is_placeholder_fixture(
     ):
         return False
 
-    if not (
+    return (
         is_spfl_team(home)
         and is_spfl_team(away)
-    ):
-        return False
-
-    return True
+    )
 
 
 # ============================================================
@@ -801,7 +636,6 @@ def is_placeholder_fixture(
 # ============================================================
 
 def parse_score_from_summary(summary):
-
     if not summary:
         return None, None
 
@@ -820,7 +654,6 @@ def parse_score_from_summary(summary):
 
 
 def remove_score_from_summary(summary):
-
     if not summary:
         return ""
 
@@ -836,16 +669,6 @@ def remove_score_from_summary(summary):
 # ============================================================
 
 def parse_match_summary(summary):
-    """
-    Parse:
-
-        Rangers - Celtic
-
-    or:
-
-        Rangers - Celtic (2 - 1)
-    """
-
     if not summary:
         return (
             None,
@@ -867,7 +690,6 @@ def parse_match_summary(summary):
     )
 
     if " - " not in clean_summary:
-
         return (
             None,
             None,
@@ -880,13 +702,8 @@ def parse_match_summary(summary):
         1,
     )
 
-    home = normalise_team_name(
-        home
-    )
-
-    away = normalise_team_name(
-        away
-    )
+    home = normalise_team_name(home)
+    away = normalise_team_name(away)
 
     return (
         home,
@@ -908,6 +725,9 @@ def parse_event(
 ):
     """
     Convert one VEVENT into the internal fixture structure.
+
+    IMPORTANT:
+    The home and away teams MUST be parsed before venue lookup.
     """
 
     uid = property_value(
@@ -951,23 +771,14 @@ def parse_event(
     )
 
     # --------------------------------------------------------
-    # Basic validation.
+    # Parse the match first.
+    #
+    # This fixes the original bug where get_venue(home)
+    # was called before "home" had been assigned.
     # --------------------------------------------------------
 
     if not summary or not dtstart:
         return None
-
-    # --------------------------------------------------------
-    # Parse the fixture summary BEFORE attempting to look up
-    # the venue.
-    #
-    # This is important. Previously get_venue(home) was called
-    # before 'home' had been assigned, causing:
-    #
-    # UnboundLocalError:
-    # cannot access local variable 'home'
-    # where it is not associated with a value
-    # --------------------------------------------------------
 
     (
         home,
@@ -981,18 +792,6 @@ def parse_event(
     if not home or not away:
         return None
 
-    # --------------------------------------------------------
-    # Venue handling.
-    #
-    # Prefer the LOCATION supplied by Fixtur.es.
-    # If LOCATION is absent, use our venue database.
-    # --------------------------------------------------------
-
-    venue = (
-        location
-        or get_venue(home)
-    )
-
     raw_kickoff = dtstart.strip()
 
     kickoff = parse_ics_datetime(
@@ -1003,9 +802,7 @@ def parse_event(
         return None
 
     # --------------------------------------------------------
-    # IMPORTANT:
-    #
-    # Placeholder detection occurs BEFORE timezone conversion.
+    # Placeholder detection before timezone conversion.
     # --------------------------------------------------------
 
     if is_placeholder_fixture(
@@ -1022,7 +819,7 @@ def parse_event(
     )
 
     # --------------------------------------------------------
-    # Explicit season filtering.
+    # Season filtering.
     # --------------------------------------------------------
 
     if not is_in_2026_27_season(
@@ -1030,15 +827,29 @@ def parse_event(
     ):
         return None
 
+    # --------------------------------------------------------
+    # End time.
+    # --------------------------------------------------------
+
     end = parse_ics_datetime(
         dtend
     )
 
     if end is not None:
+        end = localise_kickoff(end)
 
-        end = localise_kickoff(
-            end
-        )
+    # --------------------------------------------------------
+    # Venue.
+    #
+    # Prefer the actual Fixtur.es LOCATION.
+    # Fall back to our venue database using the canonical
+    # home team.
+    # --------------------------------------------------------
+
+    if location:
+        venue = location.strip()
+    else:
+        venue = get_venue(home)
 
     return {
         "home": home,
@@ -1065,13 +876,7 @@ def parse_calendar(
     source_name,
     competition=None,
 ):
-    """
-    Parse an entire ICS calendar.
-    """
-
-    events = split_events(
-        text
-    )
+    events = split_events(text)
 
     fixtures = []
 
@@ -1085,9 +890,7 @@ def parse_calendar(
         )
 
         if fixture is not None:
-            fixtures.append(
-                fixture
-            )
+            fixtures.append(fixture)
 
     return (
         events,
@@ -1100,41 +903,19 @@ def parse_calendar(
 # ============================================================
 
 def fixture_signature(fixture):
-    """
-    Exact fixture identity:
-
-        date
-        time
-        home
-        away
-
-    Kickoff is normalised to UK time.
-    """
-
-    kickoff = fixture.get(
-        "kickoff"
-    )
+    kickoff = fixture.get("kickoff")
 
     if isinstance(
         kickoff,
         datetime,
     ):
+        kickoff = localise_kickoff(kickoff)
 
-        kickoff = localise_kickoff(
-            kickoff
+        kickoff_key = kickoff.strftime(
+            "%Y-%m-%d %H:%M:%S"
         )
-
-        kickoff_key = (
-            kickoff.strftime(
-                "%Y-%m-%d %H:%M:%S"
-            )
-        )
-
     else:
-
-        kickoff_key = str(
-            kickoff
-        )
+        kickoff_key = str(kickoff)
 
     home = normalise_team_name(
         fixture.get(
@@ -1158,17 +939,10 @@ def fixture_signature(fixture):
 
 
 # ============================================================
-# STEP 4
-# TEAM CALENDARS = DISCOVERY AUTHORITY
+# TEAM CALENDARS
 # ============================================================
 
 def load_team_fixtures():
-    """
-    Load all team calendars.
-
-    ONLY these calendars are allowed to create fixtures.
-    """
-
     all_fixtures = []
 
     print()
@@ -1183,17 +957,12 @@ def load_team_fixtures():
         print(f"URL: {url}")
 
         try:
+            text = download_ics(url)
 
-            text = download_ics(
-                url
-            )
-
-            events, fixtures = (
-                parse_calendar(
-                    text,
-                    source_type="team",
-                    source_name=team,
-                )
+            events, fixtures = parse_calendar(
+                text,
+                source_type="team",
+                source_name=team,
             )
 
             print(
@@ -1206,12 +975,9 @@ def load_team_fixtures():
                 f"{len(fixtures)}"
             )
 
-            all_fixtures.extend(
-                fixtures
-            )
+            all_fixtures.extend(fixtures)
 
         except Exception as error:
-
             print(
                 f"ERROR loading "
                 f"{team}: {error}"
@@ -1221,22 +987,10 @@ def load_team_fixtures():
 
 
 # ============================================================
-# STEP 5
-# COMPETITION CALENDARS = CLASSIFICATION ONLY
+# COMPETITION CALENDARS
 # ============================================================
 
-def load_competition_fixtures(
-    calendars,
-):
-    """
-    Load competition calendars.
-
-    These records NEVER create fixtures.
-
-    They are only used later to classify fixtures already
-    discovered by team calendars.
-    """
-
+def load_competition_fixtures(calendars):
     all_fixtures = []
 
     print()
@@ -1252,23 +1006,16 @@ def load_competition_fixtures(
             f"{competition}"
         )
 
-        print(
-            f"URL: {url}"
-        )
+        print(f"URL: {url}")
 
         try:
+            text = download_ics(url)
 
-            text = download_ics(
-                url
-            )
-
-            events, fixtures = (
-                parse_calendar(
-                    text,
-                    source_type="competition",
-                    source_name=competition,
-                    competition=competition,
-                )
+            events, fixtures = parse_calendar(
+                text,
+                source_type="competition",
+                source_name=competition,
+                competition=competition,
             )
 
             print(
@@ -1281,12 +1028,9 @@ def load_competition_fixtures(
                 f"{len(fixtures)}"
             )
 
-            all_fixtures.extend(
-                fixtures
-            )
+            all_fixtures.extend(fixtures)
 
         except Exception as error:
-
             print(
                 f"ERROR loading "
                 f"{competition}: {error}"
@@ -1299,10 +1043,7 @@ def load_competition_fixtures(
 # COMPETITION TYPE
 # ============================================================
 
-def competition_type_for(
-    competition
-):
-
+def competition_type_for(competition):
     if not competition:
         return "UNKNOWN"
 
@@ -1321,39 +1062,19 @@ def competition_type_for(
 
 
 # ============================================================
-# STEP 6
-# EXACT COMPETITION CLASSIFICATION
+# CLASSIFICATION
 # ============================================================
 
 def classify_fixture(
     fixture,
     competition_index,
 ):
-    """
-    Classify an already-discovered fixture.
-
-    Competition calendars can only classify an exact match.
-
-    Matching uses:
-
-        date
-        time
-        home
-        away
-    """
-
-    signature = fixture_signature(
-        fixture
-    )
+    signature = fixture_signature(fixture)
 
     matches = competition_index.get(
         signature,
         [],
     )
-
-    # --------------------------------------------------------
-    # Exact competition match.
-    # --------------------------------------------------------
 
     if matches:
 
@@ -1361,9 +1082,7 @@ def classify_fixture(
             (
                 item
                 for item in matches
-                if item.get(
-                    "competition"
-                )
+                if item.get("competition")
             ),
             matches[0],
         )
@@ -1372,153 +1091,66 @@ def classify_fixture(
             "competition"
         )
 
-        fixture[
-            "competition"
-        ] = competition
+        fixture["competition"] = competition
 
-        fixture[
-            "competition_type"
-        ] = competition_type_for(
-            competition
+        fixture["competition_type"] = (
+            competition_type_for(
+                competition
+            )
         )
 
-        fixture[
-            "classification_status"
-        ] = (
+        fixture["classification_status"] = (
             "CONFIRMED_COMPETITIVE"
         )
 
-        fixture[
-            "competition_source_ids"
-        ] = [
-            item.get(
-                "source_id"
-            )
+        fixture["competition_source_ids"] = [
+            item.get("source_id")
             for item in matches
-            if item.get(
-                "source_id"
-            )
+            if item.get("source_id")
         ]
 
-        fixture[
-            "matched_competition_sources"
-        ] = [
-            item.get(
-                "source_name"
-            )
+        fixture["matched_competition_sources"] = [
+            item.get("source_name")
             for item in matches
-            if item.get(
-                "source_name"
-            )
+            if item.get("source_name")
         ]
 
         return fixture
 
-    # --------------------------------------------------------
-    # No competition-calendar match.
-    # --------------------------------------------------------
+    home = fixture.get("home", "")
+    away = fixture.get("away", "")
 
-    home = fixture.get(
-        "home",
-        "",
-    )
-
-    away = fixture.get(
-        "away",
-        "",
-    )
-
-    home_spfl = is_spfl_team(
-        home
-    )
-
-    away_spfl = is_spfl_team(
-        away
-    )
-
-    # --------------------------------------------------------
-    # Two SPFL teams but no competition match.
-    #
-    # NEVER guess the competition.
-    # --------------------------------------------------------
-
-    if home_spfl and away_spfl:
-
-        fixture[
-            "competition"
-        ] = "Unclassified"
-
-        fixture[
-            "competition_type"
-        ] = "UNKNOWN"
-
-        fixture[
-            "classification_status"
-        ] = (
+    if (
+        is_spfl_team(home)
+        and is_spfl_team(away)
+    ):
+        fixture["competition"] = "Unclassified"
+        fixture["competition_type"] = "UNKNOWN"
+        fixture["classification_status"] = (
             "POTENTIALLY_MISSING_COMPETITION"
         )
-
-        fixture[
-            "competition_source_ids"
-        ] = []
-
-        fixture[
-            "matched_competition_sources"
-        ] = []
+        fixture["competition_source_ids"] = []
+        fixture["matched_competition_sources"] = []
 
         return fixture
 
-    # --------------------------------------------------------
-    # Fixture involving a non-SPFL team.
-    #
-    # Per project rules this is a FRIENDLY unless a
-    # competition calendar explicitly classified it.
-    # --------------------------------------------------------
-
-    fixture[
-        "competition"
-    ] = "Friendly"
-
-    fixture[
-        "competition_type"
-    ] = "FRIENDLY"
-
-    fixture[
-        "classification_status"
-    ] = "FRIENDLY"
-
-    fixture[
-        "competition_source_ids"
-    ] = []
-
-    fixture[
-        "matched_competition_sources"
-    ] = []
+    fixture["competition"] = "Friendly"
+    fixture["competition_type"] = "FRIENDLY"
+    fixture["classification_status"] = "FRIENDLY"
+    fixture["competition_source_ids"] = []
+    fixture["matched_competition_sources"] = []
 
     return fixture
 
 
 # ============================================================
-# STEP 7
-# MERGE, DEDUPLICATE, CLASSIFY AND SORT
+# MERGE / DEDUPLICATE / SORT
 # ============================================================
 
 def merge_fixture_sources(
     team_fixtures,
     competition_fixtures,
 ):
-    """
-    Build the final fixture set.
-
-    Team calendars establish the fixture set.
-
-    Competition calendars only classify exact matches.
-    """
-
-    # --------------------------------------------------------
-    # Build competition lookup index.
-    # --------------------------------------------------------
-
     competition_index = {}
 
     for fixture in competition_fixtures:
@@ -1530,13 +1162,7 @@ def merge_fixture_sources(
         competition_index.setdefault(
             signature,
             [],
-        ).append(
-            fixture
-        )
-
-    # --------------------------------------------------------
-    # Build unique fixture set from team calendars only.
-    # --------------------------------------------------------
+        ).append(fixture)
 
     merged = {}
 
@@ -1548,21 +1174,15 @@ def merge_fixture_sources(
 
         if signature not in merged:
 
-            merged[
-                signature
-            ] = dict(
+            merged[signature] = dict(
                 fixture
             )
 
-            merged[
-                signature
-            ][
+            merged[signature][
                 "verified_by_team_calendar"
             ] = True
 
-            merged[
-                signature
-            ][
+            merged[signature][
                 "team_sources"
             ] = [
                 fixture.get(
@@ -1572,9 +1192,7 @@ def merge_fixture_sources(
 
         else:
 
-            existing = merged[
-                signature
-            ]
+            existing = merged[signature]
 
             existing[
                 "verified_by_team_calendar"
@@ -1592,69 +1210,40 @@ def merge_fixture_sources(
             if (
                 source_name
                 and source_name
-                not in existing[
-                    "team_sources"
-                ]
+                not in existing["team_sources"]
             ):
-
                 existing[
                     "team_sources"
-                ].append(
-                    source_name
-                )
-
-            # Prefer a result if another team calendar
-            # contains one.
+                ].append(source_name)
 
             if (
-                existing.get(
-                    "home_score"
-                ) is None
-                and fixture.get(
-                    "home_score"
-                ) is not None
+                existing.get("home_score")
+                is None
+                and fixture.get("home_score")
+                is not None
             ):
+                existing["home_score"] = (
+                    fixture["home_score"]
+                )
 
-                existing[
-                    "home_score"
-                ] = fixture[
-                    "home_score"
-                ]
-
-                existing[
-                    "away_score"
-                ] = fixture[
-                    "away_score"
-                ]
-
-    # --------------------------------------------------------
-    # Classify ONLY discovered fixtures.
-    # --------------------------------------------------------
+                existing["away_score"] = (
+                    fixture["away_score"]
+                )
 
     classified = []
 
     for fixture in merged.values():
 
-        classified_fixture = (
+        classified.append(
             classify_fixture(
                 fixture,
                 competition_index,
             )
         )
 
-        classified.append(
-            classified_fixture
-        )
-
-    # --------------------------------------------------------
-    # Sort chronologically.
-    # --------------------------------------------------------
-
     classified.sort(
         key=lambda fixture:
-        fixture.get(
-            "kickoff"
-        )
+        fixture.get("kickoff")
         or datetime.max.replace(
             tzinfo=UK_TZ
         )
@@ -1716,9 +1305,7 @@ def print_source_statistics(
         if fixture.get(
             "classification_status"
         )
-        == (
-            "POTENTIALLY_MISSING_COMPETITION"
-        )
+        == "POTENTIALLY_MISSING_COMPETITION"
     )
 
     print(
@@ -1748,20 +1335,14 @@ def print_source_statistics(
             "UNKNOWN",
         )
 
-        counts[
-            status
-        ] = (
-            counts.get(
-                status,
-                0,
-            )
+        counts[status] = (
+            counts.get(status, 0)
             + 1
         )
 
     for status, count in sorted(
         counts.items()
     ):
-
         print(
             f"  {status}: {count}"
         )
@@ -1774,15 +1355,11 @@ def print_source_statistics(
     for fixture in fixtures:
 
         competition = (
-            fixture.get(
-                "competition"
-            )
+            fixture.get("competition")
             or "Unclassified"
         )
 
-        competition_counts[
-            competition
-        ] = (
+        competition_counts[competition] = (
             competition_counts.get(
                 competition,
                 0,
@@ -1793,7 +1370,6 @@ def print_source_statistics(
     for competition, count in sorted(
         competition_counts.items()
     ):
-
         print(
             f"  {competition}: "
             f"{count}"
@@ -1804,13 +1380,7 @@ def print_source_statistics(
 # COMPLETE FIXTURE AUDIT
 # ============================================================
 
-def print_complete_fixture_audit(
-    fixtures
-):
-    """
-    Print every discovered 2026/27 fixture.
-    """
-
+def print_complete_fixture_audit(fixtures):
     print()
     print("=" * 70)
     print("COMPLETE 2026/27 FIXTURE AUDIT")
@@ -1827,111 +1397,52 @@ def print_complete_fixture_audit(
         start=1,
     ):
 
-        kickoff = fixture.get(
-            "kickoff"
-        )
+        kickoff = fixture.get("kickoff")
 
         if isinstance(
             kickoff,
             datetime,
         ):
-
             kickoff_text = kickoff.strftime(
                 "%Y-%m-%d %H:%M:%S %Z"
             )
-
         else:
-
-            kickoff_text = str(
-                kickoff
-            )
-
-        home = fixture.get(
-            "home",
-            "",
-        )
-
-        away = fixture.get(
-            "away",
-            "",
-        )
-
-        competition = fixture.get(
-            "competition"
-        ) or "Unclassified"
-
-        competition_type = fixture.get(
-            "competition_type"
-        ) or "UNKNOWN"
-
-        classification_status = (
-            fixture.get(
-                "classification_status"
-            )
-            or "UNKNOWN"
-        )
-
-        team_sources = ", ".join(
-            fixture.get(
-                "team_sources",
-                [],
-            )
-        )
-
-        competition_sources = ", ".join(
-            fixture.get(
-                "matched_competition_sources",
-                [],
-            )
-        )
+            kickoff_text = str(kickoff)
 
         print(
             f"{number:04d} | "
             f"{kickoff_text} | "
-            f"{home} vs {away} | "
-            f"{competition} | "
-            f"{competition_type} | "
-            f"{classification_status} | "
-            f"TEAM=[{team_sources}] | "
-            f"COMP=[{competition_sources}]"
+            f"{fixture.get('home')} vs "
+            f"{fixture.get('away')} | "
+            f"{fixture.get('competition') or 'Unclassified'} | "
+            f"{fixture.get('competition_type') or 'UNKNOWN'} | "
+            f"{fixture.get('classification_status') or 'UNKNOWN'} | "
+            f"VENUE=[{fixture.get('venue') or ''}] | "
+            f"TEAM=[{', '.join(fixture.get('team_sources', []))}] | "
+            f"COMP=[{', '.join(fixture.get('matched_competition_sources', []))}]"
         )
 
 
 # ============================================================
-# DETAILED CLASSIFICATION AUDIT
+# DETAILED AUDIT
 # ============================================================
 
-def print_detailed_audit(
-    fixtures
-):
-    """
-    Additional audit information useful for inspecting
-    Fixtur.es behaviour.
-    """
-
+def print_detailed_audit(fixtures):
     print()
     print("=" * 70)
     print("DETAILED CLASSIFICATION AUDIT")
     print("=" * 70)
-
-    # --------------------------------------------------------
-    # Competition counts.
-    # --------------------------------------------------------
 
     competition_counts = {}
 
     for fixture in fixtures:
 
         competition = (
-            fixture.get(
-                "competition"
-            )
+            fixture.get("competition")
             or "Unclassified"
         )
 
-        competition_counts[
-            competition
-        ] = (
+        competition_counts[competition] = (
             competition_counts.get(
                 competition,
                 0,
@@ -1945,14 +1456,9 @@ def print_detailed_audit(
     for competition, count in sorted(
         competition_counts.items()
     ):
-
         print(
             f"  {competition}: {count}"
         )
-
-    # --------------------------------------------------------
-    # Classification counts.
-    # --------------------------------------------------------
 
     classification_counts = {}
 
@@ -1965,9 +1471,7 @@ def print_detailed_audit(
             or "UNKNOWN"
         )
 
-        classification_counts[
-            status
-        ] = (
+        classification_counts[status] = (
             classification_counts.get(
                 status,
                 0,
@@ -1981,14 +1485,9 @@ def print_detailed_audit(
     for status, count in sorted(
         classification_counts.items()
     ):
-
         print(
             f"  {status}: {count}"
         )
-
-    # --------------------------------------------------------
-    # Competition type counts.
-    # --------------------------------------------------------
 
     type_counts = {}
 
@@ -2001,9 +1500,7 @@ def print_detailed_audit(
             or "UNKNOWN"
         )
 
-        type_counts[
-            competition_type
-        ] = (
+        type_counts[competition_type] = (
             type_counts.get(
                 competition_type,
                 0,
@@ -2017,14 +1514,9 @@ def print_detailed_audit(
     for competition_type, count in sorted(
         type_counts.items()
     ):
-
         print(
             f"  {competition_type}: {count}"
         )
-
-    # --------------------------------------------------------
-    # Potentially missing competitions.
-    # --------------------------------------------------------
 
     missing = [
         fixture
@@ -2041,11 +1533,8 @@ def print_detailed_audit(
     )
 
     if not missing:
-
         print("  None")
-
     else:
-
         for fixture in missing:
 
             kickoff = fixture.get(
@@ -2056,16 +1545,11 @@ def print_detailed_audit(
                 kickoff,
                 datetime,
             ):
-
                 kickoff_text = kickoff.strftime(
                     "%Y-%m-%d %H:%M:%S %Z"
                 )
-
             else:
-
-                kickoff_text = str(
-                    kickoff
-                )
+                kickoff_text = str(kickoff)
 
             print(
                 f"  {kickoff_text} | "
@@ -2074,10 +1558,6 @@ def print_detailed_audit(
                 f"Team sources: "
                 f"{', '.join(fixture.get('team_sources', []))}"
             )
-
-    # --------------------------------------------------------
-    # European fixtures.
-    # --------------------------------------------------------
 
     european = [
         fixture
@@ -2091,11 +1571,8 @@ def print_detailed_audit(
     print("EUROPEAN FIXTURES")
 
     if not european:
-
         print("  None")
-
     else:
-
         for fixture in european:
 
             kickoff = fixture.get(
@@ -2106,16 +1583,11 @@ def print_detailed_audit(
                 kickoff,
                 datetime,
             ):
-
                 kickoff_text = kickoff.strftime(
                     "%Y-%m-%d %H:%M:%S %Z"
                 )
-
             else:
-
-                kickoff_text = str(
-                    kickoff
-                )
+                kickoff_text = str(kickoff)
 
             print(
                 f"  {kickoff_text} | "
@@ -2130,26 +1602,6 @@ def print_detailed_audit(
 # ============================================================
 
 def get_all_fixtures():
-    """
-    Main public interface.
-
-    Seven-stage Fixtur.es import architecture:
-
-        1. DOWNLOAD TEAM CALENDARS
-        2. PARSE RAW ICS EVENTS
-        3. FILTER / VALIDATE 2026/27 FIXTURES
-        4. DISCOVER FIXTURES FROM TEAM CALENDARS
-        5. LOAD COMPETITION CALENDARS
-        6. EXACT-MATCH CLASSIFICATION
-        7. DEDUPLICATE / SORT / AUDIT / RETURN
-
-    Team calendars are the discovery authority.
-
-    Competition calendars cannot introduce fixtures.
-
-    No database is used here.
-    """
-
     print()
     print("=" * 70)
     print("FIXTUR.ES IMPORT")
@@ -2179,24 +1631,7 @@ def get_all_fixtures():
         f"{len(COMPETITION_CALENDARS)}"
     )
 
-    # --------------------------------------------------------
-    # STEP 1 + 2 + 3 + 4
-    #
-    # Download, parse, validate and discover fixtures
-    # from all team calendars.
-    # --------------------------------------------------------
-
-    team_fixtures = (
-        load_team_fixtures()
-    )
-
-    # --------------------------------------------------------
-    # STEP 5
-    #
-    # Load competition calendars.
-    #
-    # These are classification sources only.
-    # --------------------------------------------------------
+    team_fixtures = load_team_fixtures()
 
     competition_fixtures = (
         load_competition_fixtures(
@@ -2204,20 +1639,10 @@ def get_all_fixtures():
         )
     )
 
-    # --------------------------------------------------------
-    # STEP 6 + 7
-    #
-    # Exact classification, deduplication and sorting.
-    # --------------------------------------------------------
-
     fixtures = merge_fixture_sources(
         team_fixtures,
         competition_fixtures,
     )
-
-    # --------------------------------------------------------
-    # SOURCE SUMMARY
-    # --------------------------------------------------------
 
     print_source_statistics(
         team_fixtures,
@@ -2225,17 +1650,9 @@ def get_all_fixtures():
         fixtures,
     )
 
-    # --------------------------------------------------------
-    # DETAILED AUDIT
-    # --------------------------------------------------------
-
     print_detailed_audit(
         fixtures
     )
-
-    # --------------------------------------------------------
-    # COMPLETE FIXTURE AUDIT
-    # --------------------------------------------------------
 
     print_complete_fixture_audit(
         fixtures
@@ -2259,15 +1676,11 @@ def get_all_fixtures():
 # ============================================================
 
 def build_fixtures():
-    """
-    Compatibility alias for existing code.
-    """
-
     return get_all_fixtures()
 
 
 # ============================================================
-# OPTIONAL DIRECT EXECUTION
+# DIRECT EXECUTION
 # ============================================================
 
 if __name__ == "__main__":
