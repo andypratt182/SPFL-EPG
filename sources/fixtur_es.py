@@ -3,14 +3,15 @@ sources/fixtur_es.py
 
 Generic Fixtur.es SPFL team-calendar importer.
 
-Downloads the individual Fixtur.es ICS calendars for all 12
-SPFL teams and converts them into the source-independent
+Downloads the individual Fixtur.es ICS calendars for all
+12 SPFL teams and converts them into the source-independent
 fixture format used by the SPFL EPG.
 
-This module is deliberately responsible only for fixture
-acquisition and parsing.
+The team calendars are used instead of the Scottish
+Premiership league calendar because team calendars can contain
+domestic and European fixtures.
 
-It does NOT modify:
+This module does NOT modify:
     fixtures.py
     generator.py
     xmltv.py
@@ -22,16 +23,8 @@ from __future__ import annotations
 import re
 import time
 from datetime import datetime, timezone
-from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
-
-
-# =========================================================
-# Repository root
-# =========================================================
-
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # =========================================================
@@ -42,17 +35,15 @@ REQUEST_TIMEOUT = 30
 MAX_RETRIES = 3
 RETRY_DELAY = 2
 
+SEASON = "2026/27"
+
 
 # =========================================================
-# Fixtur.es team calendar configuration
+# Fixtur.es team calendars
 # =========================================================
 #
-# These are the Fixtur.es team-calendar slugs.
-#
-# The importer downloads each team's own calendar rather
-# than using the league calendar. This allows us to capture
-# league, Scottish Cup, League Cup and European fixtures
-# where Fixtur.es provides them.
+# These slugs have been checked against the actual Fixtur.es
+# team pages.
 #
 # =========================================================
 
@@ -60,9 +51,9 @@ TEAM_CALENDARS = {
     "Rangers": "rangers",
     "Celtic": "celtic",
     "Aberdeen": "aberdeen",
-    "Dundee": "dundee",
+    "Dundee": "dundee-fc",
     "Dundee United": "dundee-united",
-    "Hearts": "hearts",
+    "Hearts": "heart-of-midlothian",
     "Hibernian": "hibernian",
     "Kilmarnock": "kilmarnock",
     "Motherwell": "motherwell",
@@ -125,7 +116,6 @@ def normalise_team_name(name: str) -> str:
     if name in TEAM_NAME_MAP:
         return TEAM_NAME_MAP[name]
 
-    # Handle common suffixes defensively.
     name = re.sub(
         r"\s+Football Club$",
         "",
@@ -147,15 +137,12 @@ def normalise_team_name(name: str) -> str:
 
 
 # =========================================================
-# ICS line handling
+# ICS handling
 # =========================================================
 
 def unfold_ics_lines(text: str) -> list[str]:
     """
     Unfold RFC 5545 continuation lines.
-
-    In an ICS file, a line beginning with a space or tab is
-    a continuation of the previous line.
     """
 
     physical_lines = (
@@ -187,15 +174,7 @@ def parse_property(line: str) -> tuple[str, str]:
     """
     Parse an ICS property.
 
-    Parameters attached to a property are ignored.
-
-    Example:
-
-        DTSTART;TZID=Europe/London:20260809T133000
-
-    becomes:
-
-        ("DTSTART", "20260809T133000")
+    Parameters attached to the property are ignored.
     """
 
     if ":" not in line:
@@ -215,7 +194,7 @@ def parse_property(line: str) -> tuple[str, str]:
 
 
 # =========================================================
-# ICS datetime handling
+# ICS datetime
 # =========================================================
 
 def parse_ics_datetime(
@@ -225,13 +204,7 @@ def parse_ics_datetime(
     Convert an ICS datetime into a timezone-aware UTC
     datetime.
 
-    Supported formats include:
-
-        20260809T123000Z
-        20260809T123000
-
-    Fixtur.es team feeds use UTC fixture times. Therefore
-    timezone-less timestamps are treated as UTC.
+    Fixtur.es provides UTC timestamps in its ICS feeds.
     """
 
     if not value:
@@ -239,7 +212,6 @@ def parse_ics_datetime(
 
     value = value.strip()
 
-    # Handle date-only values defensively.
     if re.fullmatch(r"\d{8}", value):
 
         try:
@@ -412,6 +384,7 @@ def parse_events(
         if line == "END:VEVENT":
 
             if current_event is not None:
+
                 events.append(
                     current_event
                 )
@@ -436,27 +409,20 @@ def parse_events(
 
 
 # =========================================================
-# Summary parsing
+# Match summary
 # =========================================================
 
 def parse_match_summary(
     summary: str,
 ) -> tuple[str, str, int | None, int | None] | None:
     """
-    Parse a Fixtur.es event summary.
+    Parse a Fixtur.es match summary.
 
-    Expected examples:
+    Examples:
 
         Rangers - Celtic
 
         Rangers - Celtic (2-1)
-
-    Returns:
-
-        home
-        away
-        home_score
-        away_score
     """
 
     if not summary:
@@ -464,7 +430,6 @@ def parse_match_summary(
 
     summary = summary.strip()
 
-    # Standard fixture format.
     match = re.match(
         r"^(.*?)\s+-\s+(.*?)"
         r"(?:\s+\((\d+)\s*-\s*(\d+)\))?$",
@@ -514,10 +479,10 @@ def extract_competition(
     event: dict,
 ) -> str:
     """
-    Extract the competition name from the Fixtur.es event.
+    Extract competition information from an ICS event.
 
-    Fixtur.es may expose competition information through
-    different ICS properties depending on the calendar.
+    Fixtur.es can expose competition information through
+    different properties depending on the calendar version.
     """
 
     candidates = (
@@ -525,7 +490,6 @@ def extract_competition(
         event.get("X-CATEGORY"),
         event.get("X-COMPETITION"),
         event.get("COMPETITION"),
-        event.get("DESCRIPTION"),
     )
 
     for value in candidates:
@@ -535,15 +499,8 @@ def extract_competition(
 
         value = value.strip()
 
-        if not value:
-            continue
-
-        # Avoid treating the fixture description itself as
-        # a competition if it clearly looks like a match.
-        if " - " in value:
-            continue
-
-        return value
+        if value:
+            return value
 
     return "Unknown"
 
@@ -606,10 +563,6 @@ def parse_fixture(
         away_score,
     ) = parsed
 
-    competition = extract_competition(
-        event
-    )
-
     return {
         "source": "fixtur.es",
 
@@ -632,9 +585,11 @@ def parse_fixture(
             else None
         ),
 
-        "competition": competition,
+        "competition": extract_competition(
+            event
+        ),
 
-        "season": "2026/27",
+        "season": SEASON,
 
         "status": event.get(
             "STATUS",
@@ -752,19 +707,15 @@ def get_team_fixtures(
 
 
 # =========================================================
-# All SPFL team calendars
+# All SPFL calendars
 # =========================================================
 
 def get_all_fixtures() -> list[dict]:
     """
-    Download all 12 SPFL team calendars and return a single
-    combined fixture list.
+    Download all 12 SPFL team calendars.
 
-    Duplicate fixtures are removed using the Fixtur.es UID
-    where available.
-
-    If a UID is unavailable, a deterministic fixture key is
-    used instead.
+    Fixtures are combined into one dataset and duplicates
+    are removed.
     """
 
     print()
@@ -892,19 +843,12 @@ def get_all_fixtures() -> list[dict]:
 
 
 # =========================================================
-# Backwards-compatible public interface
+# Backwards-compatible interface
 # =========================================================
 
 def get_fixtures() -> list[dict]:
     """
-    Backwards-compatible alias.
-
-    Existing code that previously called the old
-    Scottish-Premiership-only Fixtur.es adapter can still
-    call get_fixtures().
-
-    The implementation now returns the combined SPFL
-    team-calendar dataset.
+    Backwards-compatible alias for get_all_fixtures().
     """
 
     return get_all_fixtures()
@@ -918,7 +862,7 @@ def main() -> int:
     """
     Standalone importer test.
 
-    This does not write any repository data.
+    Does not write any repository data.
     """
 
     try:
@@ -987,4 +931,3 @@ if __name__ == "__main__":
     raise SystemExit(
         main()
     )
-    
