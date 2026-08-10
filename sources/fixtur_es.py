@@ -941,7 +941,11 @@ def parse_event(
         lines,
         "DESCRIPTION",
     )
-
+    location = property_value(
+        lines,
+        "LOCATION",
+    )
+    
     if not summary or not dtstart:
         return None
 
