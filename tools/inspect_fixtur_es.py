@@ -1,3 +1,25 @@
+from pathlib import Path
+import sys
+
+# ---------------------------------------------------------------------------
+# Make the repository root importable when this script is run directly from
+# GitHub Actions, e.g.:
+#
+#     python tools/inspect_fixtur_es.py
+#
+# This allows:
+#
+#     from sources.fixtur_es import ...
+#
+# without requiring PYTHONPATH changes in the workflow.
+# ---------------------------------------------------------------------------
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+
 from datetime import datetime, timezone
 from collections import defaultdict
 
@@ -40,7 +62,7 @@ def normalise_team_name(name):
 
 
 def parse_datetime(value):
-    """Convert parsed DTSTART values to timezone-aware UTC datetimes."""
+    """Convert a parsed DTSTART value to timezone-aware UTC."""
 
     if isinstance(value, datetime):
         if value.tzinfo is None:
@@ -48,7 +70,13 @@ def parse_datetime(value):
 
         return value.astimezone(timezone.utc)
 
+    if value is None:
+        return None
+
     value = str(value).strip()
+
+    if not value:
+        return None
 
     if value.endswith("Z"):
         value = value[:-1] + "+00:00"
@@ -70,9 +98,11 @@ def parse_datetime(value):
         "%Y%m%d",
     )
 
+    original_value = value.replace("+00:00", "")
+
     for fmt in formats:
         try:
-            dt = datetime.strptime(str(value).replace("+00:00", ""), fmt)
+            dt = datetime.strptime(original_value, fmt)
             return dt.replace(tzinfo=timezone.utc)
         except ValueError:
             continue
@@ -127,9 +157,7 @@ def season_events(events):
 
 
 def clean_team_name(name):
-    """
-    Remove common competition suffixes from team names.
-    """
+    """Remove common competition suffixes."""
 
     name = name.strip()
 
@@ -147,7 +175,7 @@ def clean_team_name(name):
 
         for suffix in suffixes:
             if name.endswith(suffix):
-                name = name[: -len(suffix)].strip()
+                name = name[:-len(suffix)].strip()
                 changed = True
 
     return name
@@ -160,10 +188,6 @@ def parse_fixture_summary(summary):
         Rangers - Hibernian
         Rangers - Hibernian (2-1)
         Rangers - Jagiellonia Białystok [EL]
-
-    Returns:
-
-        home_team, away_team
     """
 
     if not summary or " - " not in summary:
@@ -171,11 +195,11 @@ def parse_fixture_summary(summary):
 
     value = summary.strip()
 
-    # Remove result at the end.
+    # Remove a final result such as "(2-1)".
     if value.endswith(")") and " (" in value:
         value = value.rsplit(" (", 1)[0]
 
-    # Remove competition suffix.
+    # Remove competition suffixes.
     value = clean_team_name(value)
 
     parts = value.split(" - ", 1)
@@ -191,12 +215,16 @@ def parse_fixture_summary(summary):
 
 def fixture_key(event):
     """
-    Build a comparison key from:
+    Build a source-independent fixture key.
 
-        date/time + home team + away team
-
-    This deliberately does not use UID because team and competition
+    UID is intentionally NOT used because team and competition
     calendars have different UID systems.
+
+    Key:
+
+        kickoff UTC
+        home team
+        away team
     """
 
     dt = event_datetime(event)
@@ -227,14 +255,7 @@ def display_fixture(key):
 
 
 def load_calendars(calendars, source_type):
-    """
-    Download and parse all calendars.
-
-    Returns:
-        {
-            calendar_name: [events]
-        }
-    """
+    """Download and parse a group of calendars."""
 
     loaded = {}
 
@@ -246,21 +267,26 @@ def load_calendars(calendars, source_type):
     for name, url in calendars.items():
 
         print()
-        print(f"{name}")
+        print(name)
         print(f"URL: {url}")
 
         try:
             raw = download_ics(url)
-
             events = parse_ics(raw)
 
             loaded[name] = events
 
             print(f"VEVENT records: {len(events)}")
-            print(f"2026/27 events: {len(season_events(events))}")
+            print(
+                f"2026/27 events: "
+                f"{len(season_events(events))}"
+            )
 
         except Exception as exc:
-            print(f"ERROR: {type(exc).__name__}: {exc}")
+            print(
+                f"ERROR: {type(exc).__name__}: {exc}"
+            )
+
             loaded[name] = []
 
     return loaded
@@ -268,9 +294,9 @@ def load_calendars(calendars, source_type):
 
 def build_fixture_index(calendars):
     """
-    Convert calendars into:
+    Build:
 
-        fixture_key -> list of calendar names
+        fixture_key -> list of calendars containing fixture
     """
 
     index = defaultdict(list)
@@ -357,11 +383,26 @@ def print_overlap(team_index, competition_index):
     competition_only = competition_keys - team_keys
 
     print()
-    print(f"Unique team-calendar fixtures:        {len(team_keys)}")
-    print(f"Unique competition-calendar fixtures: {len(competition_keys)}")
-    print(f"Exact fixture overlap:                {len(overlap)}")
-    print(f"Team-calendar only:                   {len(team_only)}")
-    print(f"Competition-calendar only:            {len(competition_only)}")
+    print(
+        f"Unique team-calendar fixtures:        "
+        f"{len(team_keys)}"
+    )
+    print(
+        f"Unique competition-calendar fixtures: "
+        f"{len(competition_keys)}"
+    )
+    print(
+        f"Exact fixture overlap:                "
+        f"{len(overlap)}"
+    )
+    print(
+        f"Team-calendar only:                   "
+        f"{len(team_only)}"
+    )
+    print(
+        f"Competition-calendar only:            "
+        f"{len(competition_only)}"
+    )
 
     print()
     print("Coverage percentages")
@@ -372,7 +413,10 @@ def print_overlap(team_index, competition_index):
             f"{len(overlap) / len(team_keys) * 100:.1f}%"
         )
     else:
-        print("Competition coverage of team fixtures: 0.0%")
+        print(
+            "Competition coverage of team fixtures: "
+            "0.0%"
+        )
 
     if competition_keys:
         print(
@@ -380,7 +424,10 @@ def print_overlap(team_index, competition_index):
             f"{len(overlap) / len(competition_keys) * 100:.1f}%"
         )
     else:
-        print("Team coverage of competition fixtures: 0.0%")
+        print(
+            "Team coverage of competition fixtures: "
+            "0.0%"
+        )
 
     print()
     print("=" * 70)
@@ -394,8 +441,14 @@ def print_overlap(team_index, competition_index):
 
         print()
         print(display_fixture(key))
-        print(f"  Team calendars: {', '.join(teams)}")
-        print(f"  Competition calendars: {', '.join(competitions)}")
+        print(
+            f"  Team calendars: "
+            f"{', '.join(teams)}"
+        )
+        print(
+            f"  Competition calendars: "
+            f"{', '.join(competitions)}"
+        )
 
     print()
     print("=" * 70)
@@ -408,7 +461,10 @@ def print_overlap(team_index, competition_index):
 
         print()
         print(display_fixture(key))
-        print(f"  Team calendars: {', '.join(teams)}")
+        print(
+            f"  Team calendars: "
+            f"{', '.join(teams)}"
+        )
 
     print()
     print("=" * 70)
@@ -433,39 +489,38 @@ def print_team_verification(team_index):
     print("TEAM-CALENDAR INTERNAL VERIFICATION")
     print("=" * 70)
 
-    verified = 0
-    suspicious = 0
+    multi_team = 0
+    single_team = 0
 
-    for key, calendars in sorted(team_index.items()):
+    for key, calendars in team_index.items():
 
         unique_calendars = set(calendars)
 
-        # A fixture appearing in two or more team calendars is expected
-        # for a match involving two of our tracked teams.
         if len(unique_calendars) >= 2:
-            verified += 1
+            multi_team += 1
         else:
-            suspicious += 1
+            single_team += 1
 
     print()
     print(
         "Fixtures appearing in multiple team calendars: "
-        f"{verified}"
+        f"{multi_team}"
     )
+
     print(
         "Fixtures appearing in only one team calendar: "
-        f"{suspicious}"
+        f"{single_team}"
     )
 
     print()
     print("Interpretation:")
     print(
-        "  Two tracked teams = expected for an SPFL fixture "
+        "  Two tracked teams = expected for a fixture "
         "between two tracked clubs."
     )
     print(
-        "  One tracked team = expected for matches against "
-        "clubs outside the 12-team set."
+        "  One tracked team = expected for fixtures "
+        "against clubs outside the tracked 12."
     )
 
 
@@ -477,7 +532,7 @@ def print_competition_classification(competition_index):
 
     counts = defaultdict(int)
 
-    for key, competitions in competition_index.items():
+    for competitions in competition_index.values():
 
         for competition in set(competitions):
             counts[competition] += 1
@@ -497,8 +552,18 @@ def print_architecture_assessment(
     competition_keys = set(competition_index)
 
     overlap = team_keys & competition_keys
-    team_only = team_keys - competition_keys
-    competition_only = competition_keys - team_keys
+
+    team_coverage = (
+        len(overlap) / len(team_keys)
+        if team_keys
+        else 0
+    )
+
+    competition_coverage = (
+        len(overlap) / len(competition_keys)
+        if competition_keys
+        else 0
+    )
 
     print()
     print("=" * 70)
@@ -507,56 +572,68 @@ def print_architecture_assessment(
 
     print()
 
-    if competition_only:
+    if team_keys:
         print(
-            "Competition calendars contain fixtures that are not "
-            "present in the 12 team calendars."
+            f"Team-calendar fixture coverage: "
+            f"{team_coverage * 100:.1f}%"
         )
 
-    if team_only:
+    if competition_keys:
         print(
-            "Team calendars contain fixtures that are not "
-            "present in the competition calendars."
-        )
-
-    if overlap:
-        print(
-            "There is direct fixture-level overlap between the "
-            "two source types."
+            f"Competition-calendar fixture coverage: "
+            f"{competition_coverage * 100:.1f}%"
         )
 
     print()
 
-    if competition_keys and len(overlap) / len(competition_keys) >= 0.8:
+    if competition_coverage >= 0.8:
         print(
-            "RESULT: Competition calendars appear suitable as the "
-            "PRIMARY fixture source."
-        )
-        print(
-            "Team calendars can then provide supplementary "
-            "team-level verification."
+            "Competition calendars cover the large majority "
+            "of team-calendar fixtures."
         )
 
-    elif team_keys and len(overlap) / len(team_keys) >= 0.8:
+        print()
         print(
-            "RESULT: Team calendars appear to provide the strongest "
-            "fixture coverage."
+            "LIKELY ARCHITECTURE:"
+        )
+
+        print(
+            "  Competition feeds → primary fixture source"
         )
         print(
-            "Competition calendars can potentially be used for "
-            "competition classification."
+            "  Team feeds        → supplementary verification"
+        )
+
+    elif team_coverage >= 0.8:
+        print(
+            "Team calendars cover the large majority "
+            "of competition-calendar fixtures."
+        )
+
+        print()
+        print(
+            "LIKELY ARCHITECTURE:"
+        )
+
+        print(
+            "  Team feeds        → fixture source"
+        )
+        print(
+            "  Competition feeds → competition classification"
         )
 
     else:
         print(
-            "RESULT: Coverage is mixed."
+            "Coverage is mixed."
         )
+
+        print()
         print(
-            "Do not change fixtures.py or generator.py yet."
+            "Do not modify fixtures.py or generator.py yet."
         )
+
         print(
-            "The overlap and source-specific fixtures should be "
-            "reviewed first."
+            "Review the source-specific fixtures first."
         )
 
 
@@ -573,30 +650,40 @@ def main():
     )
 
     print_team_summary(team_calendars)
-    print_competition_summary(competition_calendars)
 
-    team_index = build_fixture_index(team_calendars)
-    competition_index = build_fixture_index(competition_calendars)
+    print_competition_summary(
+        competition_calendars
+    )
+
+    team_index = build_fixture_index(
+        team_calendars
+    )
+
+    competition_index = build_fixture_index(
+        competition_calendars
+    )
 
     print_overlap(
         team_index,
         competition_index,
     )
 
-    print_team_verification(team_index)
+    print_team_verification(
+        team_index
+    )
 
     print_competition_classification(
-        competition_index,
+        competition_index
     )
 
     print_architecture_assessment(
         team_index,
-        competition_index,
+        competition_index
     )
 
     print()
     print("=" * 70)
-    print("FIxtur.es FULL DIAGNOSTIC COMPLETE")
+    print("FIXTUR.ES FULL DIAGNOSTIC COMPLETE")
     print("=" * 70)
 
 
