@@ -91,7 +91,7 @@ COMPETITION_CALENDARS = {
         "https://ics.fixtur.es/v2/league/europa-league.ics",
 
     "UEFA Conference League":
-        "https://ics.fixtur.es/v2/league/europa-conference-league.ics",
+        "https://ics.fixtur.es/v2/league/uefa-conference-league.ics",
 }
 
 
