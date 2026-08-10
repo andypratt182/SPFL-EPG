@@ -1014,6 +1014,7 @@ def parse_event(
         "kickoff": kickoff,
         "end": end,
         "competition": competition,
+        "venue": location,
         "source": "fixtur.es",
         "source_type": source_type,
         "source_name": source_name,
