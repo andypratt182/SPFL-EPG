@@ -1,48 +1,25 @@
-"""
-fixtures.py
-
-Source-independent fixture interface.
-
-The EPG generator uses:
-
-    get_fixtures(team)
-
-Fixture data is read from:
-
-    data/fixtures.json
-
-The external fixture source is handled separately by
-sources/fixture_download.py.
-"""
-
-import json
-import re
 from datetime import datetime, timedelta
-from pathlib import Path
 from zoneinfo import ZoneInfo
+
+from sources.fixtur_es import get_all_fixtures
+from teams import SPFL_TEAMS
 
 
 UK_TZ = ZoneInfo("Europe/London")
 
-BASE_DIR = Path(__file__).resolve().parent
-FIXTURES_FILE = BASE_DIR / "data" / "fixtures.json"
-
-# Number of days ahead to include in the EPG.
 FIXTURE_DAYS = 24
+
+_ALL_FIXTURES = None
 
 
 def normalise_team_name(name: str) -> str:
-    """
-    Normalise team names so small naming differences do not prevent
-    fixtures from being matched.
-    """
-
     if not name:
         return ""
 
     name = str(name).lower().strip()
 
-    name = re.sub(r"[^\w\s]", " ", name)
+    if name.endswith(" tv"):
+        name = name[:-3]
 
     for suffix in (
         " football club",
@@ -54,77 +31,38 @@ def normalise_team_name(name: str) -> str:
     return " ".join(name.split())
 
 
-def _load_fixture_data() -> list[dict]:
+def _load_fixtures() -> list[dict]:
     """
-    Load normalised fixture data from data/fixtures.json.
+    Download the Fixtur.es calendars once per generator run.
+
+    The generator calls get_fixtures() once for each of the
+    twelve channels, so caching here prevents twelve copies
+    of the twelve feeds being downloaded.
     """
 
-    if not FIXTURES_FILE.exists():
-        print(
-            f"WARNING: fixture data file not found: "
-            f"{FIXTURES_FILE}"
-        )
-        return []
+    global _ALL_FIXTURES
 
-    try:
-        with open(
-            FIXTURES_FILE,
-            "r",
-            encoding="utf-8",
-        ) as file:
-            data = json.load(file)
+    if _ALL_FIXTURES is None:
+        _ALL_FIXTURES = get_all_fixtures()
 
-    except (OSError, json.JSONDecodeError) as error:
-        print(
-            f"WARNING: unable to read fixture data: "
-            f"{error}"
-        )
-        return []
-
-    if not isinstance(data, dict):
-        print(
-            "WARNING: fixture data file does not contain "
-            "a JSON object."
-        )
-        return []
-
-    fixtures = data.get("fixtures", [])
-
-    if not isinstance(fixtures, list):
-        print(
-            "WARNING: fixture data does not contain "
-            "a valid fixtures list."
-        )
-        return []
-
-    return fixtures
+    return _ALL_FIXTURES
 
 
 def _parse_kickoff(value):
-    """
-    Convert a stored ISO timestamp into a timezone-aware
-    datetime in UK time.
-
-    Supports values such as:
-
-        2026-08-22T14:00:00+00:00
-        2026-08-22T15:00:00+01:00
-        2026-08-22 14:00:00Z
-    """
-
     if not value:
         return None
 
     if isinstance(value, datetime):
         kickoff = value
 
-    elif isinstance(value, str):
+    else:
         try:
-            normalised = value.strip()
+            normalised = str(value).strip()
 
             if normalised.endswith("Z"):
                 normalised = (
-                    normalised[:-1] + "+00:00"
+                    normalised[:-1]
+                    + "+00:00"
                 )
 
             kickoff = datetime.fromisoformat(
@@ -134,9 +72,6 @@ def _parse_kickoff(value):
         except ValueError:
             return None
 
-    else:
-        return None
-
     if kickoff.tzinfo is None:
         kickoff = kickoff.replace(
             tzinfo=UK_TZ
@@ -145,73 +80,83 @@ def _parse_kickoff(value):
     return kickoff.astimezone(UK_TZ)
 
 
+def _stadium_for(home: str) -> str:
+    """
+    Return the known stadium for the home team.
+
+    This uses the existing SPFL_TEAMS configuration,
+    so stadium data does not need to be duplicated
+    in the Fixtur.es importer.
+    """
+
+    target = normalise_team_name(home)
+
+    for team in SPFL_TEAMS.values():
+
+        if (
+            normalise_team_name(
+                team.get("name", "")
+            )
+            == target
+        ):
+            return team.get(
+                "stadium",
+                "Venue TBC",
+            )
+
+    return "Venue TBC"
+
+
 def get_fixtures(team: dict) -> list[dict]:
     """
     Public fixture interface used by generator.py.
 
-    Returns fixtures for one team in the format expected
-    by the EPG system:
-
-        {
-            "home": str,
-            "away": str,
-            "kickoff": datetime,
-            "competition": str,
-            "stadium": str,
-        }
+    Fixtur.es is now the live fixture source.
     """
 
-    team_name = team.get("name", "")
-
-    # Channel names such as "Rangers TV" are matched against
-    # the actual football club name "Rangers".
-    if team_name.endswith(" TV"):
-        team_name = team_name[:-3]
+    team_name = team.get(
+        "name",
+        "",
+    )
 
     target = normalise_team_name(
         team_name
     )
 
-    now = datetime.now(UK_TZ)
+    now = datetime.now(
+        UK_TZ
+    )
 
     window_end = (
         now
-        + timedelta(days=FIXTURE_DAYS)
+        + timedelta(
+            days=FIXTURE_DAYS
+        )
     )
 
     fixtures = []
 
-    for fixture in _load_fixture_data():
-
-        if not isinstance(fixture, dict):
-            continue
+    for fixture in _load_fixtures():
 
         home = fixture.get(
             "home",
-            ""
+            "",
         )
 
         away = fixture.get(
             "away",
-            ""
+            "",
         )
 
-        # Ignore malformed fixture records.
         if not home or not away:
             continue
 
-        home_normalised = normalise_team_name(
-            home
-        )
-
-        away_normalised = normalise_team_name(
-            away
-        )
-
         if (
-            home_normalised != target
+            normalise_team_name(home)
+            != target
             and
-            away_normalised != target
+            normalise_team_name(away)
+            != target
         ):
             continue
 
@@ -222,8 +167,6 @@ def get_fixtures(team: dict) -> list[dict]:
         if kickoff is None:
             continue
 
-        # Only return fixtures inside the EPG's
-        # upcoming fixture window.
         if kickoff < now:
             continue
 
@@ -239,14 +182,12 @@ def get_fixtures(team: dict) -> list[dict]:
                     "competition",
                     "Unknown",
                 ),
-                "stadium": fixture.get(
-                    "stadium",
-                    "Venue TBC",
+                "stadium": _stadium_for(
+                    home
                 ),
             }
         )
 
-    # Sort chronologically.
     fixtures.sort(
         key=lambda fixture:
         fixture["kickoff"]
