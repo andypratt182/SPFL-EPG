@@ -269,7 +269,7 @@ def normalise_team_name(name):
     if not name:
         return ""
 
-    name = str(name).strip()
+    name = clean_competition_suffix(name)
 
     # Remove common suffixes.
     name = re.sub(
