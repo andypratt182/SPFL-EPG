@@ -1,62 +1,92 @@
+```python
 """
 sources/fixtur_es.py
 
-Fixtur.es Scottish Premiership source adapter.
+Generic Fixtur.es SPFL team-calendar importer.
 
-Downloads the Scottish Premiership calendar from Fixtur.es,
-parses the ICS/iCalendar data, and converts it into the
-source-independent fixture format used by the SPFL EPG.
+Downloads the individual Fixtur.es ICS calendars for all 12
+SPFL teams and converts them into the source-independent
+fixture format used by the SPFL EPG.
 
-This file is intentionally standalone.
+This module is deliberately responsible only for fixture
+acquisition and parsing.
 
 It does NOT modify:
     fixtures.py
-    data_layer.py
     generator.py
-    data/fixtures.json
-
-The adapter can therefore be tested safely before connecting
-it to the existing EPG pipeline.
+    xmltv.py
+    data/football.db
 """
 
 from __future__ import annotations
 
 import re
-import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 
-# ---------------------------------------------------------
+# =========================================================
 # Repository root
-# ---------------------------------------------------------
+# =========================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# ---------------------------------------------------------
+# =========================================================
 # Configuration
-# ---------------------------------------------------------
-
-COMPETITION = "Scottish Premiership"
-
-SEASON = "2026/27"
-
-FEED_URL = (
-    "https://ics.fixtur.es/v2/league/"
-    "scottish-premier-league.ics"
-)
+# =========================================================
 
 REQUEST_TIMEOUT = 30
-
 MAX_RETRIES = 3
+RETRY_DELAY = 2
 
 
-# ---------------------------------------------------------
+# =========================================================
+# Fixtur.es team calendar configuration
+# =========================================================
+#
+# These are the Fixtur.es team-calendar slugs.
+#
+# The importer downloads each team's own calendar rather
+# than using the league calendar. This allows us to capture
+# league, Scottish Cup, League Cup and European fixtures
+# where Fixtur.es provides them.
+#
+# =========================================================
+
+TEAM_CALENDARS = {
+    "Rangers": "rangers",
+    "Celtic": "celtic",
+    "Aberdeen": "aberdeen",
+    "Dundee": "dundee",
+    "Dundee United": "dundee-united",
+    "Hearts": "hearts",
+    "Hibernian": "hibernian",
+    "Kilmarnock": "kilmarnock",
+    "Motherwell": "motherwell",
+    "Falkirk": "falkirk",
+    "St Johnstone": "st-johnstone",
+    "St Mirren": "st-mirren",
+}
+
+
+def build_team_feed_url(slug: str) -> str:
+    """
+    Build the Fixtur.es ICS URL for a team.
+    """
+
+    return (
+        "https://ics.fixtur.es/v2/"
+        f"{slug}.ics"
+    )
+
+
+# =========================================================
 # Team name normalisation
-# ---------------------------------------------------------
+# =========================================================
 
 TEAM_NAME_MAP = {
     "Heart of Midlothian": "Hearts",
@@ -88,7 +118,28 @@ def normalise_team_name(name: str) -> str:
     used by the SPFL EPG.
     """
 
+    if not name:
+        return ""
+
     name = name.strip()
+
+    if name in TEAM_NAME_MAP:
+        return TEAM_NAME_MAP[name]
+
+    # Handle common suffixes defensively.
+    name = re.sub(
+        r"\s+Football Club$",
+        "",
+        name,
+        flags=re.IGNORECASE,
+    )
+
+    name = re.sub(
+        r"\s+FC$",
+        "",
+        name,
+        flags=re.IGNORECASE,
+    )
 
     return TEAM_NAME_MAP.get(
         name,
@@ -96,27 +147,26 @@ def normalise_team_name(name: str) -> str:
     )
 
 
-# ---------------------------------------------------------
-# ICS text handling
-# ---------------------------------------------------------
+# =========================================================
+# ICS line handling
+# =========================================================
 
 def unfold_ics_lines(text: str) -> list[str]:
     """
     Unfold RFC 5545 continuation lines.
 
-    In an ICS file, a line beginning with a space or tab is a
-    continuation of the previous line.
+    In an ICS file, a line beginning with a space or tab is
+    a continuation of the previous line.
     """
 
-    physical_lines = text.replace(
-        "\r\n",
-        "\n",
-    ).replace(
-        "\r",
-        "\n",
-    ).split("\n")
+    physical_lines = (
+        text
+        .replace("\r\n", "\n")
+        .replace("\r", "\n")
+        .split("\n")
+    )
 
-    lines = []
+    lines: list[str] = []
 
     for line in physical_lines:
 
@@ -137,14 +187,6 @@ def unfold_ics_lines(text: str) -> list[str]:
 def parse_property(line: str) -> tuple[str, str]:
     """
     Parse an ICS property.
-
-    Example:
-
-        DTSTART:20260809T123000Z
-
-    returns:
-
-        ("DTSTART", "20260809T123000Z")
 
     Parameters attached to a property are ignored.
 
@@ -173,32 +215,47 @@ def parse_property(line: str) -> tuple[str, str]:
     return property_name, value
 
 
-# ---------------------------------------------------------
-# ICS datetime
-# ---------------------------------------------------------
+# =========================================================
+# ICS datetime handling
+# =========================================================
 
 def parse_ics_datetime(
     value: str,
 ) -> datetime | None:
     """
-    Convert an ICS datetime into a timezone-aware UTC datetime.
+    Convert an ICS datetime into a timezone-aware UTC
+    datetime.
 
-    Supports:
+    Supported formats include:
 
         20260809T123000Z
-
-    and:
-
         20260809T123000
 
-    For the latter, UTC is assumed because the Fixtur.es feed
-    used by this project provides UTC fixture times.
+    Fixtur.es team feeds use UTC fixture times. Therefore
+    timezone-less timestamps are treated as UTC.
     """
 
     if not value:
         return None
 
     value = value.strip()
+
+    # Handle date-only values defensively.
+    if re.fullmatch(r"\d{8}", value):
+
+        try:
+
+            dt = datetime.strptime(
+                value,
+                "%Y%m%d",
+            )
+
+            return dt.replace(
+                tzinfo=timezone.utc
+            )
+
+        except ValueError:
+            return None
 
     try:
 
@@ -210,7 +267,7 @@ def parse_ics_datetime(
             )
 
             return dt.replace(
-                tzinfo=timezone.utc,
+                tzinfo=timezone.utc
             )
 
         dt = datetime.strptime(
@@ -219,7 +276,7 @@ def parse_ics_datetime(
         )
 
         return dt.replace(
-            tzinfo=timezone.utc,
+            tzinfo=timezone.utc
         )
 
     except ValueError:
@@ -227,15 +284,15 @@ def parse_ics_datetime(
         return None
 
 
-# ---------------------------------------------------------
+# =========================================================
 # HTTP download
-# ---------------------------------------------------------
+# =========================================================
 
 def download_ics(
     url: str,
 ) -> str:
     """
-    Download the Fixtur.es ICS feed.
+    Download a Fixtur.es ICS feed.
 
     Retries temporary failures before raising an error.
     """
@@ -314,6 +371,9 @@ def download_ics(
                 f"Unexpected error: {error}"
             )
 
+        if attempt < MAX_RETRIES:
+            time.sleep(RETRY_DELAY)
+
     raise RuntimeError(
         "Unable to download Fixtur.es feed "
         f"after {MAX_RETRIES} attempts: "
@@ -321,28 +381,28 @@ def download_ics(
     )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # VEVENT parser
-# ---------------------------------------------------------
+# =========================================================
 
 def parse_events(
     ics_text: str,
 ) -> list[dict]:
     """
-    Parse VEVENT records from the Fixtur.es ICS feed.
+    Parse VEVENT records from an ICS feed.
     """
 
     lines = unfold_ics_lines(
         ics_text
     )
 
-    events = []
+    events: list[dict] = []
 
-    current_event = None
+    current_event: dict | None = None
 
-    for line in lines:
+    for raw_line in lines:
 
-        line = line.strip()
+        line = raw_line.strip()
 
         if line == "BEGIN:VEVENT":
 
@@ -353,7 +413,6 @@ def parse_events(
         if line == "END:VEVENT":
 
             if current_event is not None:
-
                 events.append(
                     current_event
                 )
@@ -372,20 +431,131 @@ def parse_events(
         if not property_name:
             continue
 
-        # Keep the first occurrence of normal
-        # properties but preserve the fields
-        # required by this source.
         current_event[property_name] = value
 
     return events
 
 
-# ---------------------------------------------------------
+# =========================================================
+# Summary parsing
+# =========================================================
+
+def parse_match_summary(
+    summary: str,
+) -> tuple[str, str, int | None, int | None] | None:
+    """
+    Parse a Fixtur.es event summary.
+
+    Expected examples:
+
+        Rangers - Celtic
+
+        Rangers - Celtic (2-1)
+
+    Returns:
+
+        home
+        away
+        home_score
+        away_score
+    """
+
+    if not summary:
+        return None
+
+    summary = summary.strip()
+
+    # Standard fixture format.
+    match = re.match(
+        r"^(.*?)\s+-\s+(.*?)"
+        r"(?:\s+\((\d+)\s*-\s*(\d+)\))?$",
+        summary,
+    )
+
+    if not match:
+        return None
+
+    home = normalise_team_name(
+        match.group(1)
+    )
+
+    away = normalise_team_name(
+        match.group(2)
+    )
+
+    home_score = None
+    away_score = None
+
+    if match.group(3) is not None:
+
+        home_score = int(
+            match.group(3)
+        )
+
+        away_score = int(
+            match.group(4)
+        )
+
+    if not home or not away:
+        return None
+
+    return (
+        home,
+        away,
+        home_score,
+        away_score,
+    )
+
+
+# =========================================================
+# Competition extraction
+# =========================================================
+
+def extract_competition(
+    event: dict,
+) -> str:
+    """
+    Extract the competition name from the Fixtur.es event.
+
+    Fixtur.es may expose competition information through
+    different ICS properties depending on the calendar.
+    """
+
+    candidates = (
+        event.get("CATEGORIES"),
+        event.get("X-CATEGORY"),
+        event.get("X-COMPETITION"),
+        event.get("COMPETITION"),
+        event.get("DESCRIPTION"),
+    )
+
+    for value in candidates:
+
+        if not value:
+            continue
+
+        value = value.strip()
+
+        if not value:
+            continue
+
+        # Avoid treating the fixture description itself as
+        # a competition if it clearly looks like a match.
+        if " - " in value:
+            continue
+
+        return value
+
+    return "Unknown"
+
+
+# =========================================================
 # Fixture parser
-# ---------------------------------------------------------
+# =========================================================
 
 def parse_fixture(
     event: dict,
+    source_team: str,
 ) -> dict | None:
     """
     Convert one Fixtur.es VEVENT into the common
@@ -417,49 +587,29 @@ def parse_fixture(
         )
     )
 
-    # -----------------------------------------------------
-    # Fixtur.es summaries use:
-    #
-    #     Rangers - Hibernian
-    #
-    # and completed matches may use:
-    #
-    #     Rangers - Hibernian (2-1)
-    # -----------------------------------------------------
-
-    match = re.match(
-        r"^(.*?)\s+-\s+(.*?)(?:\s+\((\d+)\s*-\s*(\d+)\))?$",
-        summary,
+    parsed = parse_match_summary(
+        summary
     )
 
-    if not match:
+    if parsed is None:
+
         print(
-            f"WARNING: unable to parse fixture: "
+            "WARNING: unable to parse fixture: "
             f"{summary}"
         )
 
         return None
 
-    home = normalise_team_name(
-        match.group(1)
+    (
+        home,
+        away,
+        home_score,
+        away_score,
+    ) = parsed
+
+    competition = extract_competition(
+        event
     )
-
-    away = normalise_team_name(
-        match.group(2)
-    )
-
-    home_score = None
-    away_score = None
-
-    if match.group(3) is not None:
-
-        home_score = int(
-            match.group(3)
-        )
-
-        away_score = int(
-            match.group(4)
-        )
 
     return {
         "source": "fixtur.es",
@@ -468,6 +618,8 @@ def parse_fixture(
             "UID",
             "",
         ),
+
+        "source_team": source_team,
 
         "home": home,
 
@@ -481,9 +633,9 @@ def parse_fixture(
             else None
         ),
 
-        "competition": COMPETITION,
+        "competition": competition,
 
-        "season": SEASON,
+        "season": "2026/27",
 
         "status": event.get(
             "STATUS",
@@ -511,46 +663,50 @@ def parse_fixture(
     }
 
 
-# ---------------------------------------------------------
-# Public source interface
-# ---------------------------------------------------------
+# =========================================================
+# Single team calendar
+# =========================================================
 
-def get_fixtures() -> list[dict]:
+def get_team_fixtures(
+    team_name: str,
+) -> list[dict]:
     """
-    Download and return all usable Scottish Premiership
-    fixtures from Fixtur.es.
+    Download and parse one team's Fixtur.es calendar.
     """
 
+    if team_name not in TEAM_CALENDARS:
+
+        raise ValueError(
+            f"Unknown SPFL team: {team_name}"
+        )
+
+    slug = TEAM_CALENDARS[
+        team_name
+    ]
+
+    url = build_team_feed_url(
+        slug
+    )
+
+    print()
     print(
-        "=============================="
+        "------------------------------"
     )
 
     print(
-        "FIXTUR.ES SOURCE"
+        f"TEAM: {team_name}"
     )
 
     print(
-        "=============================="
+        f"Feed: {url}"
     )
 
     print(
-        f"Feed: {FEED_URL}"
-    )
-
-    print(
-        f"Competition: {COMPETITION}"
-    )
-
-    print(
-        f"Season: {SEASON}"
-    )
-
-    print(
-        "=============================="
+        "------------------------------"
     )
 
     ics_text = download_ics(
-        FEED_URL
+        url
     )
 
     print(
@@ -567,19 +723,21 @@ def get_fixtures() -> list[dict]:
         f"{len(events)}"
     )
 
-    fixtures = []
+    fixtures: list[dict] = []
 
     for event in events:
 
         fixture = parse_fixture(
-            event
+            event,
+            team_name,
         )
 
-        if fixture is not None:
+        if fixture is None:
+            continue
 
-            fixtures.append(
-                fixture
-            )
+        fixtures.append(
+            fixture
+        )
 
     fixtures.sort(
         key=lambda fixture:
@@ -594,21 +752,179 @@ def get_fixtures() -> list[dict]:
     return fixtures
 
 
-# ---------------------------------------------------------
+# =========================================================
+# All SPFL team calendars
+# =========================================================
+
+def get_all_fixtures() -> list[dict]:
+    """
+    Download all 12 SPFL team calendars and return a single
+    combined fixture list.
+
+    Duplicate fixtures are removed using the Fixtur.es UID
+    where available.
+
+    If a UID is unavailable, a deterministic fixture key is
+    used instead.
+    """
+
+    print()
+    print(
+        "=========================================="
+    )
+
+    print(
+        "FIXTUR.ES SPFL TEAM-CALENDAR SOURCE"
+    )
+
+    print(
+        "=========================================="
+    )
+
+    print(
+        f"Team calendars: "
+        f"{len(TEAM_CALENDARS)}"
+    )
+
+    print(
+        "=========================================="
+    )
+
+    all_fixtures: list[dict] = []
+
+    seen: set[str] = set()
+
+    successful_teams = 0
+    failed_teams = 0
+
+    for team_name in TEAM_CALENDARS:
+
+        try:
+
+            fixtures = get_team_fixtures(
+                team_name
+            )
+
+            successful_teams += 1
+
+        except Exception as error:
+
+            failed_teams += 1
+
+            print()
+            print(
+                f"ERROR loading "
+                f"{team_name}: {error}"
+            )
+
+            continue
+
+        for fixture in fixtures:
+
+            source_id = fixture.get(
+                "source_id",
+                "",
+            )
+
+            if source_id:
+
+                dedupe_key = (
+                    f"uid:{source_id}"
+                )
+
+            else:
+
+                dedupe_key = (
+                    f"{fixture.get('home', '')}|"
+                    f"{fixture.get('away', '')}|"
+                    f"{fixture.get('kickoff', '')}"
+                )
+
+            if dedupe_key in seen:
+                continue
+
+            seen.add(
+                dedupe_key
+            )
+
+            all_fixtures.append(
+                fixture
+            )
+
+    all_fixtures.sort(
+        key=lambda fixture:
+        fixture["kickoff"]
+    )
+
+    print()
+    print(
+        "=========================================="
+    )
+
+    print(
+        "FIXTUR.ES IMPORT COMPLETE"
+    )
+
+    print(
+        "=========================================="
+    )
+
+    print(
+        f"Successful team feeds: "
+        f"{successful_teams}/"
+        f"{len(TEAM_CALENDARS)}"
+    )
+
+    print(
+        f"Failed team feeds: "
+        f"{failed_teams}"
+    )
+
+    print(
+        f"Unique fixtures: "
+        f"{len(all_fixtures)}"
+    )
+
+    print(
+        "=========================================="
+    )
+
+    return all_fixtures
+
+
+# =========================================================
+# Backwards-compatible public interface
+# =========================================================
+
+def get_fixtures() -> list[dict]:
+    """
+    Backwards-compatible alias.
+
+    Existing code that previously called the old
+    Scottish-Premiership-only Fixtur.es adapter can still
+    call get_fixtures().
+
+    The implementation now returns the combined SPFL
+    team-calendar dataset.
+    """
+
+    return get_all_fixtures()
+
+
+# =========================================================
 # Standalone test
-# ---------------------------------------------------------
+# =========================================================
 
 def main() -> int:
     """
-    Standalone test.
+    Standalone importer test.
 
-    This does NOT write data/fixtures.json.
-    It only downloads, parses and displays the feed.
+    This does not write any repository data.
     """
 
     try:
 
-        fixtures = get_fixtures()
+        fixtures = get_all_fixtures()
 
     except Exception as error:
 
@@ -623,23 +939,23 @@ def main() -> int:
 
     print()
     print(
-        "=============================="
+        "=========================================="
     )
 
     print(
-        "FIRST 20 FIXTURES"
+        "FIRST 30 FIXTURES"
     )
 
     print(
-        "=============================="
+        "=========================================="
     )
 
-    for fixture in fixtures[:20]:
+    for fixture in fixtures[:30]:
 
         score = ""
 
         if (
-            fixture["home_score"]
+            fixture.get("home_score")
             is not None
         ):
 
@@ -654,12 +970,14 @@ def main() -> int:
             f"{fixture['kickoff']} | "
             f"{fixture['home']} - "
             f"{fixture['away']}"
-            f"{score}"
+            f"{score} | "
+            f"{fixture['competition']}"
         )
 
     print()
     print(
-        "Fixtur.es test completed successfully."
+        "Fixtur.es SPFL importer test "
+        "completed successfully."
     )
 
     return 0
@@ -669,4 +987,5 @@ if __name__ == "__main__":
 
     raise SystemExit(
         main()
-  )
+    )
+```
