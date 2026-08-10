@@ -301,14 +301,13 @@ def create_next_game_programme(
             "Competition TBC"
         )
 
-        venue = next_match.get(
-            "stadium"
-        )
+       venue = next_match.get("venue")
 
         if not venue:
-            venue = next_match.get(
-                "location"
-            )
+            venue = next_match.get("stadium")
+
+        if not venue:
+            venue = next_match.get("location")
 
         if not venue:
             venue = "Venue TBC"
