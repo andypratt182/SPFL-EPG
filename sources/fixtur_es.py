@@ -1,32 +1,57 @@
 from datetime import datetime
-from email.utils import parsedate_to_datetime
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 import re
 import time
-
 
 # ============================================================
 # FIxtur.es SOURCE CONFIGURATION
 # ============================================================
 
 TEAM_CALENDARS = {
-    "Rangers": "https://ics.fixtur.es/v2/rangers.ics",
-    "Celtic": "https://ics.fixtur.es/v2/celtic.ics",
-    "Aberdeen": "https://ics.fixtur.es/v2/aberdeen.ics",
-    "Dundee": "https://ics.fixtur.es/v2/dundee-fc.ics",
-    "Dundee United": "https://ics.fixtur.es/v2/dundee-united.ics",
-    "Hearts": "https://ics.fixtur.es/v2/heart-of-midlothian.ics",
-    "Hibernian": "https://ics.fixtur.es/v2/hibernian.ics",
-    "Kilmarnock": "https://ics.fixtur.es/v2/kilmarnock.ics",
-    "Motherwell": "https://ics.fixtur.es/v2/motherwell.ics",
-    "Falkirk": "https://ics.fixtur.es/v2/falkirk.ics",
-    "St Johnstone": "https://ics.fixtur.es/v2/st-johnstone.ics",
-    "St Mirren": "https://ics.fixtur.es/v2/st-mirren.ics",
+    "Rangers":
+        "https://ics.fixtur.es/v2/rangers.ics",
+
+    "Celtic":
+        "https://ics.fixtur.es/v2/celtic.ics",
+
+    "Aberdeen":
+        "https://ics.fixtur.es/v2/aberdeen.ics",
+
+    "Dundee":
+        "https://ics.fixtur.es/v2/dundee-fc.ics",
+
+    "Dundee United":
+        "https://ics.fixtur.es/v2/dundee-united.ics",
+
+    "Hearts":
+        "https://ics.fixtur.es/v2/heart-of-midlothian.ics",
+
+    "Hibernian":
+        "https://ics.fixtur.es/v2/hibernian.ics",
+
+    "Kilmarnock":
+        "https://ics.fixtur.es/v2/kilmarnock.ics",
+
+    "Motherwell":
+        "https://ics.fixtur.es/v2/motherwell.ics",
+
+    "Falkirk":
+        "https://ics.fixtur.es/v2/falkirk.ics",
+
+    "St Johnstone":
+        "https://ics.fixtur.es/v2/st-johnstone.ics",
+
+    "St Mirren":
+        "https://ics.fixtur.es/v2/st-mirren.ics",
 }
 
 
-# Competition calendars confirmed by the Fixtur.es diagnostic.
+# Domestic competition calendars.
+
+# These calendars classify fixtures discovered by the team
+# calendars. They do NOT create fixtures.
+
 COMPETITION_CALENDARS = {
     "Scottish Premiership":
         "https://ics.fixtur.es/v2/league/scottish-premier-league.ics",
@@ -45,18 +70,96 @@ COMPETITION_CALENDARS = {
 }
 
 
-# Kept separate so European competitions can be added later
-# without changing the importer architecture.
-EUROPEAN_COMPETITION_CALENDARS = {}
+# UEFA competition calendars.
+
+# These are deliberately separate from domestic calendars.
+# UEFA classification is based on actual calendar evidence.
+# No date-based UEFA inference is performed.
+
+EUROPEAN_COMPETITION_CALENDARS = {
+    "Champions League":
+        "https://ics.fixtur.es/v2/league/champions-league.ics",
+
+    "Europa League":
+        "https://ics.fixtur.es/v2/league/europa-league.ics",
+
+    "UEFA Conference League":
+        "https://ics.fixtur.es/v2/league/uefa-conference-league.ics",
+}
 
 
 USER_AGENT = (
     "Mozilla/5.0 "
-    "(compatible; SPFL-EPG/1.0; +https://github.com/andypratt182/SPFL-EPG)"
+    "(compatible; SPFL-EPG/1.0; "
+    "+https://github.com/andypratt182/SPFL-EPG)"
 )
 
 MAX_ATTEMPTS = 3
 RETRY_DELAY = 2
+
+
+# ============================================================
+# CLASSIFICATION CONSTANTS
+# ============================================================
+
+DOMESTIC_COMPETITIONS = {
+    "Scottish Premiership",
+    "Scottish Championship",
+    "Scottish League One",
+    "Scottish League Two",
+    "Scottish Cup",
+}
+
+UEFA_COMPETITIONS = {
+    "Champions League",
+    "Europa League",
+    "UEFA Conference League",
+}
+
+SPFL_TEAMS = {
+    "Rangers",
+    "Celtic",
+    "Aberdeen",
+    "Dundee",
+    "Dundee United",
+    "Hearts",
+    "Hibernian",
+    "Kilmarnock",
+    "Motherwell",
+    "Falkirk",
+    "St Johnstone",
+    "St Mirren",
+}
+
+CLASSIFICATION_CONFIRMED = (
+    "CONFIRMED_COMPETITIVE"
+)
+
+CLASSIFICATION_FRIENDLY = (
+    "FRIENDLY"
+)
+
+CLASSIFICATION_MISSING = (
+    "POTENTIALLY_MISSING_COMPETITION"
+)
+
+CLASSIFICATION_UNKNOWN = (
+    "UNKNOWN"
+)
+
+COMPETITION_TYPE_DOMESTIC = "DOMESTIC"
+COMPETITION_TYPE_UEFA = "UEFA"
+COMPETITION_TYPE_FRIENDLY = "FRIENDLY"
+COMPETITION_TYPE_UNKNOWN = "UNKNOWN"
+
+
+# Fixtur.es team calendars can contain explicit UEFA markers.
+
+UEFA_TAG_TO_COMPETITION = {
+    "CL": "Champions League",
+    "EL": "Europa League",
+    "CONF": "UEFA Conference League",
+}
 
 
 # ============================================================
@@ -109,7 +212,15 @@ def normalise_team_name(name):
 
     name = str(name).strip()
 
-    # Remove common suffixes/prefixes.
+    # Remove explicit UEFA markers before normalisation.
+    name = re.sub(
+        r"\s*\[(?:CL|EL|CONF|Conf)\]\s*$",
+        "",
+        name,
+        flags=re.IGNORECASE,
+    )
+
+    # Remove common suffixes.
     name = re.sub(
         r"\s+football\s+club$",
         "",
@@ -139,6 +250,13 @@ def normalise_team_name(name):
     )
 
 
+def is_spfl_team(name):
+    return (
+        normalise_team_name(name)
+        in SPFL_TEAMS
+    )
+
+
 # ============================================================
 # ICS DOWNLOADING
 # ============================================================
@@ -146,10 +264,13 @@ def normalise_team_name(name):
 def download_ics(url):
     last_error = None
 
-    for attempt in range(1, MAX_ATTEMPTS + 1):
-
+    for attempt in range(
+        1,
+        MAX_ATTEMPTS + 1,
+    ):
         print(
-            f"Request attempt {attempt}/{MAX_ATTEMPTS}"
+            f"Request attempt "
+            f"{attempt}/{MAX_ATTEMPTS}"
         )
 
         request = Request(
@@ -161,14 +282,12 @@ def download_ics(url):
         )
 
         try:
-
             with urlopen(
                 request,
                 timeout=30,
             ) as response:
 
                 status = response.getcode()
-
                 data = response.read()
 
             text = data.decode(
@@ -181,7 +300,8 @@ def download_ics(url):
             )
 
             print(
-                f"Downloaded ICS characters: {len(text)}"
+                "Downloaded ICS characters: "
+                f"{len(text)}"
             )
 
             return text
@@ -231,16 +351,13 @@ def unfold_ics(text):
     the previous physical line.
     """
 
-    text = text.replace(
-        "\r\n",
-        "\n",
-    ).replace(
-        "\r",
-        "\n",
+    text = (
+        text
+        .replace("\r\n", "\n")
+        .replace("\r", "\n")
     )
 
     lines = text.split("\n")
-
     unfolded = []
 
     for line in lines:
@@ -271,7 +388,6 @@ def split_events(text):
         if line.strip() == "BEGIN:VEVENT":
 
             current = []
-
             continue
 
         if line.strip() == "END:VEVENT":
@@ -280,7 +396,6 @@ def split_events(text):
                 events.append(current)
 
             current = None
-
             continue
 
         if current is not None:
@@ -289,18 +404,23 @@ def split_events(text):
     return events
 
 
-def property_value(lines, property_name):
+def property_value(
+    lines,
+    property_name,
+):
     """
     Return the first value for an ICS property.
 
     Handles parameters such as:
+
         DTSTART;TZID=Europe/London:
         DTSTART;VALUE=DATE:
     """
 
     prefix = property_name.upper() + ":"
-
-    parameter_prefix = property_name.upper() + ";"
+    parameter_prefix = (
+        property_name.upper() + ";"
+    )
 
     for line in lines:
 
@@ -326,7 +446,10 @@ def property_value(lines, property_name):
     return None
 
 
-def property_line(lines, property_name):
+def property_line(
+    lines,
+    property_name,
+):
     """
     Return the complete ICS property line.
     """
@@ -335,10 +458,14 @@ def property_line(lines, property_name):
 
     for line in lines:
 
-        if line.upper().startswith(
-            prefix + ":"
-        ) or line.upper().startswith(
-            prefix + ";"
+        if (
+            line.upper().startswith(
+                prefix + ":"
+            )
+            or
+            line.upper().startswith(
+                prefix + ";"
+            )
         ):
 
             return line
@@ -367,6 +494,7 @@ def parse_ics_datetime(value):
                 value,
                 "%Y%m%d",
             )
+
         except ValueError:
             return None
 
@@ -378,6 +506,7 @@ def parse_ics_datetime(value):
                 value,
                 "%Y%m%dT%H%M%SZ",
             )
+
         except ValueError:
             return None
 
@@ -392,6 +521,7 @@ def parse_ics_datetime(value):
                 value,
                 fmt,
             )
+
         except ValueError:
             pass
 
@@ -401,6 +531,7 @@ def parse_ics_datetime(value):
         normalised = value
 
         if normalised.endswith("Z"):
+
             normalised = (
                 normalised[:-1]
                 + "+00:00"
@@ -411,6 +542,7 @@ def parse_ics_datetime(value):
         )
 
     except ValueError:
+
         return None
 
 
@@ -418,7 +550,9 @@ def parse_ics_datetime(value):
 # SCORE PARSING
 # ============================================================
 
-def parse_score_from_summary(summary):
+def parse_score_from_summary(
+    summary,
+):
     if not summary:
         return None, None
 
@@ -436,7 +570,9 @@ def parse_score_from_summary(summary):
     )
 
 
-def remove_score_from_summary(summary):
+def remove_score_from_summary(
+    summary,
+):
     if not summary:
         return ""
 
@@ -451,7 +587,9 @@ def remove_score_from_summary(summary):
 # MATCH PARSING
 # ============================================================
 
-def parse_match_summary(summary):
+def parse_match_summary(
+    summary,
+):
     if not summary:
         return None, None, None, None
 
@@ -467,12 +605,8 @@ def parse_match_summary(summary):
         )
     )
 
-    # Fixtur.es uses:
-    #
-    # Rangers - Celtic
-    #
-    # We split on the first separator.
     if " - " not in clean_summary:
+
         return (
             None,
             None,
@@ -480,9 +614,11 @@ def parse_match_summary(summary):
             away_score,
         )
 
-    home, away = clean_summary.split(
-        " - ",
-        1,
+    home, away = (
+        clean_summary.split(
+            " - ",
+            1,
+        )
     )
 
     home = normalise_team_name(
@@ -498,6 +634,59 @@ def parse_match_summary(summary):
         away,
         home_score,
         away_score,
+    )
+
+
+# ============================================================
+# UEFA MARKERS
+# ============================================================
+
+def get_uefa_tag(
+    fixture,
+):
+    """
+    Return an explicit Fixtur.es UEFA marker.
+
+    Examples:
+
+        [CL]   -> CL
+        [EL]   -> EL
+        [Conf] -> CONF
+
+    The marker is diagnostic evidence only.
+    It does not override the UEFA competition calendar.
+    """
+
+    summary = fixture.get(
+        "raw_summary",
+        "",
+    )
+
+    match = re.search(
+        r"\[(CL|EL|Conf)\]\s*"
+        r"(?:\(\d+\s*-\s*\d+\))?$",
+        summary,
+        flags=re.IGNORECASE,
+    )
+
+    if not match:
+        return None
+
+    return match.group(1).upper()
+
+
+def get_explicit_uefa_competition(
+    fixture,
+):
+    tag = get_uefa_tag(
+        fixture
+    )
+
+    if tag is None:
+        return None
+
+    return UEFA_TAG_TO_COMPETITION.get(
+        tag
     )
 
 
@@ -587,6 +776,7 @@ def parse_event(
         "description": description,
         "home_score": home_score,
         "away_score": away_score,
+        "raw_summary": summary,
     }
 
 
@@ -596,9 +786,7 @@ def parse_calendar(
     source_name,
     competition=None,
 ):
-    events = split_events(
-        text
-    )
+    events = split_events(text)
 
     fixtures = []
 
@@ -626,25 +814,31 @@ def parse_calendar(
 # FIXTURE SIGNATURE
 # ============================================================
 
-def fixture_signature(fixture):
+def fixture_signature(
+    fixture,
+):
+    """
+    Canonical fixture identity.
+
+    Production matching is deliberately exact:
+
+        date
+        time
+        home team
+        away team
+
+    No approximate-date or team-only matching is used here.
+    """
+
     kickoff = fixture.get(
         "kickoff"
     )
 
-    if isinstance(
+    if not isinstance(
         kickoff,
         datetime,
     ):
-
-        kickoff_key = (
-            kickoff.isoformat()
-        )
-
-    else:
-
-        kickoff_key = str(
-            kickoff
-        )
+        return None
 
     home = normalise_team_name(
         fixture.get(
@@ -660,8 +854,15 @@ def fixture_signature(fixture):
         )
     )
 
+    if not home or not away:
+        return None
+
     return (
-        kickoff_key,
+        kickoff.year,
+        kickoff.month,
+        kickoff.day,
+        kickoff.hour,
+        kickoff.minute,
         home.lower(),
         away.lower(),
     )
@@ -675,15 +876,9 @@ def load_team_fixtures():
     all_fixtures = []
 
     print()
-    print(
-        "=" * 70
-    )
-    print(
-        "LOADING FIxtur.es TEAM CALENDARS"
-    )
-    print(
-        "=" * 70
-    )
+    print("=" * 70)
+    print("LOADING FIxtur.es TEAM CALENDARS")
+    print("=" * 70)
 
     for team, url in TEAM_CALENDARS.items():
 
@@ -791,24 +986,22 @@ def load_competition_fixtures(
 
 
 # ============================================================
-# DEDUPLICATION
+# TEAM FIXTURE DISCOVERY
 # ============================================================
 
-def merge_fixture_sources(
+def build_unique_team_fixtures(
     team_fixtures,
-    competition_fixtures,
 ):
-    merged = {}
+    """
+    Build the authoritative fixture set.
 
-    team_verified = set()
+    ONLY fixtures discovered through team calendars are
+    allowed into the production fixture set.
 
-    # --------------------------------------------------------
-    # Team calendars first.
-    #
-    # They establish that the fixture exists and provide
-    # fallback coverage for fixtures not found in a
-    # competition calendar.
-    # --------------------------------------------------------
+    Competition calendars can never create fixtures.
+    """
+
+    discovered = {}
 
     for fixture in team_fixtures:
 
@@ -816,165 +1009,44 @@ def merge_fixture_sources(
             fixture
         )
 
-        if signature not in merged:
+        if signature is None:
+            continue
 
-            merged[signature] = dict(
+        if signature not in discovered:
+
+            discovered[signature] = dict(
                 fixture
             )
 
-            merged[signature][
+            discovered[signature][
                 "verified_by_team_calendar"
             ] = True
 
-            merged[signature][
-                "team_sources"
-            ] = [
-                fixture.get(
-                    "source_name"
-                )
-            ]
-
-            merged[signature][
-                "competition_source"
-            ] = False
-
-        else:
-
-            existing = merged[
-                signature
-            ]
-
-            existing[
-                "verified_by_team_calendar"
-            ] = True
-
-            team_source = fixture.get(
-                "source_name"
-            )
-
-            existing.setdefault(
-                "team_sources",
-                [],
-            )
-
-            if (
-                team_source
-                and team_source
-                not in existing[
-                    "team_sources"
-                ]
-            ):
-
-                existing[
-                    "team_sources"
-                ].append(
-                    team_source
-                )
-
-            # Prefer a result if one feed has it.
-            if (
-                existing.get(
-                    "home_score"
-                ) is None
-                and fixture.get(
-                    "home_score"
-                ) is not None
-            ):
-
-                existing[
-                    "home_score"
-                ] = fixture[
-                    "home_score"
-                ]
-
-                existing[
-                    "away_score"
-                ] = fixture[
-                    "away_score"
-                ]
-
-        team_verified.add(
-            signature
-        )
-
-    # --------------------------------------------------------
-    # Competition calendars.
-    #
-    # Competition feeds are authoritative for competition
-    # classification.
-    # --------------------------------------------------------
-
-    for fixture in competition_fixtures:
-
-        signature = fixture_signature(
-            fixture
-        )
-
-        if signature not in merged:
-
-            merged[signature] = dict(
-                fixture
-            )
-
-            merged[signature][
-                "verified_by_team_calendar"
-            ] = False
-
-            merged[signature][
+            discovered[signature][
                 "team_sources"
             ] = []
 
-            merged[signature][
-                "competition_source"
-            ] = True
-
-            continue
-
-        existing = merged[
-            signature
-        ]
-
-        competition = fixture.get(
-            "competition"
-        )
-
-        if competition:
-
-            existing[
-                "competition"
-            ] = competition
-
-        existing[
-            "competition_source"
-        ] = True
-
-        # Preserve the competition source ID.
-        competition_id = fixture.get(
-            "source_id"
-        )
-
-        existing.setdefault(
-            "competition_source_ids",
-            [],
+        team_source = fixture.get(
+            "source_name"
         )
 
         if (
-            competition_id
-            and competition_id
-            not in existing[
-                "competition_source_ids"
+            team_source
+            and team_source
+            not in discovered[signature][
+                "team_sources"
             ]
         ):
 
-            existing[
-                "competition_source_ids"
+            discovered[signature][
+                "team_sources"
             ].append(
-                competition_id
+                team_source
             )
 
-        # Prefer a score if the competition calendar has one.
+        # Prefer a result if another team calendar has one.
         if (
-            existing.get(
+            discovered[signature].get(
                 "home_score"
             ) is None
             and fixture.get(
@@ -982,52 +1054,341 @@ def merge_fixture_sources(
             ) is not None
         ):
 
-            existing[
+            discovered[signature][
                 "home_score"
             ] = fixture[
                 "home_score"
             ]
 
-            existing[
+            discovered[signature][
                 "away_score"
             ] = fixture[
                 "away_score"
             ]
 
-    return list(
-        merged.values()
-    )
+    return discovered
 
 
 # ============================================================
-# COMPETITION FALLBACK
+# COMPETITION INDEX
 # ============================================================
 
-def infer_fallback_competition(
-    fixture,
+def build_competition_index(
+    competition_fixtures,
 ):
     """
-    Do not guess competitions from the teams.
+    Index competition calendars by exact fixture identity.
 
-    If a competition calendar has classified the fixture,
-    retain that classification.
-
-    Otherwise leave it as None/Unknown.
-
-    This is deliberately conservative. A Rangers vs Celtic
-    fixture, for example, could be a Premiership match,
-    Scottish Cup match, League Cup match, or European match.
-    Team names alone cannot safely determine the competition.
+    This index is used only to classify already-discovered
+    team-calendar fixtures.
     """
 
-    competition = fixture.get(
-        "competition"
+    index = {}
+
+    for fixture in competition_fixtures:
+
+        signature = fixture_signature(
+            fixture
+        )
+
+        if signature is None:
+            continue
+
+        competition = fixture.get(
+            "competition"
+        )
+
+        if not competition:
+            continue
+
+        index.setdefault(
+            signature,
+            [],
+        )
+
+        index[signature].append(
+            fixture
+        )
+
+    return index
+
+
+# ============================================================
+# CLASSIFICATION
+# ============================================================
+
+def classify_fixture(
+    fixture,
+    competition_index,
+):
+    """
+    Classify a fixture that has already been discovered
+    by a team calendar.
+
+    Authority order:
+
+        1. UEFA competition calendar
+        2. Domestic competition calendar
+        3. Friendly
+        4. Potentially missing competition
+        5. Unknown
+
+    Fixture existence is NEVER determined by the competition
+    calendars.
+    """
+
+    signature = fixture_signature(
+        fixture
     )
 
-    if competition:
-        return competition
+    if signature is None:
 
-    return None
+        return {
+            "competition": None,
+            "competition_type":
+                COMPETITION_TYPE_UNKNOWN,
+            "classification_status":
+                CLASSIFICATION_UNKNOWN,
+            "classification_reason":
+                "Unable to construct exact fixture identity.",
+        }
+
+    matches = competition_index.get(
+        signature,
+        [],
+    )
+
+    uefa_matches = [
+        match
+        for match in matches
+        if match.get("competition")
+        in UEFA_COMPETITIONS
+    ]
+
+    domestic_matches = [
+        match
+        for match in matches
+        if match.get("competition")
+        in DOMESTIC_COMPETITIONS
+    ]
+
+    # --------------------------------------------------------
+    # 1. UEFA calendar authority
+    # --------------------------------------------------------
+
+    if uefa_matches:
+
+        competitions = sorted(
+            {
+                match.get(
+                    "competition"
+                )
+                for match in uefa_matches
+                if match.get(
+                    "competition"
+                )
+            }
+        )
+
+        competition = competitions[0]
+
+        fixture["competition_source"] = (
+            "UEFA competition calendar"
+        )
+
+        fixture["competition_source_ids"] = [
+            match.get("source_id")
+            for match in uefa_matches
+            if match.get("source_id")
+        ]
+
+        return {
+            "competition": competition,
+            "competition_type":
+                COMPETITION_TYPE_UEFA,
+            "classification_status":
+                CLASSIFICATION_CONFIRMED,
+            "classification_reason":
+                "Exact match in UEFA competition calendar.",
+        }
+
+    # --------------------------------------------------------
+    # 2. Explicit UEFA marker
+    # --------------------------------------------------------
+
+    explicit_uefa = (
+        get_explicit_uefa_competition(
+            fixture
+        )
+    )
+
+    if explicit_uefa:
+
+        fixture["competition_source"] = (
+            "Fixtur.es team-calendar marker"
+        )
+
+        return {
+            "competition": None,
+            "competition_type":
+                COMPETITION_TYPE_UNKNOWN,
+            "classification_status":
+                CLASSIFICATION_MISSING,
+            "classification_reason":
+                "Team calendar explicitly marks this "
+                f"fixture as {explicit_uefa}, but no "
+                "exact UEFA competition-calendar match "
+                "was found.",
+        }
+
+    # --------------------------------------------------------
+    # 3. Domestic competition authority
+    # --------------------------------------------------------
+
+    if domestic_matches:
+
+        competitions = sorted(
+            {
+                match.get(
+                    "competition"
+                )
+                for match in domestic_matches
+                if match.get(
+                    "competition"
+                )
+            }
+        )
+
+        competition = competitions[0]
+
+        fixture["competition_source"] = (
+            "Domestic competition calendar"
+        )
+
+        fixture["competition_source_ids"] = [
+            match.get("source_id")
+            for match in domestic_matches
+            if match.get("source_id")
+        ]
+
+        return {
+            "competition": competition,
+            "competition_type":
+                COMPETITION_TYPE_DOMESTIC,
+            "classification_status":
+                CLASSIFICATION_CONFIRMED,
+            "classification_reason":
+                "Exact match in domestic competition calendar.",
+        }
+
+    # --------------------------------------------------------
+    # 4. No competition match
+    # --------------------------------------------------------
+
+    home = normalise_team_name(
+        fixture.get(
+            "home",
+            "",
+        )
+    )
+
+    away = normalise_team_name(
+        fixture.get(
+            "away",
+            "",
+        )
+    )
+
+    home_spfl = is_spfl_team(
+        home
+    )
+
+    away_spfl = is_spfl_team(
+        away
+    )
+
+    # Both SPFL clubs, but no competition calendar confirms
+    # the fixture. Retain it and flag it for investigation.
+    if home_spfl and away_spfl:
+
+        return {
+            "competition": None,
+            "competition_type":
+                COMPETITION_TYPE_UNKNOWN,
+            "classification_status":
+                CLASSIFICATION_MISSING,
+            "classification_reason":
+                "Both clubs are SPFL teams, but the fixture "
+                "does not appear in any available domestic "
+                "or UEFA competition calendar.",
+        }
+
+    # An SPFL team against a non-SPFL opponent with no
+    # competition-calendar evidence is classified as friendly.
+    if home_spfl != away_spfl:
+
+        return {
+            "competition": None,
+            "competition_type":
+                COMPETITION_TYPE_FRIENDLY,
+            "classification_status":
+                CLASSIFICATION_FRIENDLY,
+            "classification_reason":
+                "SPFL club has a non-SPFL opponent and no "
+                "domestic or UEFA competition calendar "
+                "confirms the fixture.",
+        }
+
+    # --------------------------------------------------------
+    # 5. Genuine ambiguity
+    # --------------------------------------------------------
+
+    return {
+        "competition": None,
+        "competition_type":
+            COMPETITION_TYPE_UNKNOWN,
+        "classification_status":
+            CLASSIFICATION_UNKNOWN,
+        "classification_reason":
+            "Fixture does not match a known competition "
+            "and cannot safely be classified as a friendly.",
+    }
+
+
+def apply_classification(
+    fixture,
+    competition_index,
+):
+    classification = classify_fixture(
+        fixture,
+        competition_index,
+    )
+
+    fixture[
+        "competition"
+    ] = classification[
+        "competition"
+    ]
+
+    fixture[
+        "competition_type"
+    ] = classification[
+        "competition_type"
+    ]
+
+    fixture[
+        "classification_status"
+    ] = classification[
+        "classification_status"
+    ]
+
+    fixture[
+        "classification_reason"
+    ] = classification[
+        "classification_reason"
+    ]
+
+    return fixture
 
 
 # ============================================================
@@ -1060,15 +1421,9 @@ def print_source_statistics(
     merged,
 ):
     print()
-    print(
-        "=" * 70
-    )
-    print(
-        "FIXTUR.ES SOURCE AUDIT"
-    )
-    print(
-        "=" * 70
-    )
+    print("=" * 70)
+    print("FIXTUR.ES SOURCE / CLASSIFICATION AUDIT")
+    print("=" * 70)
 
     print(
         f"Team-calendar records: "
@@ -1081,102 +1436,136 @@ def print_source_statistics(
     )
 
     print(
-        f"Unique fixtures: "
+        f"Unique team-discovered fixtures: "
         f"{len(merged)}"
     )
 
-    verified = sum(
+    confirmed = sum(
         1
         for fixture in merged
         if fixture.get(
-            "verified_by_team_calendar"
+            "classification_status"
         )
+        == CLASSIFICATION_CONFIRMED
     )
 
-    classified = sum(
+    domestic = sum(
         1
         for fixture in merged
         if fixture.get(
-            "competition"
+            "competition_type"
         )
+        == COMPETITION_TYPE_DOMESTIC
     )
 
-    competition_only = sum(
+    uefa = sum(
         1
         for fixture in merged
         if fixture.get(
-            "competition_source"
+            "competition_type"
         )
-        and not fixture.get(
-            "verified_by_team_calendar"
-        )
+        == COMPETITION_TYPE_UEFA
     )
 
-    team_only = sum(
+    friendlies = sum(
         1
         for fixture in merged
         if fixture.get(
-            "verified_by_team_calendar"
+            "classification_status"
         )
-        and not fixture.get(
-            "competition_source"
+        == CLASSIFICATION_FRIENDLY
+    )
+
+    missing = sum(
+        1
+        for fixture in merged
+        if fixture.get(
+            "classification_status"
         )
+        == CLASSIFICATION_MISSING
     )
 
-    print(
-        f"Team-calendar verified: "
-        f"{verified}"
-    )
-
-    print(
-        f"Competition classified: "
-        f"{classified}"
-    )
-
-    print(
-        f"Competition-only fixtures: "
-        f"{competition_only}"
-    )
-
-    print(
-        f"Team-only fixtures: "
-        f"{team_only}"
+    unknown = sum(
+        1
+        for fixture in merged
+        if fixture.get(
+            "classification_status"
+        )
+        == CLASSIFICATION_UNKNOWN
     )
 
     print()
     print(
-        "Competition breakdown:"
+        "CLASSIFICATION SUMMARY"
     )
 
-    competition_counts = {}
+    print(
+        f"Confirmed competitive: "
+        f"{confirmed}"
+    )
 
-    for fixture in merged:
+    print(
+        f"  Domestic: "
+        f"{domestic}"
+    )
 
-        competition = (
-            fixture.get(
-                "competition"
-            )
-            or "Unknown"
-        )
+    print(
+        f"  UEFA: "
+        f"{uefa}"
+    )
 
-        competition_counts[
-            competition
-        ] = (
-            competition_counts.get(
-                competition,
-                0,
-            )
-            + 1
-        )
+    print(
+        f"Friendlies: "
+        f"{friendlies}"
+    )
 
-    for competition, count in sorted(
-        competition_counts.items()
-    ):
+    print(
+        f"Potentially missing competition: "
+        f"{missing}"
+    )
 
-        print(
-            f"  {competition}: "
-            f"{count}"
-        )
+    print(
+        f"Unknown: "
+        f"{unknown}"
+    )
+
+    print()
+    print(
+        "IMPORTANT:"
+    )
+
+    print(
+        "Team calendars are the fixture-discovery authority."
+    )
+
+    print(
+        "Competition calendars only classify "
+        "already-discovered team fixtures."
+    )
+
+    print(
+        "UEFA classification requires an exact "
+        "UEFA competition-calendar match."
+    )
+
+    print(
+        "July/August timing is never used to infer UEFA."
+    )
+
+    print(
+        "Unmatched non-SPFL fixtures are classified "
+        "as FRIENDLY."
+    )
+
+    print(
+        "Unmatched fixtures between two SPFL clubs are "
+        "flagged as POTENTIALLY_MISSING_COMPETITION."
+    )
+
+    print(
+        "Unknown is used only where the fixture cannot "
+        "safely be classified."
+    )
 
 
 # ============================================================
@@ -1187,31 +1576,27 @@ def get_all_fixtures():
     """
     Main public interface.
 
-    Architecture:
+    Production architecture:
 
-        competition calendars
+        12 team calendars
                 ↓
-        competition classification
-                ↑
-        team calendars
+        fixture discovery
                 ↓
-        deduplicated fixture set
+        exact deduplication
+                ↓
+        domestic / UEFA classification
+                ↓
+        friendly / missing / unknown classification
+                ↓
+        final fixture list
 
-    No database is used.
-
-    The returned list is suitable for fixtures.py.
+    Competition calendars never create fixtures.
     """
 
     print()
-    print(
-        "=" * 70
-    )
-    print(
-        "FIXTUR.ES IMPORT"
-    )
-    print(
-        "=" * 70
-    )
+    print("=" * 70)
+    print("FIXTUR.ES IMPORT")
+    print("=" * 70)
 
     print()
     print(
@@ -1220,49 +1605,115 @@ def get_all_fixtures():
     )
 
     print(
-        "Competition calendars: "
+        "Domestic competition calendars: "
         f"{len(COMPETITION_CALENDARS)}"
     )
+
+    print(
+        "UEFA competition calendars: "
+        f"{len(EUROPEAN_COMPETITION_CALENDARS)}"
+    )
+
+    # --------------------------------------------------------
+    # 1. DISCOVERY AUTHORITY
+    #
+    # Team calendars determine which fixtures exist.
+    # --------------------------------------------------------
 
     team_fixtures = (
         load_team_fixtures()
     )
 
-    competition_fixtures = (
+    unique_team_fixtures = (
+        build_unique_team_fixtures(
+            team_fixtures
+        )
+    )
+
+    print()
+    print(
+        f"Unique team-calendar fixtures discovered: "
+        f"{len(unique_team_fixtures)}"
+    )
+
+    # --------------------------------------------------------
+    # 2. CLASSIFICATION SOURCES
+    #
+    # Competition feeds are loaded only to classify the
+    # fixtures already discovered above.
+    # --------------------------------------------------------
+
+    domestic_fixtures = (
         load_competition_fixtures(
             COMPETITION_CALENDARS
         )
     )
 
-    # European calendars are deliberately optional.
-    if EUROPEAN_COMPETITION_CALENDARS:
-
-        european_fixtures = (
-            load_competition_fixtures(
-                EUROPEAN_COMPETITION_CALENDARS
-            )
+    uefa_fixtures = (
+        load_competition_fixtures(
+            EUROPEAN_COMPETITION_CALENDARS
         )
-
-        competition_fixtures.extend(
-            european_fixtures
-        )
-
-    merged = merge_fixture_sources(
-        team_fixtures,
-        competition_fixtures,
     )
 
-    for fixture in merged:
+    competition_fixtures = (
+        domestic_fixtures
+        + uefa_fixtures
+    )
 
-        fixture[
-            "competition"
-        ] = infer_fallback_competition(
+    print()
+    print(
+        f"Domestic classification records: "
+        f"{len(domestic_fixtures)}"
+    )
+
+    print(
+        f"UEFA classification records: "
+        f"{len(uefa_fixtures)}"
+    )
+
+    # --------------------------------------------------------
+    # 3. BUILD CLASSIFICATION INDEX
+    # --------------------------------------------------------
+
+    competition_index = (
+        build_competition_index(
+            competition_fixtures
+        )
+    )
+
+    # --------------------------------------------------------
+    # 4. CLASSIFY EVERY DISCOVERED FIXTURE
+    #
+    # No fixture is discarded because it lacks a competition
+    # calendar match.
+    # --------------------------------------------------------
+
+    merged = []
+
+    for signature, fixture in (
+        unique_team_fixtures.items()
+    ):
+
+        fixture = dict(
+            fixture
+        )
+
+        fixture = apply_classification(
+            fixture,
+            competition_index,
+        )
+
+        merged.append(
             fixture
         )
 
     merged.sort(
         key=fixture_sort_key
     )
+
+    # --------------------------------------------------------
+    # 5. AUDIT OUTPUT
+    # --------------------------------------------------------
 
     print_source_statistics(
         team_fixtures,
@@ -1271,15 +1722,9 @@ def get_all_fixtures():
     )
 
     print()
-    print(
-        "=" * 70
-    )
-    print(
-        "FIXTUR.ES IMPORT COMPLETE"
-    )
-    print(
-        "=" * 70
-    )
+    print("=" * 70)
+    print("FIXTUR.ES IMPORT COMPLETE")
+    print("=" * 70)
 
     return merged
 
@@ -1306,7 +1751,7 @@ if __name__ == "__main__":
 
     print()
     print(
-        "First 20 normalised fixtures:"
+        "First 20 classified fixtures:"
     )
 
     for fixture in fixtures[:20]:
@@ -1328,4 +1773,12 @@ if __name__ == "__main__":
                 "competition"
             )
             or "Unknown",
+            "|",
+            fixture.get(
+                "competition_type"
+            ),
+            "|",
+            fixture.get(
+                "classification_status"
+            ),
         )
