@@ -174,19 +174,27 @@ def get_fixtures(team: dict) -> list[dict]:
             continue
 
         fixtures.append(
-            {
-                "home": home,
-                "away": away,
-                "kickoff": kickoff,
-                "competition": fixture.get(
-                    "competition",
-                    "Unknown",
-                ),
-                "stadium": _stadium_for(
-                    home
-                ),
-            }
-        )
+    {
+        "home": home,
+        "away": away,
+        "kickoff": kickoff,
+        "competition": fixture.get(
+            "competition",
+            "Unknown",
+        ),
+        "competition_type": fixture.get(
+            "competition_type",
+            "UNKNOWN",
+        ),
+        "classification_status": fixture.get(
+            "classification_status",
+            "UNKNOWN",
+        ),
+        "stadium": _stadium_for(
+            home
+        ),
+    }
+)
 
     fixtures.sort(
         key=lambda fixture:
