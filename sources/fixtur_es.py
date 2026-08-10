@@ -1,4 +1,3 @@
-```python
 """
 sources/fixtur_es.py
 
@@ -988,4 +987,4 @@ if __name__ == "__main__":
     raise SystemExit(
         main()
     )
-```
+    
