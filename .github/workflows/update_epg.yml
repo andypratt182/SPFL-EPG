@@ -50,19 +50,6 @@ jobs:
 
 
       # ------------------------------------------------------------
-      # Update fixture data
-      #
-      # Fixture Download is the current source adapter.
-      # This updates data/fixtures.json before the EPG
-      # generator runs.
-      # ------------------------------------------------------------
-
-      - name: Update fixture data
-        run: |
-          python sources/fixture_download.py
-
-
-      # ------------------------------------------------------------
       # Generate XMLTV
       # ------------------------------------------------------------
 
