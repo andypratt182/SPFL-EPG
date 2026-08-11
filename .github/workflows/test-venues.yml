@@ -1,0 +1,25 @@
+name: Test Venue Database
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "venues.py"
+      - "data/venues.json"
+      - ".github/workflows/test-venues.yml"
+
+jobs:
+  test-venues:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run venue database test
+        run: python venues.py
