@@ -4,7 +4,6 @@ from zoneinfo import ZoneInfo
 from sources.fixtur_es import get_all_fixtures
 from teams import SPFL_TEAMS
 
-
 UK_TZ = ZoneInfo("Europe/London")
 
 FIXTURE_DAYS = 24
@@ -174,27 +173,28 @@ def get_fixtures(team: dict) -> list[dict]:
             continue
 
         fixtures.append(
-    {
-        "home": home,
-        "away": away,
-        "kickoff": kickoff,
-        "competition": fixture.get(
-            "competition",
-            "Unknown",
-        ),
-        "competition_type": fixture.get(
-            "competition_type",
-            "UNKNOWN",
-        ),
-        "classification_status": fixture.get(
-            "classification_status",
-            "UNKNOWN",
-        ),
-        "stadium": _stadium_for(
-            home
-        ),
-    }
-)
+            {
+                "home": home,
+                "away": away,
+                "kickoff": kickoff,
+                "competition": fixture.get(
+                    "competition",
+                    "Unknown",
+                ),
+                "competition_type": fixture.get(
+                    "competition_type",
+                    "UNKNOWN",
+                ),
+                "classification_status": fixture.get(
+                    "classification_status",
+                    "UNKNOWN",
+                ),
+                "venue": fixture.get(
+                    "venue",
+                    "Venue TBC",
+                ),
+            }
+        )
 
     fixtures.sort(
         key=lambda fixture:
