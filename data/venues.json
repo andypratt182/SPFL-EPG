@@ -1,802 +1,114 @@
-[
-  {
-    "team": "Arsenal F.C.",
-    "stadium": "Emirates Stadium"
-  },
-  {
-    "team": "Aston Villa F.C.",
-    "stadium": "Villa Park"
-  },
-  {
-    "team": "Manchester City F.C.",
-    "stadium": "Etihad Stadium"
-  },
-  {
-    "team": "Manchester United F.C.",
-    "stadium": "Old Trafford"
-  },
-  {
-    "team": "Liverpool F.C.",
-    "stadium": "Anfield"
-  },
-  {
-    "team": "Tottenham Hotspur F.C.",
-    "stadium": "Tottenham Hotspur Stadium"
-  },
-  {
-    "team": "Chelsea F.C.",
-    "stadium": "Stamford Bridge"
-  },
-  {
-    "team": "Crystal Palace F.C.",
-    "stadium": "Selhurst Park"
-  },
-  {
-    "team": "Bournemouth F.C.",
-    "stadium": "Vitality Stadium"
-  },
-  {
-    "team": "Sunderland AFC",
-    "stadium": "Stadium of Light"
-  },
-  {
-    "team": "Real Madrid CF",
-    "stadium": "Santiago Bernabéu"
-  },
-  {
-    "team": "FC Barcelona",
-    "stadium": "Camp Nou"
-  },
-  {
-    "team": "Atlético de Madrid",
-    "stadium": "Cívitas Metropolitano"
-  },
-  {
-    "team": "Villarreal CF",
-    "stadium": "Estadio de la Cerámica"
-  },
-  {
-    "team": "Real Betis",
-    "stadium": "Estadio Benito Villamarín"
-  },
-  {
-    "team": "Real Sociedad",
-    "stadium": "Reale Arena"
-  },
-  {
-    "team": "Celta Vigo",
-    "stadium": "Estadio Abanca-Balaídos"
-  },
-  {
-    "team": "Rayo Vallecano",
-    "stadium": "Estadio de Vallecas"
-  },
-  {
-    "team": "FC Bayern Munich",
-    "stadium": "Allianz Arena"
-  },
-  {
-    "team": "Borussia Dortmund",
-    "stadium": "Signal Iduna Park"
-  },
-  {
-    "team": "RB Leipzig",
-    "stadium": "Red Bull Arena"
-  },
-  {
-    "team": "VfB Stuttgart",
-    "stadium": "MHPArena"
-  },
-  {
-    "team": "Bayer 04 Leverkusen",
-    "stadium": "BayArena"
-  },
-  {
-    "team": "TSG Hoffenheim",
-    "stadium": "PreZero Arena"
-  },
-  {
-    "team": "1. FSV Mainz 05",
-    "stadium": "MEWA Arena"
-  },
-  {
-    "team": "Inter Milan",
-    "stadium": "San Siro"
-  },
-  {
-    "team": "SSC Napoli",
-    "stadium": "Stadio Diego Armando Maradona"
-  },
-  {
-    "team": "AS Roma",
-    "stadium": "Stadio Olimpico"
-  },
-  {
-    "team": "Juventus FC",
-    "stadium": "Allianz Stadium"
-  },
-  {
-    "team": "AC Milan",
-    "stadium": "San Siro"
-  },
-  {
-    "team": "Atalanta BC",
-    "stadium": "Gewiss Stadium"
-  },
-  {
-    "team": "Como 1907",
-    "stadium": "Stadio Giuseppe Sinigaglia"
-  },
-  {
-    "team": "Paris Saint-Germain F.C.",
-    "stadium": "Parc des Princes"
-  },
-  {
-    "team": "RC Lens",
-    "stadium": "Stade Bollaert-Delelis"
-  },
-  {
-    "team": "LOSC Lille",
-    "stadium": "Stade Pierre-Mauroy"
-  },
-  {
-    "team": "Olympique de Marseille",
-    "stadium": "Stade Vélodrome"
-  },
-  {
-    "team": "AS Monaco",
-    "stadium": "Stade Louis II"
-  },
-  {
-    "team": "Stade Rennais FC",
-    "stadium": "Roazhon Park"
-  },
-  {
-    "team": "RC Strasbourg Alsace",
-    "stadium": "Stade de la Meinau"
-  },
-  {
-    "team": "FC Porto",
-    "stadium": "Estádio do Dragão"
-  },
-  {
-    "team": "S.L. Benfica",
-    "stadium": "Estádio da Luz"
-  },
-  {
-    "team": "Sporting CP",
-    "stadium": "Estádio José Alvalade"
-  },
-  {
-    "team": "S.C. Braga",
-    "stadium": "Estádio Municipal de Braga"
-  },
-  {
-    "team": "Torreense",
-    "stadium": "Estádio Manuel Marques"
-  },
-  {
-    "team": "PSV Eindhoven",
-    "stadium": "Philips Stadion"
-  },
-  {
-    "team": "Feyenoord",
-    "stadium": "De Kuip"
-  },
-  {
-    "team": "AFC Ajax",
-    "stadium": "Johan Cruyff ArenA"
-  },
-  {
-    "team": "FC Twente",
-    "stadium": "De Grolsch Veste"
-  },
-  {
-    "team": "AZ Alkmaar",
-    "stadium": "AFAS Stadion"
-  },
-  {
-    "team": "NEC Nijmegen",
-    "stadium": "Goffertstadion"
-  },
-  {
-    "team": "Celtic FC",
-    "stadium": "Celtic Park"
-  },
-  {
-    "team": "Rangers FC",
-    "stadium": "Ibrox Stadium"
-  },
-  {
-    "team": "Heart of Midlothian F.C.",
-    "stadium": "Tynecastle Park"
-  },
-  {
-    "team": "Aberdeen F.C.",
-    "stadium": "Pittodrie Stadium"
-  },
-  {
-    "team": "Hibernian F.C.",
-    "stadium": "Easter Road"
-  },
-  {
-    "team": "Galatasaray S.K.",
-    "stadium": "Rams Park"
-  },
-  {
-    "team": "Fenerbahçe SK",
-    "stadium": "Şükrü Saracoğlu Stadium"
-  },
-  {
-    "team": "Beşiktaş JK",
-    "stadium": "Tüpraş Stadium"
-  },
-  {
-    "team": "Trabzonspor",
-    "stadium": "Şenol Güneş Sports Complex"
-  },
-  {
-    "team": "Samsunspor",
-    "stadium": "Samsun 19 Mayis Stadium"
-  },
-  {
-    "team": "Shakhtar Donetsk",
-    "stadium": "Donbass Arena"
-  },
-  {
-    "team": "FC Dynamo Kyiv",
-    "stadium": "NSC Olimpiyskiy"
-  },
-  {
-    "team": "Club Brugge KV",
-    "stadium": "Jan Breydel Stadium"
-  },
-  {
-    "team": "R.S.C. Anderlecht",
-    "stadium": "Lotto Park"
-  },
-  {
-    "team": "Sint-Truidense V.V.",
-    "stadium": "Daio Wasabi Stayen Stadium"
-  },
-  {
-    "team": "SK Slavia Prague",
-    "stadium": "Fortuna Arena"
-  },
-  {
-    "team": "AC Sparta Praha",
-    "stadium": "epet ARENA"
-  },
-  {
-    "team": "FC Viktoria Plzeň",
-    "stadium": "Doosan Arena"
-  },
-  {
-    "team": "FC Hradec Králové",
-    "stadium": "Malšovická aréna"
-  },
-  {
-    "team": "FC Red Bull Salzburg",
-    "stadium": "Red Bull Arena"
-  },
-  {
-    "team": "SK Rapid Wien",
-    "stadium": "Allianz Stadion"
-  },
-  {
-    "team": "SK Sturm Graz",
-    "stadium": "Merkur Arena"
-  },
-  {
-    "team": "FK Crvena zvezda",
-    "stadium": "Rajko Mitić Stadium"
-  },
-  {
-    "team": "Partizan Belgrade",
-    "stadium": "Partizan Stadium"
-  },
-  {
-    "team": "GNK Dinamo Zagreb",
-    "stadium": "Stadion Maksimir"
-  },
-  {
-    "team": "HNK Rijeka",
-    "stadium": "Stadion Rujevica"
-  },
-  {
-    "team": "HNK Hajduk Split",
-    "stadium": "Stadion Poljud"
-  },
-  {
-    "team": "PAOK FC",
-    "stadium": "Toumba Stadium"
-  },
-  {
-    "team": "Olympiacos F.C.",
-    "stadium": "Georgios Karaiskakis Stadium"
-  },
-  {
-    "team": "Panathinaikos",
-    "stadium": "Apostolos Nikolaidis Stadium"
-  },
-  {
-    "team": "AEK Athens F.C.",
-    "stadium": "OPAP Arena"
-  },
-  {
-    "team": "OFI Crete F.C.",
-    "stadium": "Theodoros Vardinogiannis Stadium"
-  },
-  {
-    "team": "F.C. Copenhagen",
-    "stadium": "Parken Stadium"
-  },
-  {
-    "team": "FC Midtjylland",
-    "stadium": "MCH Arena"
-  },
-  {
-    "team": "Aarhus Gymnastikforening",
-    "stadium": "Ceres Park"
-  },
-  {
-    "team": "Nordsjælland",
-    "stadium": "Right to Dream Park"
-  },
-  {
-    "team": "FK Bodø/Glimt",
-    "stadium": "Aspmyra Stadion"
-  },
-  {
-    "team": "Lillestrøm SK",
-    "stadium": "Åråsen Stadion"
-  },
-  {
-    "team": "Viking FK",
-    "stadium": "SR-Bank Arena"
-  },
-  {
-    "team": "Raków Częstochowa",
-    "stadium": "Miejski Stadion Piłkarski"
-  },
-  {
-    "team": "Lech Poznań",
-    "stadium": "Poznań Stadium"
-  },
-  {
-    "team": "Jagiellonia Białystok",
-    "stadium": "Bystok City Stadium"
-  },
-  {
-    "team": "Legia Warszawa",
-    "stadium": "Polish Army Stadium"
-  },
-  {
-    "team": "Górnik Zabrze",
-    "stadium": "Stadion im. Ernesta Pohla"
-  },
-  {
-    "team": "Maccabi Tel Aviv F.C.",
-    "stadium": "Bloomfield Stadium"
-  },
-  {
-    "team": "Hapoel Be'er Sheva F.C.",
-    "stadium": "Turner Stadium"
-  },
-  {
-    "team": "PFC CSKA Sofia",
-    "stadium": "Balgarska Armiya Stadium"
-  },
-  {
-    "team": "Ferencvárosi TC",
-    "stadium": "Groupama Arena"
-  },
-  {
-    "team": "KF Shkëndija",
-    "stadium": "Ecolog Arena"
-  },
-  {
-    "team": "FC Astana",
-    "stadium": "Astana Arena"
-  },
-  {
-    "team": "Caernarfon Town F.C.",
-    "stadium": "The Oval"
-  },
-  {
-    "team": "Connah's Quay Nomads F.C.",
-    "stadium": "Deeside Stadium"
-  },
-  {
-    "team": "FK Dečić",
-    "stadium": "Stadion Tuško Polje"
-  },
-  {
-    "team": "FC Differdange 03",
-    "stadium": "Stade Municipal de Differdange"
-  },
-  {
-    "team": "AF Elbasani",
-    "stadium": "Elbasan Arena"
-  },
-  {
-    "team": "FC Yelimay Semey",
-    "stadium": "Spartak Stadium"
-  },
-  {
-    "team": "Europa F.C.",
-    "stadium": "Victoria Stadium"
-  },
-  {
-    "team": "Glentoran F.C.",
-    "stadium": "The Oval"
-  },
-  {
-    "team": "Ħamrun Spartans F.C.",
-    "stadium": "Victor Tedesco Stadium"
-  },
-  {
-    "team": "FC Hegelmann",
-    "stadium": "Raudonvaris Stadium"
-  },
-  {
-    "team": "S.P. La Fiorita",
-    "stadium": "Stadio Igor Crescentini"
-  },
-  {
-    "team": "Linfield F.C.",
-    "stadium": "Windsor Park"
-  },
-  {
-    "team": "Marsaxlokk F.C.",
-    "stadium": "Marsaxlokk Ground"
-  },
-  {
-    "team": "FC Milsami Orhei",
-    "stadium": "CSR Orhei"
-  },
-  {
-    "team": "US Mondorf-les-Bains",
-    "stadium": "Stade John Grün"
-  },
-  {
-    "team": "FK Mornar Bar",
-    "stadium": "Stadion Topolica"
-  },
-  {
-    "team": "Penybont F.C.",
-    "stadium": "The SDM Glass Stadium"
-  },
-  {
-    "team": "OFK Petrovac",
-    "stadium": "Stadion pod Malim brdom"
-  },
-  {
-    "team": "FK Sarajevo",
-    "stadium": "Asim Ferhatović Hase Stadium"
-  },
-  {
-    "team": "FK Sileks",
-    "stadium": "Gradski stadion Kratovo"
-  },
-  {
-    "team": "St Joseph's F.C.",
-    "stadium": "Victoria Stadium"
-  },
-  {
-    "team": "FC Torpedo Kutaisi",
-    "stadium": "Givi Kiladze Stadium"
-  },
-  {
-    "team": "Víkingur Gøta",
-    "stadium": "Sarpugerði"
-  },
-  {
-    "team": "S.S. Virtus",
-    "stadium": "Stadio di Acquaviva"
-  },
-  {
-    "team": "KF Vllaznia Shkodër",
-    "stadium": "Loro Boriçi Stadium"
-  },
-  {
-    "team": "LASK",
-    "stadium": "Raiffeisen Arena"
-  },
-  {
-    "team": "NK Celje",
-    "stadium": "Stadion Z'dežele"
-  },
-  {
-    "team": "FC Ararat-Armenia",
-    "stadium": "Vazgen Sargsyan Republican Stadium"
-  },
-  {
-    "team": "KÍ Klaksvík",
-    "stadium": "Við Djúpumýrar"
-  },
-  {
-    "team": "KuPS Kuopio",
-    "stadium": "Väre Areena"
-  },
-  {
-    "team": "Iberia Tbilisi 1999",
-    "stadium": "Mikheil Meskhi Stadium"
-  },
-  {
-    "team": "FC Atert Bissen",
-    "stadium": "Terrain Bousbierg"
-  },
-  {
-    "team": "FK Vojvodina",
-    "stadium": "Karađorđe Stadium"
-  },
-  {
-    "team": "Hammarby Fotboll",
-    "stadium": "Tele2 Arena"
-  },
-  {
-    "team": "Qarabağ FK",
-    "stadium": "Tofiq Bahramov Republican Stadium"
-  },
-  {
-    "team": "FC Sheriff Tiraspol",
-    "stadium": "Sheriff Stadium"
-  },
-  {
-    "team": "FC St. Gallen",
-    "stadium": "Kybunpark"
-  },
-  {
-    "team": "Tromsø IL",
-    "stadium": "Romssa Arena"
-  },
-  {
-    "team": "FK Borac Banja Luka",
-    "stadium": "Banja Luka City Stadium"
-  },
-  {
-    "team": "KF Drita",
-    "stadium": "Fadil Vokrri Stadium"
-  },
-  {
-    "team": "FC Flora Tallinn",
-    "stadium": "A. Le Coq Arena"
-  },
-  {
-    "team": "Floriana F.C.",
-    "stadium": "Independence Ground"
-  },
-  {
-    "team": "Győri ETO FC",
-    "stadium": "ETO Park"
-  },
-  {
-    "team": "Inter Club d'Escaldes",
-    "stadium": "Estadi Comunal d'Andorra la Vella"
-  },
-  {
-    "team": "FC ML Vitebsk",
-    "stadium": "Vitebsky Central Sport Complex"
-  },
-  {
-    "team": "FC Petrocub Hîncești",
-    "stadium": "Stadionul Municipal Hîncești"
-  },
-  {
-    "team": "FK RFS",
-    "stadium": "LNK Sporta Parks"
-  },
-  {
-    "team": "FK Sutjeska Nikšić",
-    "stadium": "Gradski stadion Nikšić"
-  },
-  {
-    "team": "The New Saints F.C.",
-    "stadium": "Park Hall"
-  },
-  {
-    "team": "SP Tre Fiori",
-    "stadium": "Stadio di Fiorentino"
-  },
-  {
-    "team": "FK Vardar",
-    "stadium": "Toše Proeski Arena"
-  },
-  {
-    "team": "Apollon Limassol FC",
-    "stadium": "Alphamega Stadium"
-  },
-  {
-    "team": "CSKA 1948 Sofia",
-    "stadium": "Vasil Levski National Stadium"
-  },
-  {
-    "team": "Paide Linnameeskond",
-    "stadium": "Paide Linnastaadion"
-  },
-  {
-    "team": "Debreceni VSC",
-    "stadium": "Nagyerdei Stadion"
-  },
-  {
-    "team": "GKS Katowice",
-    "stadium": "Stadion GKS Katowice"
-  },
-  {
-    "team": "Hapoel Tel Aviv F.C.",
-    "stadium": "Bloomfield Stadium"
-  },
-  {
-    "team": "FC Tobyl",
-    "stadium": "Kostanay Central Stadium"
-  },
-  {
-    "team": "FC Ilves",
-    "stadium": "Tammelan Stadion"
-  },
-  {
-    "team": "Tallinna FC Flora",
-    "stadium": "A. Le Coq Arena"
-  },
-  {
-    "team": "FK Jablonec",
-    "stadium": "Stadion Střelnice"
-  },
-  {
-    "team": "FC Dinamo Minsk",
-    "stadium": "Dinamo Stadium"
-  },
-  {
-    "team": "FC DAC 1904",
-    "stadium": "MOL Aréna"
-  },
-  {
-    "team": "Valur",
-    "stadium": "Hlíðarendi"
-  },
-  {
-    "team": "FC Lugano",
-    "stadium": "Stadio Cornaredo"
-  },
-  {
-    "team": "NSÍ Runavík",
-    "stadium": "Við Løkin"
-  },
-  {
-    "team": "FC Vaduz",
-    "stadium": "Rheinpark Stadion"
-  },
-  {
-    "team": "FC Inter Turku",
-    "stadium": "Veritas Stadion"
-  },
-  {
-    "team": "FC Noah",
-    "stadium": "Armavir City Stadium"
-  },
-  {
-    "team": "FC Sion",
-    "stadium": "Stade de Tourbillon"
-  },
-  {
-    "team": "Motherwell F.C.",
-    "stadium": "Fir Park"
-  },
-  {
-    "team": "Shelbourne F.C.",
-    "stadium": "Tolka Park"
-  },
-  {
-    "team": "FC Dinamo City",
-    "stadium": "Elbasan Arena"
-  },
-  {
-    "team": "FK Auda",
-    "stadium": "Audas stadions"
-  },
-  {
-    "team": "SK Brann",
-    "stadium": "Brann Stadion"
-  },
-  {
-    "team": "FK Kauno Žalgiris",
-    "stadium": "Darius and Girėnas Stadium"
-  },
-  {
-    "team": "Royale Union Saint-Gilloise",
-    "stadium": "Stade Joseph Marien"
-  },
-  {
-    "team": "Sabah FK",
-    "stadium": "Bank Respublika Arena"
-  },
-  {
-    "team": "ŠK Slovan Bratislava",
-    "stadium": "Tehelné pole"
-  },
-  {
-    "team": "Lincoln Red Imps F.C.",
-    "stadium": "Victoria Stadium"
-  },
-  {
-    "team": "FC Thun",
-    "stadium": "Stockhorn Arena"
-  },
-  {
-    "team": "KF Egnatia",
-    "stadium": "Egnatia Arena"
-  },
-  {
-    "team": "Shamrock Rovers F.C.",
-    "stadium": "Tallaght Stadium"
-  },
-  {
-    "team": "Omonoia FC",
-    "stadium": "GSP Stadium"
-  },
-  {
-    "team": "CS Universitatea Craiova",
-    "stadium": "Ion Oblemenco Stadium"
-  },
-  {
-    "team": "Larne F.C.",
-    "stadium": "Inver Park"
-  },
-  {
-    "team": "FC Iberia 1999",
-    "stadium": "Mikheil Meskhi Stadium"
-  },
-  {
-    "team": "Mjällby AIF",
-    "stadium": "Strandvallen"
-  },
-  {
-    "team": "Stjarnan",
-    "stadium": "Samsung völlurinn"
-  },
-  {
-    "team": "FK Velež Mostar",
-    "stadium": "Stadion Rođeni"
-  },
-  {
-    "team": "Pyunik Yerevan",
-    "stadium": "Vazgen Sargsyan Republican Stadium"
-  },
-  {
-    "team": "Alashkert FC",
-    "stadium": "Alashkert Stadium"
-  },
-  {
-    "team": "FK Liepāja",
-    "stadium": "Daugava Stadium"
-  },
-  {
-    "team": "FC Malisheva",
-    "stadium": "Liman Gegaj Stadium"
-  },
-  {
-    "team": "KF Ballkani",
-    "stadium": "Suva Reka City Stadium"
-  },
-  {
-    "team": "FCI Levadia Tallinn",
-    "stadium": "A. Le Coq Arena"
-  },
-  {
-    "team": "Nõmme Kalju FC",
-    "stadium": "Hiiu Stadium"
-  },
-  {
-    "team": "Dinamo Tirana",
-    "stadium": "Selman Stërmasi Stadium"
-  },
-  {
-    "team": "UNA Strassen",
-    "stadium": "Complexe Sportif Jean Wirtz"
-  },
-  {
-    "team": "BATE Borisov",
-    "stadium": "Borisov Arena"
-  }
-]
+{
+  "Arsenal F.C.": "Emirates Stadium",
+  "Aston Villa F.C.": "Villa Park",
+  "Manchester City F.C.": "Etihad Stadium",
+  "Manchester United F.C.": "Old Trafford",
+  "Liverpool F.C.": "Anfield",
+  "Tottenham Hotspur F.C.": "Tottenham Hotspur Stadium",
+  "Chelsea F.C.": "Stamford Bridge",
+  "Crystal Palace F.C.": "Selhurst Park",
+  "Bournemouth F.C.": "Vitality Stadium",
+  "Sunderland AFC": "Stadium of Light",
+  "Real Madrid CF": "Santiago Bernabéu",
+  "FC Barcelona": "Camp Nou",
+  "Atlético de Madrid": "Cívitas Metropolitano",
+  "Villarreal CF": "Estadio de la Cerámica",
+  "Real Betis": "Estadio Benito Villamarín",
+  "Real Sociedad": "Reale Arena",
+  "Celta Vigo": "Estadio Abanca-Balaídos",
+  "Rayo Vallecano": "Estadio de Vallecas",
+  "FC Bayern Munich": "Allianz Arena",
+  "Borussia Dortmund": "Signal Iduna Park",
+  "RB Leipzig": "Red Bull Arena",
+  "VfB Stuttgart": "MHPArena",
+  "Bayer 04 Leverkusen": "BayArena",
+  "TSG Hoffenheim": "PreZero Arena",
+  "1. FSV Mainz 05": "MEWA Arena",
+  "Inter Milan": "San Siro",
+  "SSC Napoli": "Stadio Diego Armando Maradona",
+  "AS Roma": "Stadio Olimpico",
+  "Juventus FC": "Allianz Stadium",
+  "AC Milan": "San Siro",
+  "Atalanta BC": "Gewiss Stadium",
+  "Como 1907": "Stadio Giuseppe Sinigaglia",
+  "Paris Saint-Germain F.C.": "Parc des Princes",
+  "RC Lens": "Stade Bollaert-Delelis",
+  "LOSC Lille": "Stade Pierre-Mauroy",
+  "Olympique de Marseille": "Stade Vélodrome",
+  "AS Monaco": "Stade Louis II",
+  "Stade Rennais FC": "Roazhon Park",
+  "RC Strasbourg Alsace": "Stade de la Meinau",
+  "FC Porto": "Estádio do Dragão",
+  "S.L. Benfica": "Estádio da Luz",
+  "Sporting CP": "Estádio José Alvalade",
+  "S.C. Braga": "Estádio Municipal de Braga",
+  "Torreense": "Estádio Manuel Marques",
+  "PSV Eindhoven": "Philips Stadion",
+  "Feyenoord": "De Kuip",
+  "AFC Ajax": "Johan Cruyff ArenA",
+  "FC Twente": "De Grolsch Veste",
+  "AZ Alkmaar": "AFAS Stadion",
+  "NEC Nijmegen": "Goffertstadion",
+  "Celtic FC": "Celtic Park",
+  "Rangers FC": "Ibrox Stadium",
+  "Heart of Midlothian F.C.": "Tynecastle Park",
+  "Aberdeen F.C.": "Pittodrie Stadium",
+  "Hibernian F.C.": "Easter Road",
+  "Galatasaray S.K.": "Rams Park",
+  "Fenerbahçe SK": "Şükrü Saracoğlu Stadium",
+  "Beşiktaş JK": "Tüpraş Stadium",
+  "Trabzonspor": "Şenol Güneş Sports Complex",
+  "Samsunspor": "Samsun 19 Mayis Stadium",
+  "Shakhtar Donetsk": "Donbass Arena",
+  "FC Dynamo Kyiv": "NSC Olimpiyskiy",
+  "Club Brugge KV": "Jan Breydel Stadium",
+  "R.S.C. Anderlecht": "Lotto Park",
+  "Sint-Truidense V.V.": "Daio Wasabi Stayen Stadium",
+  "SK Slavia Prague": "Fortuna Arena",
+  "AC Sparta Praha": "epet ARENA",
+  "FC Viktoria Plzeň": "Doosan Arena",
+  "FC Hradec Králové": "Malšovická aréna",
+  "FC Red Bull Salzburg": "Red Bull Arena",
+  "SK Rapid Wien": "Allianz Stadion",
+  "SK Sturm Graz": "Merkur Arena",
+  "FK Crvena zvezda": "Rajko Mitić Stadium",
+  "Partizan Belgrade": "Partizan Stadium",
+  "GNK Dinamo Zagreb": "Stadion Maksimir",
+  "HNK Rijeka": "Stadion Rujevica",
+  "HNK Hajduk Split": "Stadion Poljud",
+  "PAOK FC": "Toumba Stadium",
+  "Olympiacos F.C.": "Georgios Karaiskakis Stadium",
+  "Panathinaikos": "Apostolos Nikolaidis Stadium",
+  "AEK Athens F.C.": "OPAP Arena",
+  "OFI Crete F.C.": "Theodoros Vardinogiannis Stadium",
+  "F.C. Copenhagen": "Parken Stadium",
+  "FC Midtjylland": "MCH Arena",
+  "Aarhus Gymnastikforening": "Ceres Park",
+  "Nordsjælland": "Right to Dream Park",
+  "FK Bodø/Glimt": "Aspmyra Stadion",
+  "Lillestrøm SK": "Åråsen Stadion",
+  "Viking FK": "SR-Bank Arena",
+  "Raków Częstochowa": "Miejski Stadion Piłkarski",
+  "Lech Poznań": "Poznań Stadium",
+  "Jagiellonia Białystok": "Bystok City Stadium",
+  "Legia Warszawa": "Polish Army Stadium",
+  "Górnik Zabrze": "Stadion im. Ernesta Pohla",
+  "Maccabi Tel Aviv F.C.": "Bloomfield Stadium",
+  "Hapoel Be'er Sheva F.C.": "Turner Stadium",
+  "PFC CSKA Sofia": "Balgarska Armiya Stadium",
+  "Ferencvárosi TC": "Groupama Arena",
+  "KF Shkëndija": "Ecolog Arena",
+  "FC Astana": "Astana Arena",
+  "Caernarfon Town F.C.": "The Oval",
+  "Connah's Quay Nomads F.C.": "Deeside Stadium",
+  "FK Dečić": "Stadion Tuško Polje",
+  "FC Differdange 03": "Stade Municipal de Differdange",
+  "AF Elbasani": "Elbasan Arena",
+  "FC Yelimay Semey": "Spartak Stadium",
+  "Europa F.C.": "Victoria Stadium",
+  "Glentoran F.C.": "The Oval",
+  "Ħamrun Spartans F.C.": "Victor Tedesco Stadium",
+  "FC Hegelmann": "Raudonvaris Stadium",
+  "S.P. La Fiorita": "Stadio Igor Crescentini",
+  "Linfield F.C.": "Windsor Park"
+}
