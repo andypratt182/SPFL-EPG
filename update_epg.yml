@@ -1,0 +1,77 @@
+name: Update SPFL EPG
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  generate:
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+
+      # ------------------------------------------------------------
+      # Checkout repository
+      # ------------------------------------------------------------
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+
+      # ------------------------------------------------------------
+      # Setup Python
+      # ------------------------------------------------------------
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+
+      # ------------------------------------------------------------
+      # Install dependencies
+      # ------------------------------------------------------------
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+
+      # ------------------------------------------------------------
+      # Generate XMLTV
+      # ------------------------------------------------------------
+
+      - name: Generate XMLTV
+        run: |
+          python generator.py
+
+
+      # ------------------------------------------------------------
+      # Upload GitHub Pages artifact
+      # ------------------------------------------------------------
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./output
+
+
+      # ------------------------------------------------------------
+      # Deploy GitHub Pages
+      # ------------------------------------------------------------
+
+      - name: Deploy Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
