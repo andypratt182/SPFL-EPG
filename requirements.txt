@@ -1,2 +1,3 @@
-requests
-beautifulsoup4
+# No third-party runtime dependencies -- everything uses the
+# standard library (urllib, xml.etree, zoneinfo, etc). See
+# requirements-dev.txt for the test suite's dependencies.
