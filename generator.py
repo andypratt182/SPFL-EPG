@@ -19,6 +19,12 @@ logger = logging.getLogger(__name__)
 OUTPUT_FOLDER = Path("output")
 OUTPUT_FILE = OUTPUT_FOLDER / "spfl.xml"
 
+# Kept separate from OUTPUT_FOLDER: everything in output/ gets
+# published to the public GitHub Pages site by the workflow, and
+# this log is an internal debugging aid, not something to publish.
+LOG_FOLDER = Path("logs")
+WARNINGS_LOG_FILE = LOG_FOLDER / "warnings.log"
+
 
 def main() -> None:
     OUTPUT_FOLDER.mkdir(exist_ok=True)
@@ -55,5 +61,25 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+    LOG_FOLDER.mkdir(exist_ok=True)
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(logging.Formatter("%(levelname)s %(name)s: %(message)s"))
+
+    # WARNING and above only -- venue/logo gaps, unparseable
+    # fixtures, download errors. Kept separate from the console
+    # output so they're easy to find without scrolling a full run's
+    # INFO-level fixture listing in the Actions log.
+    file_handler = logging.FileHandler(WARNINGS_LOG_FILE, mode="w", encoding="utf-8")
+    file_handler.setLevel(logging.WARNING)
+    file_handler.setFormatter(
+        logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+    )
+
+    logging.basicConfig(level=logging.INFO, handlers=[console_handler, file_handler])
+
     main()
+
+    if WARNINGS_LOG_FILE.stat().st_size > 0:
+        logger.info("Warnings were logged this run -- see %s", WARNINGS_LOG_FILE)
