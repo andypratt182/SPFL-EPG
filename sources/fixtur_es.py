@@ -62,6 +62,14 @@ COMPETITION_CALENDARS = {
     "Scottish League One": "https://ics.fixtur.es/v2/league/scottish-league-one.ics",
     "Scottish League Two": "https://ics.fixtur.es/v2/league/scottish-league-two.ics",
     "Scottish Cup": "https://ics.fixtur.es/v2/league/scottish-cup.ics",
+    # UNVERIFIED: best guess at the slug, following the naming
+    # convention of the leagues above. Not confirmed against the
+    # live site -- check the next run's log for this URL. If it
+    # logs "Calendar not found" (or a similar error) rather than
+    # "HTTP 200", the slug is wrong and needs the real one from
+    # fixtur.es directly, the same way the Scottish Cup URL issue
+    # was diagnosed.
+    "Scottish League Cup": "https://ics.fixtur.es/v2/league/scottish-league-cup.ics",
     "UEFA Champions League": "https://ics.fixtur.es/v2/league/champions-league.ics",
     "UEFA Europa League": "https://ics.fixtur.es/v2/league/europa-league.ics",
     "UEFA Conference League": "https://ics.fixtur.es/v2/league/uefa-conference-league.ics",
@@ -215,18 +223,36 @@ def parse_calendar(
 ) -> tuple[list[list[str]], list[dict]]:
     events = split_events(text)
 
-    fixtures = [
-        fixture
-        for event in events
-        if (
-            fixture := parse_event(
-                event, source_type, source_name, season_start, season_end, competition
-            )
+    fixtures = []
+
+    for event in events:
+        fixture = parse_event(
+            event, source_type, source_name, season_start, season_end, competition
         )
-        is not None
-    ]
+
+        if fixture is not None:
+            fixtures.append(fixture)
+        elif competition:
+            _log_if_unparseable_summary(event, competition)
 
     return events, fixtures
+
+
+def _log_if_unparseable_summary(event: list[str], competition: str) -> None:
+    """
+    Distinguish a genuine SUMMARY-parsing failure from a fixture that
+    was correctly parsed but legitimately filtered out (out of
+    season, placeholder). Only the former is worth a warning -- see
+    parse_calendar's docstring-equivalent comment above.
+    """
+
+    summary = property_value(event, "SUMMARY")
+    home, away, _, _ = parse_match_summary(summary)
+
+    if not home or not away:
+        logger.warning(
+            "%s: could not parse fixture from SUMMARY: %r", competition, summary
+        )
 
 
 # ============================================================
