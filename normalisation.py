@@ -65,6 +65,17 @@ _TV_SUFFIX_RE = re.compile(r"\s+tv$", re.IGNORECASE)
 _ST_PREFIX_RE = re.compile(r"\bst\.?\s+", re.IGNORECASE)
 _SAINT_PREFIX_RE = re.compile(r"\bsaint\s+", re.IGNORECASE)
 
+# Match-status markers Fixtur.es prepends to a team name for that
+# specific event, e.g. "⚠️ Suspended: Rangers" for an abandoned/
+# suspended fixture. Left unstripped, these corrupt matching for
+# BOTH venue lookups and competition classification -- "⚠️
+# Suspended: Rangers" doesn't equal "Rangers" as far as either is
+# concerned, even though it's the same club.
+_STATUS_PREFIX_RE = re.compile(
+    r"^[^\w]*(?:suspended|postponed|cancelled|canceled|abandoned)\s*:\s*",
+    re.IGNORECASE,
+)
+
 
 def normalise_team_name(name: str | None) -> str:
     """
@@ -85,6 +96,7 @@ def normalise_team_name(name: str | None) -> str:
 
     value = str(name).strip()
 
+    value = _STATUS_PREFIX_RE.sub("", value).strip()
     value = _UEFA_SUFFIX_RE.sub("", value)
     value = _CLUB_SUFFIX_RE.sub("", value)
     value = _TV_SUFFIX_RE.sub("", value)
