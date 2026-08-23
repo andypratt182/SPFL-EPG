@@ -32,16 +32,22 @@ UEFA competitive classification.
 
 from __future__ import annotations
 
+import logging
 import sys
-from pathlib import Path
-from datetime import datetime
 from collections import defaultdict
-from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
-
+from datetime import datetime, timezone
+from pathlib import Path
 
 # ============================================================
 # PROJECT IMPORTS
+#
+# ICS parsing and team-name normalisation used to be reimplemented
+# here as a second copy of sources/fixtur_es.py's logic. That's how
+# they drifted apart: this diagnostic tool worked out the
+# time-tolerant classification fix documented below, but production
+# never got it, because there was no shared code forcing the two to
+# stay in sync. Both files now import the same primitives from
+# ics.py / normalisation.py.
 # ============================================================
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -49,35 +55,40 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
+from ics import (  # noqa: E402
+    download_ics,
+    parse_ics_datetime as _parse_ics_datetime,
+    parse_match_summary,
+    split_events,
+    property_value,
+)
+from normalisation import SPFL_TEAMS as TEAM_NAMES  # noqa: E402
+from normalisation import is_spfl_team  # noqa: E402
+from normalisation import normalise_team_name  # noqa: E402
 from sources.fixtur_es import (  # noqa: E402
     TEAM_CALENDARS,
     COMPETITION_CALENDARS,
 )
+
+logger = logging.getLogger(__name__)
 
 
 # ============================================================
 # DIAGNOSTIC-ONLY COMPETITION FEED EXTENSIONS
 # ============================================================
 #
-# Keep the existing competition configuration from sources.fixtur_es.py
-# intact. This diagnostic additionally loads the three UEFA competition
-# feeds required for authoritative UEFA classification.
-#
-# This mapping is local to this inspection tool only.
-# sources/fixtur_es.py is deliberately not modified.
+# Keep the existing competition configuration from sources/fixtur_es.py
+# intact, and additionally load the three UEFA competition feeds
+# required for authoritative UEFA classification. This mapping is
+# local to this diagnostic tool only.
 #
 AUDIT_COMPETITION_CALENDARS = dict(COMPETITION_CALENDARS)
 
 AUDIT_COMPETITION_CALENDARS.update(
     {
-        "Champions League":
-            "https://ics.fixtur.es/v2/league/champions-league.ics",
-
-        "Europa League":
-            "https://ics.fixtur.es/v2/league/europa-league.ics",
-
-        "UEFA Conference League":
-            "https://ics.fixtur.es/v2/league/uefa-conference-league.ics",
+        "Champions League": "https://ics.fixtur.es/v2/league/champions-league.ics",
+        "Europa League": "https://ics.fixtur.es/v2/league/europa-league.ics",
+        "UEFA Conference League": "https://ics.fixtur.es/v2/league/uefa-conference-league.ics",
     }
 )
 
@@ -86,74 +97,16 @@ AUDIT_COMPETITION_CALENDARS.update(
 # CONFIGURATION
 # ============================================================
 
-SEASON_START = datetime(2026, 7, 1)
-SEASON_END = datetime(2027, 6, 30, 23, 59, 59)
+# This diagnostic tool works in naive (timezone-less) UTC throughout.
+# Rather than round-tripping through the timezone-aware
+# current_season_bounds() (which shifts the July 1st boundary by an
+# hour once BST is accounted for), the same "1 July - 30 June"
+# rollover rule is applied directly in naive terms here.
+_now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+_season_start_year = _now_utc.year if _now_utc.month >= 7 else _now_utc.year - 1
+SEASON_START = datetime(_season_start_year, 7, 1)
+SEASON_END = datetime(_season_start_year + 1, 6, 30, 23, 59, 59)
 
-
-TEAM_NAMES = {
-    "Rangers",
-    "Celtic",
-    "Aberdeen",
-    "Dundee",
-    "Dundee United",
-    "Hearts",
-    "Hibernian",
-    "Kilmarnock",
-    "Motherwell",
-    "Falkirk",
-    "St Johnstone",
-    "St Mirren",
-}
-
-
-# Names that commonly appear in Fixtur.es feeds but represent
-# an SPFL club.
-
-TEAM_ALIASES = {
-    "rangers": "Rangers",
-    "rangers fc": "Rangers",
-
-    "celtic": "Celtic",
-    "celtic fc": "Celtic",
-
-    "aberdeen": "Aberdeen",
-    "aberdeen fc": "Aberdeen",
-
-    "dundee": "Dundee",
-    "dundee fc": "Dundee",
-
-    "dundee united": "Dundee United",
-    "dundee united fc": "Dundee United",
-
-    "hearts": "Hearts",
-    "heart of midlothian": "Hearts",
-    "heart of midlothian fc": "Hearts",
-
-    "hibernian": "Hibernian",
-    "hibernian fc": "Hibernian",
-
-    "kilmarnock": "Kilmarnock",
-    "kilmarnock fc": "Kilmarnock",
-
-    "motherwell": "Motherwell",
-    "motherwell fc": "Motherwell",
-
-    "falkirk": "Falkirk",
-    "falkirk fc": "Falkirk",
-
-    "st johnstone": "St Johnstone",
-    "st. johnstone": "St Johnstone",
-    "st johnstone fc": "St Johnstone",
-    "st. johnstone fc": "St Johnstone",
-
-    "st mirren": "St Mirren",
-    "st. mirren": "St Mirren",
-    "st mirren fc": "St Mirren",
-    "st. mirren fc": "St Mirren",
-}
-
-
-# Domestic competitions.
 
 DOMESTIC_COMPETITIONS = [
     "Scottish Premiership",
@@ -161,10 +114,8 @@ DOMESTIC_COMPETITIONS = [
     "Scottish League One",
     "Scottish League Two",
     "Scottish Cup",
+    "Scottish League Cup",
 ]
-
-
-# UEFA competitions.
 
 UEFA_COMPETITIONS = [
     "Champions League",
@@ -172,16 +123,10 @@ UEFA_COMPETITIONS = [
     "UEFA Conference League",
 ]
 
+ALL_COMPETITIONS = DOMESTIC_COMPETITIONS + UEFA_COMPETITIONS
 
-ALL_COMPETITIONS = (
-    DOMESTIC_COMPETITIONS
-    + UEFA_COMPETITIONS
-)
-
-
-# Fixtur.es team calendars may explicitly identify UEFA fixtures
-# with these suffixes.
-
+# Fixtur.es team calendars may explicitly identify UEFA fixtures with
+# these suffixes.
 UEFA_TAG_TO_COMPETITION = {
     "CL": "Champions League",
     "EL": "Europa League",
@@ -190,366 +135,86 @@ UEFA_TAG_TO_COMPETITION = {
 
 
 # ============================================================
-# DOWNLOAD
+# DOWNLOAD (shared with sources/fixtur_es.py via ics.download_ics)
 # ============================================================
 
-def fetch_ics(
-    url: str,
-    attempts: int = 3,
-) -> str:
-    """Download an ICS feed with simple retries."""
-
-    last_error = None
-
-    for attempt in range(1, attempts + 1):
-
-        print(
-            f"Request attempt {attempt}/{attempts}"
-        )
-
-        try:
-
-            request = Request(
-                url,
-                headers={
-                    "User-Agent": (
-                        "Mozilla/5.0 "
-                        "(compatible; SPFL-EPG-FixturES-Audit/1.0)"
-                    )
-                },
-            )
-
-            with urlopen(
-                request,
-                timeout=30,
-            ) as response:
-
-                status = getattr(
-                    response,
-                    "status",
-                    200,
-                )
-
-                data = response.read()
-
-            text = data.decode(
-                "utf-8",
-                errors="replace",
-            )
-
-            print(
-                f"HTTP status: {status}"
-            )
-
-            print(
-                f"Downloaded ICS characters: "
-                f"{len(text)}"
-            )
-
-            return text
-
-        except (
-            HTTPError,
-            URLError,
-            OSError,
-            ValueError,
-        ) as exc:
-
-            last_error = exc
-
-            print(
-                f"HTTP error: {exc}"
-            )
-
-    raise RuntimeError(
-        f"Unable to download Fixtur.es feed after "
-        f"{attempts} attempts: {last_error}"
-    )
+def fetch_ics(url: str, attempts: int = 3) -> str:
+    return download_ics(url, max_attempts=attempts)
 
 
 # ============================================================
-# ICS PARSING
+# ICS PARSING (shared with sources/fixtur_es.py via ics.py)
 # ============================================================
 
-def unfold_ics(
-    text: str,
-) -> list[str]:
+_TRACKED_PROPERTIES = ("UID", "DTSTART", "DTEND", "SUMMARY", "STATUS", "DESCRIPTION")
+
+
+def parse_ics_events(text: str) -> list[dict[str, str]]:
     """
-    Unfold RFC5545 continuation lines.
-
-    Lines beginning with a space or tab continue the previous line.
+    Parse the small subset of ICS fields this diagnostic needs, using
+    the shared ics.split_events()/property_value() parser rather than
+    a second hand-rolled one.
     """
 
-    raw_lines = (
-        text
-        .replace("\r\n", "\n")
-        .replace("\r", "\n")
-        .split("\n")
-    )
+    events = []
 
-    lines: list[str] = []
-
-    for line in raw_lines:
-
-        if (
-            line.startswith((" ", "\t"))
-            and lines
-        ):
-
-            lines[-1] += line[1:]
-
-        else:
-
-            lines.append(line)
-
-    return lines
-
-
-def parse_ics_events(
-    text: str,
-) -> list[dict[str, str]]:
-    """Parse the small subset of ICS fields required by this diagnostic."""
-
-    lines = unfold_ics(text)
-
-    events: list[dict[str, str]] = []
-
-    current: dict[str, str] | None = None
-
-    for line in lines:
-
-        if line == "BEGIN:VEVENT":
-
-            current = {}
-
-        elif line == "END:VEVENT":
-
-            if current is not None:
-                events.append(current)
-
-            current = None
-
-        elif (
-            current is not None
-            and ":" in line
-        ):
-
-            key, value = line.split(
-                ":",
-                1,
-            )
-
-            base_key = (
-                key
-                .split(";", 1)[0]
-                .upper()
-            )
-
-            if base_key in {
-                "UID",
-                "DTSTART",
-                "DTEND",
-                "SUMMARY",
-                "STATUS",
-                "DESCRIPTION",
-            }:
-
-                current[base_key] = value
+    for event_lines in split_events(text):
+        event = {}
+        for prop in _TRACKED_PROPERTIES:
+            value = property_value(event_lines, prop)
+            if value is not None:
+                event[prop] = value
+        events.append(event)
 
     return events
 
 
-# ============================================================
-# DATE / TEXT HELPERS
-# ============================================================
+def parse_ics_datetime(value: str) -> datetime | None:
+    """
+    Parse an ICS datetime, always returning a naive UTC datetime (to
+    match this file's naive-datetime convention throughout).
+    """
 
-def parse_ics_datetime(
-    value: str,
-) -> datetime | None:
-    """Parse common Fixtur.es UTC/local ICS datetime formats."""
+    dt = _parse_ics_datetime(value)
 
-    if not value:
-        return None
+    if dt is not None and dt.tzinfo is not None:
+        dt = dt.astimezone(timezone.utc).replace(tzinfo=None)
 
-    value = value.strip()
-
-    formats = [
-        "%Y%m%dT%H%M%SZ",
-        "%Y%m%dT%H%M%S",
-        "%Y%m%d",
-    ]
-
-    for fmt in formats:
-
-        try:
-
-            return datetime.strptime(
-                value,
-                fmt,
-            )
-
-        except ValueError:
-            pass
-
-    return None
+    return dt
 
 
-def clean_text(
-    value: str | None,
-) -> str:
-    """Clean ICS text for diagnostic output."""
+def clean_text(value: str | None) -> str:
+    """Clean ICS text for diagnostic output (unescape ICS text escaping)."""
 
     if not value:
         return ""
 
-    return (
-        value
-        .replace("\n", " ")
-        .replace("\\,", ",")
-        .replace("\\;", ";")
-        .replace("\\\\", "\\")
-        .strip()
-    )
-
-
-# ============================================================
-# TEAM NAME NORMALISATION
-# ============================================================
-
-def normalise_team_name(
-    name: str,
-) -> str:
-    """Normalise common team-name variations."""
-
-    value = clean_text(name).strip()
-
-    # Remove Fixtur.es competition markers such as:
-    #
-    # Heart of Midlothian [CL]
-    # Rangers [EL]
-    # Hibernian [Conf]
-    #
-    # These markers are classification metadata, not part of
-    # the club name.
-
-    value = re_remove_uefa_tag(value)
-
-    lowered = value.lower()
-
-    return TEAM_ALIASES.get(
-        lowered,
-        value,
-    )
-
-
-def re_remove_uefa_tag(
-    value: str,
-) -> str:
-    """
-    Remove a trailing Fixtur.es UEFA competition marker.
-
-    Examples:
-
-        Rangers [EL]
-        Celtic [CL]
-        Hibernian [Conf]
-
-    become:
-
-        Rangers
-        Celtic
-        Hibernian
-    """
-
-    import re
-
-    return re.sub(
-        r"\s*\[(?:CL|EL|CONF|Conf)\]\s*$",
-        "",
-        value,
-        flags=re.IGNORECASE,
-    ).strip()
+    return value.replace("\n", " ").replace("\\,", ",").replace("\\;", ";").replace("\\\\", "\\").strip()
 
 
 # ============================================================
 # FIXTURE PARSING
 # ============================================================
 
-def split_fixture(
-    summary: str,
-) -> tuple[str, str] | None:
-    """
-    Split:
+def fixture_teams(summary: str) -> tuple[str, str] | None:
+    """Extract (home, away) from a SUMMARY field, via the shared parser."""
 
-        Rangers - Celtic
-        Dundee FC - Rangers (1-1)
+    home, away, _, _ = parse_match_summary(summary)
 
-    Returns:
-
-        home, away
-    """
-
-    summary = clean_text(summary)
-
-    # Remove result.
-
-    if " (" in summary:
-        summary = summary.split(
-            " (",
-            1,
-        )[0]
-
-    if " - " not in summary:
+    if not home or not away:
         return None
 
-    home, away = summary.split(
-        " - ",
-        1,
-    )
-
-    return (
-        home.strip(),
-        away.strip(),
-    )
+    return home, away
 
 
-def fixture_teams(
-    summary: str,
-) -> tuple[str, str] | None:
-    pair = split_fixture(
-        summary
-    )
-
-    if pair is None:
-        return None
-
-    home, away = pair
-
-    return (
-        normalise_team_name(home),
-        normalise_team_name(away),
-    )
-
-
-def is_season_fixture(
-    event: dict[str, str],
-) -> bool:
-
-    dt = parse_ics_datetime(
-        event.get(
-            "DTSTART",
-            "",
-        )
-    )
+def is_season_fixture(event: dict[str, str]) -> bool:
+    dt = parse_ics_datetime(event.get("DTSTART", ""))
 
     if dt is None:
         return False
 
-    return (
-        SEASON_START
-        <= dt
-        <= SEASON_END
-    )
+    return SEASON_START <= dt <= SEASON_END
+
 
 
 # ============================================================
@@ -2031,4 +1696,5 @@ def main():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     main()
