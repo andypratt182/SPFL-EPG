@@ -21,7 +21,10 @@ logger = logging.getLogger(__name__)
 UK_TZ = ZoneInfo("Europe/London")
 
 # How far ahead of "now" to include fixtures in the generated EPG.
-FIXTURE_DAYS = 24
+# Must stay >= xmltv.py's EPG_DURATION -- if this is narrower, it
+# silently clips fixtures before they ever reach the EPG window, no
+# matter how wide EPG_DURATION is set.
+FIXTURE_DAYS = 60
 
 _ALL_FIXTURES: list[dict] | None = None
 

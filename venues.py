@@ -48,6 +48,18 @@ VENUES = _load_venues()
 # re-normalising every key on every call to get_venue().
 _NORMALISED_VENUES = {normalise_team_name(name): venue for name, venue in VENUES.items()}
 
+# Deliberately NOT aliased: "Vikingur" as it appears in fixture data
+# is ambiguous between two different real clubs -- Víkingur
+# Reykjavík (Iceland) and Víkingur Gøta (Faroe Islands) -- both
+# entered in UEFA qualifying most seasons. Confirmed by real fixture
+# data: "Vikingur" appears simultaneously alive in Champions League
+# qualifying (7/21 Jul) AND playing a separate Conference League
+# qualifier sandwiched between those dates (16 Jul) -- two different
+# qualifying paths that can't belong to the same club at once. Any
+# single alias here would be wrong for roughly half its fixtures, so
+# this one stays unresolved ("Venue TBC") rather than guessed.
+_KNOWN_UNRESOLVABLE_AMBIGUOUS_NAMES = {"Vikingur"}
+
 # Known cases where the team name as it appears in fixture data
 # (Fixtur.es SUMMARY parsing) doesn't match the venues.json key --
 # usually an extra club-type prefix ("FK ", "SK ") or city qualifier
@@ -205,6 +217,14 @@ def get_venue(team_name: str | None, *, context: str | None = None) -> str:
     # mismatches (an opponent's name spelled differently to how
     # venues.json has it) are visible in run logs instead of
     # silently producing "Venue TBC" forever.
+    #
+    # Exception: names in _KNOWN_UNRESOLVABLE_AMBIGUOUS_NAMES are a
+    # settled case, not a new gap -- warning about them every run
+    # would just bury genuinely new misses in repeat noise.
+    if team_name in _KNOWN_UNRESOLVABLE_AMBIGUOUS_NAMES:
+        logger.debug("No venue found for %r (known ambiguous name)", team_name)
+        return UNKNOWN_VENUE
+
     suffix = f" ({context})" if context else ""
     logger.warning("No venue found for %r%s", team_name, suffix)
 

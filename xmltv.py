@@ -21,7 +21,10 @@ logger = logging.getLogger(__name__)
 UK_TZ = ZoneInfo("Europe/London")
 
 MATCH_DURATION = timedelta(hours=2)
-EPG_DURATION = timedelta(hours=240)
+# The actual visible EPG window. Must stay <= fixtures.py's
+# FIXTURE_DAYS -- widening this alone does nothing if fixtures.py is
+# still discarding fixtures beyond a narrower window first.
+EPG_DURATION = timedelta(days=60)
 
 LOGO_BASE_URL = "https://andypratt182.github.io/SPFL-EPG/logos/"
 LOGO_FOLDER = Path("logos")

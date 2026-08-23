@@ -250,6 +250,29 @@ def localise(dt: datetime, tz: ZoneInfo) -> datetime:
 
 _SCORE_RE = re.compile(r"\((\d+)\s*-\s*(\d+)\)\s*$")
 
+# Any other trailing parenthetical annotation, e.g. "(Replay)",
+# "(AET)", "(Behind Closed Doors)". Scottish Cup fixtures carry these
+# far more often than league or European fixtures do (replays,
+# extra time), and an unstripped one silently corrupts the away team
+# name -- e.g. "Hibernian (Replay)" no longer matches the plain
+# "Hibernian" from the team calendar, so the fixture can never be
+# classified.
+_TRAILING_ANNOTATION_RE = re.compile(r"\s*\([^()]*\)\s*$")
+
+# Cup rounds are sometimes prefixed with a round/leg label ahead of
+# the team names, e.g. "Round 4: Rangers - Hibernian" or
+# "Replay: Rangers v Hibernian". League and European fixtures don't
+# carry this.
+_ROUND_PREFIX_RE = re.compile(
+    r"^\s*(?:round\s*\d+|r\d+|leg\s*\d+|replay|quarter[\s-]?final|"
+    r"semi[\s-]?final|final)\b[^:]*:\s*",
+    re.IGNORECASE,
+)
+
+# " - " is the common case; cup feeds have also been seen using
+# " v " / " vs " between team names.
+_SEPARATOR_RE = re.compile(r"\s+(?:-|vs?\.?)\s+", re.IGNORECASE)
+
 
 def parse_score_from_summary(summary: str | None) -> tuple[int | None, int | None]:
     if not summary:
@@ -267,7 +290,18 @@ def remove_score_from_summary(summary: str | None) -> str:
     if not summary:
         return ""
 
-    return _SCORE_RE.sub("", summary).strip()
+    cleaned = _SCORE_RE.sub("", summary).strip()
+
+    # Strip any other trailing parenthetical (replay/AET/etc.) that
+    # isn't a score, so it doesn't end up glued onto the away team
+    # name. Repeat in case of more than one, e.g. "(Replay) (AET)".
+    while True:
+        stripped = _TRAILING_ANNOTATION_RE.sub("", cleaned).strip()
+        if stripped == cleaned:
+            break
+        cleaned = stripped
+
+    return cleaned
 
 
 def parse_match_summary(
@@ -277,6 +311,12 @@ def parse_match_summary(
     Parse a SUMMARY field like "Rangers - Celtic (2-1)" into
     (home, away, home_score, away_score), with team names normalised
     via normalisation.normalise_team_name.
+
+    Tolerates a leading round/leg label ("Round 4: ...", "Replay:
+    ..."), " - "/" v "/" vs " as the team separator, and trailing
+    non-score parenthetical annotations ("(Replay)", "(AET)") --
+    variations seen on cup fixtures but not on league or European
+    ones.
     """
 
     if not summary:
@@ -284,11 +324,15 @@ def parse_match_summary(
 
     home_score, away_score = parse_score_from_summary(summary)
     clean_summary = remove_score_from_summary(summary)
+    clean_summary = _ROUND_PREFIX_RE.sub("", clean_summary).strip()
 
-    if " - " not in clean_summary:
+    match = _SEPARATOR_RE.search(clean_summary)
+
+    if not match:
         return None, None, home_score, away_score
 
-    home, away = clean_summary.split(" - ", 1)
+    home = clean_summary[: match.start()]
+    away = clean_summary[match.end() :]
 
     return (
         normalise_team_name(home),
