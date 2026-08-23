@@ -48,6 +48,21 @@ VENUES = _load_venues()
 # re-normalising every key on every call to get_venue().
 _NORMALISED_VENUES = {normalise_team_name(name): venue for name, venue in VENUES.items()}
 
+# Known cases where the team name as it appears in fixture data
+# (Fixtur.es SUMMARY parsing) doesn't match the venues.json key --
+# usually an extra club-type prefix ("FK ", "SK ") or city qualifier
+# ("Linz") that normalise_team_name() doesn't strip generically.
+# Generic prefix/suffix stripping isn't safe here: venues.json has
+# 800+ entries including short, common words as keys ("Rangers",
+# "United"), so a loose substring match risks matching the wrong
+# club entirely (e.g. "Rangers" matching inside "Queens Park
+# Rangers"). Confirmed mismatches are added here explicitly instead.
+_FIXTURE_NAME_ALIASES = {
+    "FK Jablonec 97": "Jablonec",
+    "LASK Linz": "LASK",
+    "SK Rapid Wien": "Rapid Wien",
+}
+
 
 def _stadium_from(venue) -> str | None:
     if isinstance(venue, str) and venue.strip():
@@ -74,7 +89,24 @@ def get_venue(team_name: str | None) -> str:
 
     venue = _NORMALISED_VENUES.get(normalise_team_name(team_name))
 
-    return _stadium_from(venue) or UNKNOWN_VENUE
+    if venue is None:
+        alias = _FIXTURE_NAME_ALIASES.get(team_name)
+        if alias:
+            venue = VENUES.get(alias)
+
+    stadium = _stadium_from(venue)
+
+    if stadium:
+        return stadium
+
+    # Data-completeness gap rather than a code bug: this team just
+    # isn't in venues.json under any name we tried. Logged so new
+    # mismatches (an opponent's name spelled differently to how
+    # venues.json has it) are visible in run logs instead of
+    # silently producing "Venue TBC" forever.
+    logger.warning("No venue found for %r", team_name)
+
+    return UNKNOWN_VENUE
 
 
 def has_venue(team_name: str | None) -> bool:
