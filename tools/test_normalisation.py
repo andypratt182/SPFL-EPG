@@ -34,3 +34,14 @@ def test_is_spfl_team():
     assert is_spfl_team("Heart of Midlothian") is True
     assert is_spfl_team("Buckie Thistle") is False
     assert is_spfl_team("") is False
+
+
+def test_status_prefix_stripped():
+    """
+    Regression test: Fixtur.es prefixes a team name with a match
+    status marker for suspended/postponed fixtures (e.g. "⚠️
+    Suspended: Rangers"). Left unstripped this breaks both venue
+    lookup and competition matching for that fixture.
+    """
+    assert normalise_team_name("⚠️ Suspended: Rangers") == "Rangers"
+    assert normalise_team_name("Postponed: Celtic") == "Celtic"
