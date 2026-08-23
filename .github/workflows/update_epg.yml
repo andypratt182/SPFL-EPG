@@ -59,6 +59,22 @@ jobs:
 
 
       # ------------------------------------------------------------
+      # Upload warnings log (private run artifact -- not published
+      # to the public Pages site, just downloadable from this run's
+      # Actions summary for debugging venue/logo/fixture gaps)
+      # ------------------------------------------------------------
+
+      - name: Upload warnings log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: warnings-log
+          path: ./logs/warnings.log
+          retention-days: 14
+          if-no-files-found: ignore
+
+
+      # ------------------------------------------------------------
       # Upload GitHub Pages artifact
       # ------------------------------------------------------------
 
