@@ -170,8 +170,15 @@ def _stadium_from(venue) -> str | None:
     return None
 
 
-def get_venue(team_name: str | None) -> str:
-    """Return the stadium for a team, or "Venue TBC" if unknown."""
+def get_venue(team_name: str | None, *, context: str | None = None) -> str:
+    """
+    Return the stadium for a team, or "Venue TBC" if unknown.
+
+    `context` is optional and purely for the miss-warning below --
+    e.g. the opponent/competition/kickoff of the fixture that
+    triggered the lookup, so an unresolved name can be traced back to
+    an actual fixture in the log instead of just a bare team name.
+    """
 
     if not team_name:
         return UNKNOWN_VENUE
@@ -198,7 +205,8 @@ def get_venue(team_name: str | None) -> str:
     # mismatches (an opponent's name spelled differently to how
     # venues.json has it) are visible in run logs instead of
     # silently producing "Venue TBC" forever.
-    logger.warning("No venue found for %r", team_name)
+    suffix = f" ({context})" if context else ""
+    logger.warning("No venue found for %r%s", team_name, suffix)
 
     return UNKNOWN_VENUE
 
