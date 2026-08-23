@@ -62,13 +62,6 @@ COMPETITION_CALENDARS = {
     "Scottish League One": "https://ics.fixtur.es/v2/league/scottish-league-one.ics",
     "Scottish League Two": "https://ics.fixtur.es/v2/league/scottish-league-two.ics",
     "Scottish Cup": "https://ics.fixtur.es/v2/league/scottish-cup.ics",
-    # UNVERIFIED: best guess at the slug, following the naming
-    # convention of the leagues above. Not confirmed against the
-    # live site -- check the next run's log for this URL. If it
-    # logs "Calendar not found" (or a similar error) rather than
-    # "HTTP 200", the slug is wrong and needs the real one from
-    # fixtur.es directly, the same way the Scottish Cup URL issue
-    # was diagnosed.
     "Scottish League Cup": "https://ics.fixtur.es/v2/league/scottish-league-cup.ics",
     "UEFA Champions League": "https://ics.fixtur.es/v2/league/champions-league.ics",
     "UEFA Europa League": "https://ics.fixtur.es/v2/league/europa-league.ics",
@@ -192,7 +185,11 @@ def parse_event(
         end = localise(end, UK_TZ)
 
     # Prefer the feed's own LOCATION; fall back to our venue database.
-    venue = location.strip() if location else get_venue(home)
+    if location:
+        venue = location.strip()
+    else:
+        context = f"vs {away}, {competition or source_name}, {kickoff.strftime('%Y-%m-%d %H:%M')}"
+        venue = get_venue(home, context=context)
 
     return {
         "home": home,
