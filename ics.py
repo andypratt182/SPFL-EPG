@@ -78,10 +78,12 @@ def download_ics(
     last_error: Exception | None = None
 
     for attempt in range(1, max_attempts + 1):
-        logger.debug("Request attempt %d/%d for %s", attempt, max_attempts, url)
+        requested_url = _cache_busted(url)
+
+        logger.debug("Request attempt %d/%d for %s", attempt, max_attempts, requested_url)
 
         request = Request(
-            _cache_busted(url),
+            requested_url,
             headers={
                 "User-Agent": user_agent,
                 "Accept": "text/calendar,*/*",
@@ -97,23 +99,28 @@ def download_ics(
 
             text = data.decode("utf-8-sig", errors="replace")
 
+            # Log the actual requested URL (cache-buster included), not
+            # just the base url -- otherwise there's no way to tell from
+            # the log whether the cache-busting fix is even active,
+            # which is exactly the visibility gap that made a real
+            # caching problem look inconclusive from the log alone.
             logger.info(
-                "Downloaded %s: HTTP %s, %d characters", url, status, len(text)
+                "Downloaded %s: HTTP %s, %d characters", requested_url, status, len(text)
             )
 
             return text
 
         except HTTPError as error:
             last_error = error
-            logger.warning("HTTP error fetching %s: %s", url, error.code)
+            logger.warning("HTTP error fetching %s: %s", requested_url, error.code)
 
         except URLError as error:
             last_error = error
-            logger.warning("URL error fetching %s: %s", url, error)
+            logger.warning("URL error fetching %s: %s", requested_url, error)
 
         except Exception as error:  # noqa: BLE001 - want to retry on anything
             last_error = error
-            logger.warning("Unexpected error fetching %s: %s", url, error)
+            logger.warning("Unexpected error fetching %s: %s", requested_url, error)
 
         if attempt < max_attempts:
             time.sleep(retry_delay)
