@@ -1,0 +1,44 @@
+name: Keep Repository Active
+
+# GitHub automatically disables a repo's scheduled (cron) workflows
+# after 60 days with no repository activity -- silently, with no
+# notification. update_epg.yml's cron trigger would eventually stop
+# firing if this repo is never touched again, and the EPG would go
+# stale with no error anywhere to notice.
+#
+# "Activity" means git commits/pushes to the repo, not workflow runs
+# -- update_epg.yml deploying to Pages every 6 hours doesn't count.
+# This workflow makes a trivial, automated commit well within that
+# 60-day window, which resets the clock for every scheduled workflow
+# in the repo, including this one. As long as it fires at least once
+# every 60 days, it keeps itself (and update_epg.yml) alive
+# indefinitely with zero manual action needed.
+
+on:
+  schedule:
+    - cron: "0 3 1 * *" # 03:00 UTC on the 1st of every month
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Update keepalive timestamp
+        run: |
+          mkdir -p .github
+          date -u +"Last keepalive commit: %Y-%m-%dT%H:%M:%SZ" > .github/last-keepalive.txt
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/last-keepalive.txt
+          git commit -m "chore: keepalive commit to prevent scheduled workflow disable"
+          git push
