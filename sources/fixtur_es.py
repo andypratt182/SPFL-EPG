@@ -168,14 +168,6 @@ def parse_event(
     description = property_value(lines, "DESCRIPTION")
     location = property_value(lines, "LOCATION")
 
-    # TEMPORARY diagnostic: log the raw SUMMARY for this one specific
-    # fixture unconditionally, before any filtering below, so we can
-    # see exactly what the live pipeline receives regardless of
-    # whether the fixture would otherwise be dropped (season filter,
-    # placeholder detection, etc). To be removed once resolved.
-    if summary and "jablonec" in summary.lower():
-        logger.info("DIAGNOSTIC raw SUMMARY for Jablonec fixture: %r (source=%s)", summary, source_name)
-
     if not summary or not dtstart:
         return None
 
@@ -437,6 +429,21 @@ def _apply_competition_match(fixture: dict, matches: list[dict], status: str) ->
         round_label = next((item.get("round") for item in matches if item.get("round")), None)
         if round_label:
             fixture["round"] = round_label
+
+    # Same idea for the score: confirmed via a real run that these
+    # two feeds can genuinely disagree on which has been updated
+    # first -- a team's own calendar was missing a just-played
+    # fixture's score while the competition-wide feed already had
+    # it. Without this, a score sitting right there in `matches`
+    # was never used, and the fixture fell back to reporting a
+    # stale earlier result instead. Signature-matched `matches`
+    # share this fixture's exact home/away orientation, so there's
+    # no risk of the scores being swapped.
+    if fixture.get("home_score") is None:
+        score_match = next((item for item in matches if item.get("home_score") is not None), None)
+        if score_match:
+            fixture["home_score"] = score_match["home_score"]
+            fixture["away_score"] = score_match["away_score"]
 
     return fixture
 
