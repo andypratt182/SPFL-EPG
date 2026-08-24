@@ -280,6 +280,55 @@ def get_venue_country(team_name: str | None) -> str:
     return _country_from(_resolve_entry(team_name)) or UNKNOWN_COUNTRY
 
 
+# Demonym for every country currently used in venues.json (verified
+# 75/75 -- programmatically checked against the actual distinct
+# country values in the file, not just written by hand and hoped
+# complete). Used to describe an opponent's nationality in a more
+# natural way than repeating the country noun, e.g. "Czech
+# opposition" rather than "opposition from Czech Republic".
+_DEMONYMS = {
+    "Albania": "Albanian", "Andorra": "Andorran", "Argentina": "Argentine",
+    "Armenia": "Armenian", "Australia": "Australian", "Austria": "Austrian",
+    "Azerbaijan": "Azerbaijani", "Belarus": "Belarusian", "Belgium": "Belgian",
+    "Bolivia": "Bolivian", "Bosnia and Herzegovina": "Bosnian", "Brazil": "Brazilian",
+    "Bulgaria": "Bulgarian", "Canada": "Canadian", "Chile": "Chilean", "China": "Chinese",
+    "Colombia": "Colombian", "Croatia": "Croatian", "Cyprus": "Cypriot",
+    "Czech Republic": "Czech", "Denmark": "Danish", "Ecuador": "Ecuadorian",
+    "Egypt": "Egyptian", "England": "English", "Estonia": "Estonian",
+    "Faroe Islands": "Faroese", "Finland": "Finnish", "France": "French",
+    "Georgia": "Georgian", "Germany": "German", "Gibraltar": "Gibraltarian",
+    "Greece": "Greek", "Hungary": "Hungarian", "Iceland": "Icelandic", "India": "Indian",
+    "Israel": "Israeli", "Italy": "Italian", "Japan": "Japanese", "Kazakhstan": "Kazakh",
+    "Kosovo": "Kosovan", "Latvia": "Latvian", "Liechtenstein": "Liechtenstein",
+    "Lithuania": "Lithuanian", "Luxembourg": "Luxembourgish", "Malta": "Maltese",
+    "Mexico": "Mexican", "Moldova": "Moldovan", "Montenegro": "Montenegrin",
+    "Morocco": "Moroccan", "Netherlands": "Dutch", "North Macedonia": "North Macedonian",
+    "Northern Ireland": "Northern Irish", "Norway": "Norwegian", "Peru": "Peruvian",
+    "Poland": "Polish", "Portugal": "Portuguese", "Republic of Ireland": "Irish",
+    "Romania": "Romanian", "Russia": "Russian", "San Marino": "Sammarinese",
+    "Saudi Arabia": "Saudi", "Scotland": "Scottish", "Serbia": "Serbian",
+    "Slovakia": "Slovak", "Slovenia": "Slovenian", "South Africa": "South African",
+    "South Korea": "South Korean", "Spain": "Spanish", "Sweden": "Swedish",
+    "Switzerland": "Swiss", "Turkey": "Turkish", "Ukraine": "Ukrainian",
+    "United States": "American", "Uruguay": "Uruguayan", "Wales": "Welsh",
+}
+
+
+def get_demonym(country: str | None) -> str | None:
+    """
+    Adjective form of a country name, e.g. "Czech" for "Czech
+    Republic". Returns None (not UNKNOWN_COUNTRY or similar) for
+    anything not in _DEMONYMS, so callers can use `if demonym:` to
+    decide whether they have something usable rather than needing to
+    special-case a placeholder string.
+    """
+
+    if not country:
+        return None
+
+    return _DEMONYMS.get(country)
+
+
 def has_venue(team_name: str | None) -> bool:
     """Return True if a known venue exists for the team."""
 

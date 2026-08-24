@@ -16,7 +16,7 @@ from zoneinfo import ZoneInfo
 
 from normalisation import normalise_team_name
 from teams import SPFL_TEAMS
-from venues import UNKNOWN_COUNTRY, get_venue_country
+from venues import UNKNOWN_COUNTRY, get_demonym, get_venue_country
 
 logger = logging.getLogger(__name__)
 
@@ -154,9 +154,10 @@ def _channel_team_name(channel_id: str) -> str:
 def _match_parts(channel_id: str, match: dict) -> dict:
     """
     Resolve a fixture from the channel's own club's point of view --
-    whether they're home or away, who the opponent is, and (only for
-    an away fixture where it's genuinely new information) the
-    country they're travelling to.
+    whether they're home or away, who the opponent is, the country
+    they're travelling to (away fixtures only, and only when it's
+    genuinely new information -- see _narrative_sentence), and a
+    demonym for the opponent (home fixtures only -- see below).
     """
 
     our_team = _channel_team_name(channel_id)
@@ -167,13 +168,32 @@ def _match_parts(channel_id: str, match: dict) -> dict:
     opponent = away if is_home else home
 
     country = None
+    demonym = None
 
-    if not is_home:
+    if is_home:
+        # For a home fixture the country is never stated as part of
+        # a "travel to X" clause (there's no travelling involved),
+        # but the opponent's own country can still add a bit of
+        # flavour as a demonym -- "Czech opposition FK Jablonec"
+        # rather than just "FK Jablonec". Only for non-Scottish
+        # opponents, for the same reason "Scotland" is never named
+        # for a domestic away trip: it's true of every single
+        # domestic fixture and so isn't actually new information.
+        opponent_country = get_venue_country(opponent)
+        if opponent_country not in (UNKNOWN_COUNTRY, "Scotland"):
+            demonym = get_demonym(opponent_country)
+    else:
         venue_country = get_venue_country(home)
         if venue_country not in (UNKNOWN_COUNTRY, "Scotland"):
             country = venue_country
 
-    return {"our_team": our_team, "opponent": opponent, "is_home": is_home, "country": country}
+    return {
+        "our_team": our_team,
+        "opponent": opponent,
+        "is_home": is_home,
+        "country": country,
+        "demonym": demonym,
+    }
 
 
 def _narrative_sentence(parts: dict, venue: str, competition: str, *, gerund: bool) -> str:
@@ -183,14 +203,22 @@ def _narrative_sentence(parts: dict, venue: str, competition: str, *, gerund: bo
     Reframed around the channel's own club rather than generic
     home/away, since that's who the channel exists for:
 
-      - Home: "{team} host(ing) {opponent} at {venue}{competition}."
+      - Home, domestic opponent: "{team} host(ing) {opponent} at
+        {venue}{competition}."
+      - Home, non-Scottish opponent: "{team} host(ing) {demonym}
+        opposition {opponent} at {venue}{competition}." -- e.g.
+        "Rangers hosting Czech opposition FK Jablonec 97...". Only
+        when a demonym is actually known; falls back to the plain
+        form above otherwise rather than guessing one.
       - Away, in Scotland: "{team} travel(ling) to {venue} to take
         on {opponent}{competition}." -- naming the country here
         would be redundant/odd for a routine domestic away trip.
       - Away, abroad: "{team} travel(ling) to {country} to take on
         {opponent} at {venue}{competition}." -- country is genuinely
         new information here, so it leads, with the venue mentioned
-        separately since the country alone doesn't place it.
+        separately since the country alone doesn't place it. No
+        demonym here too -- "travel to Czech Republic to take on
+        Czech opposition..." would repeat the same fact twice.
     """
 
     clause = _competition_clause(competition)
@@ -199,7 +227,8 @@ def _narrative_sentence(parts: dict, venue: str, competition: str, *, gerund: bo
 
     if parts["is_home"]:
         verb = "hosting" if gerund else "host"
-        return f"{our_team} {verb} {opponent} at {venue}{clause}"
+        opponent_label = f"{parts['demonym']} opposition {opponent}" if parts["demonym"] else opponent
+        return f"{our_team} {verb} {opponent_label} at {venue}{clause}"
 
     verb = "travelling" if gerund else "travel"
 
