@@ -118,6 +118,16 @@ def is_placeholder_fixture(raw_kickoff, kickoff, home, away, competition) -> boo
 
     raw_value = raw_kickoff.strip()
 
+    # Strip a trailing "Z" (UTC marker) before checking for a
+    # midnight time-of-day. Without this, a placeholder expressed in
+    # UTC ("...T000000Z") never matched here -- only the floating/
+    # local-time form ("...T000000" with no "Z") did. A UK fixture
+    # placeholder at 1am BST (a very plausible "no time set yet"
+    # value) is exactly midnight UTC, i.e. "...T000000Z", so this
+    # was silently letting real placeholders through.
+    if raw_value.endswith("Z"):
+        raw_value = raw_value[:-1]
+
     is_midnight = raw_value.endswith("T000000") or raw_value.endswith("T0000")
 
     if not is_midnight:
