@@ -262,10 +262,13 @@ _TRAILING_ANNOTATION_RE = re.compile(r"\s*\([^()]*\)\s*$")
 # Cup rounds are sometimes prefixed with a round/leg label ahead of
 # the team names, e.g. "Round 4: Rangers - Hibernian" or
 # "Replay: Rangers v Hibernian". League and European fixtures don't
-# carry this.
+# carry this. Leg labels have been seen in more than one form --
+# "Leg 2:", "2nd Leg:", "Second Leg:" -- all covered here rather
+# than assuming just one.
 _ROUND_PREFIX_RE = re.compile(
-    r"^\s*(?:round\s*\d+|r\d+|leg\s*\d+|replay|quarter[\s-]?final|"
-    r"semi[\s-]?final|final)\b[^:]*:\s*",
+    r"^\s*(?:round\s*\d+|r\d+|"
+    r"leg\s*\d+|\d+(?:st|nd|rd|th)\s*leg|(?:first|second|third)\s*leg|"
+    r"replay|quarter[\s-]?final|semi[\s-]?final|final)\b[^:]*:\s*",
     re.IGNORECASE,
 )
 
