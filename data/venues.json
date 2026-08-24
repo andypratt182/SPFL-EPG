@@ -1,865 +1,3454 @@
 {
-  "FK Shkendija 79": "Ecolog Stadium",
-  "FC Edinburgh": "Meadowbank Stadium",
-  "Bohemians": "Dalymount Park",
-  "Arsenal": "Emirates Stadium",
-  "Aston Villa": "Villa Park",
-  "Bournemouth": "Vitality Stadium",
-  "Brentford": "Gtech Community Stadium",
-  "Brighton & Hove Albion": "Amex Stadium",
-  "Burnley": "Turf Moor",
-  "Chelsea": "Stamford Bridge",
-  "Crystal Palace": "Selhurst Park",
-  "Everton": "Hill Dickinson Stadium",
-  "Fulham": "Craven Cottage",
-  "Leeds United": "Elland Road",
-  "Liverpool": "Anfield",
-  "Manchester City": "Etihad Stadium",
-  "Manchester United": "Old Trafford",
-  "Newcastle United": "St James' Park",
-  "Nottingham Forest": "The City Ground",
-  "Sunderland": "Stadium of Light",
-  "Tottenham Hotspur": "Tottenham Hotspur Stadium",
-  "West Ham United": "London Stadium",
-  "Wolverhampton Wanderers": "Molineux Stadium",
-  "Leicester City": "King Power Stadium",
-  "Southampton": "St Mary's Stadium",
-  "Ipswich Town": "Portman Road",
-  "Norwich City": "Carrow Road",
-  "West Bromwich Albion": "The Hawthorns",
-  "Middlesbrough": "Riverside Stadium",
-  "Sheffield United": "Bramall Lane",
-  "Sheffield Wednesday": "Hillsborough Stadium",
-  "Stoke City": "bet365 Stadium",
-  "Coventry City": "Coventry Building Society Arena",
-  "Watford": "Vicarage Road",
-  "Millwall": "The Den",
-  "Preston North End": "Deepdale",
-  "Swansea City": "Swansea.com Stadium",
-  "Cardiff City": "Cardiff City Stadium",
-  "Hull City": "MKM Stadium",
-  "Bristol City": "Ashton Gate",
-  "Blackburn Rovers": "Ewood Park",
-  "Derby County": "Pride Park Stadium",
-  "Queens Park Rangers": "Loftus Road",
-  "Luton Town": "Kenilworth Road",
-  "Oxford United": "Kassam Stadium",
-  "Portsmouth": "Fratton Park",
-  "Charlton Athletic": "The Valley",
-  "Plymouth Argyle": "Home Park",
-  "Wrexham": "Racecourse Ground",
-  "Birmingham City": "St Andrew's",
-  "Bolton Wanderers": "University of Bolton Stadium",
-  "Barnsley": "Oakwell",
-  "Notts County": "Meadow Lane",
-  "Real Madrid": "Santiago Bernabéu",
-  "Barcelona": "Camp Nou",
-  "Atlético Madrid": "Cívitas Metropolitano",
-  "Athletic Bilbao": "San Mamés",
-  "Real Sociedad": "Reale Arena",
-  "Sevilla": "Ramón Sánchez-Pizjuán",
-  "Real Betis": "Benito Villamarín",
-  "Villarreal": "Estadio de la Cerámica",
-  "Valencia": "Mestalla",
-  "Celta Vigo": "Balaídos",
-  "Osasuna": "El Sadar",
-  "Getafe": "Coliseum Alfonso Pérez",
-  "Girona": "Montilivi",
-  "Rayo Vallecano": "Vallecas",
-  "Espanyol": "RCDE Stadium",
-  "Mallorca": "Son Moix",
-  "Alavés": "Mendizorroza",
-  "Levante": "Ciutat de València",
-  "Elche": "Martínez Valero",
-  "Real Oviedo": "Carlos Tartiere",
-  "Juventus": "Allianz Stadium",
-  "AC Milan": "San Siro",
-  "Inter Milan": "San Siro",
-  "Napoli": "Stadio Diego Armando Maradona",
-  "AS Roma": "Stadio Olimpico",
-  "Lazio": "Stadio Olimpico",
-  "Atalanta": "Gewiss Stadium",
-  "Fiorentina": "Stadio Artemio Franchi",
-  "Bologna": "Stadio Renato Dall'Ara",
-  "Torino": "Stadio Olimpico Grande Torino",
-  "Udinese": "Bluenergy Stadium",
-  "Genoa": "Stadio Luigi Ferraris",
-  "Sampdoria": "Stadio Luigi Ferraris",
-  "Cagliari": "Unipol Domus",
-  "Hellas Verona": "Stadio Marcantonio Bentegodi",
-  "Parma": "Stadio Ennio Tardini",
-  "Como": "Stadio Giuseppe Sinigaglia",
-  "Lecce": "Stadio Via del Mare",
-  "Empoli": "Stadio Carlo Castellani",
-  "Cremonese": "Stadio Giovanni Zini",
-  "Pisa": "Arena Garibaldi",
-  "Sassuolo": "Mapei Stadium",
-  "Bayern Munich": "Allianz Arena",
-  "Borussia Dortmund": "Signal Iduna Park",
-  "RB Leipzig": "Red Bull Arena",
-  "Bayer Leverkusen": "BayArena",
-  "Eintracht Frankfurt": "Deutsche Bank Park",
-  "VfB Stuttgart": "MHPArena",
-  "SC Freiburg": "Europa-Park Stadion",
-  "VfL Wolfsburg": "Volkswagen Arena",
-  "Borussia Mönchengladbach": "Borussia-Park",
-  "Werder Bremen": "Weserstadion",
-  "1. FC Union Berlin": "Stadion An der Alten Försterei",
-  "TSG Hoffenheim": "PreZero Arena",
-  "FC Augsburg": "WWK Arena",
-  "1. FSV Mainz 05": "MEWA Arena",
-  "1. FC Köln": "RheinEnergieStadion",
-  "FC St. Pauli": "Millerntor-Stadion",
-  "Hamburger SV": "Volksparkstadion",
-  "Holstein Kiel": "Holstein-Stadion",
-  "1. FC Heidenheim": "Voith-Arena",
-  "Paris Saint-Germain": "Parc des Princes",
-  "Marseille": "Orange Vélodrome",
-  "Monaco": "Stade Louis II",
-  "Lyon": "Groupama Stadium",
-  "Lille": "Stade Pierre-Mauroy",
-  "Nice": "Allianz Riviera",
-  "Rennes": "Roazhon Park",
-  "Lens": "Stade Bollaert-Delelis",
-  "Strasbourg": "Stade de la Meinau",
-  "Toulouse": "Stadium de Toulouse",
-  "Nantes": "Stade de la Beaujoire",
-  "Montpellier": "Stade de la Mosson",
-  "Brest": "Stade Francis-Le Blé",
-  "Reims": "Stade Auguste-Delaune",
-  "Auxerre": "Stade de l'Abbé-Deschamps",
-  "Angers": "Stade Raymond-Kopa",
-  "Le Havre": "Stade Océane",
-  "Metz": "Stade Saint-Symphorien",
-  "Ajax": "Johan Cruyff Arena",
-  "PSV Eindhoven": "Philips Stadion",
-  "Feyenoord": "De Kuip",
-  "AZ Alkmaar": "AFAS Stadion",
-  "FC Utrecht": "Stadion Galgenwaard",
-  "FC Twente": "De Grolsch Veste",
-  "Vitesse": "GelreDome",
-  "Sparta Rotterdam": "Sparta-Stadion Het Kasteel",
-  "NEC Nijmegen": "Goffertstadion",
-  "Heerenveen": "Abe Lenstra Stadion",
-  "Benfica": "Estádio da Luz",
-  "Porto": "Estádio do Dragão",
-  "Sporting CP": "Estádio José Alvalade",
-  "Braga": "Estádio Municipal de Braga",
-  "Vitória de Guimarães": "Estádio D. Afonso Henriques",
-  "Boavista": "Estádio do Bessa",
-  "Celtic": "Celtic Park",
-  "Rangers": "Ibrox Stadium",
-  "Aberdeen": "Pittodrie Stadium",
-  "Hibernian": "Easter Road",
-  "Dundee United": "Tannadice Park",
-  "Motherwell": "Fir Park",
-  "St Mirren": "SMISA Stadium",
-  "Club Brugge": "Jan Breydel Stadium",
-  "Anderlecht": "Lotto Park",
-  "Royal Antwerp": "Bosuilstadion",
-  "Genk": "Cegeka Arena",
-  "Standard Liège": "Stade Maurice Dufrasne",
-  "Union SG": "Stade Joseph Marien",
-  "Galatasaray": "Rams Park",
-  "Fenerbahçe": "Şükrü Saracoğlu Stadium",
-  "Beşiktaş": "Vodafone Park",
-  "Trabzonspor": "Şenol Güneş Sports Complex",
-  "Olympiacos": "Karaiskakis Stadium",
-  "Panathinaikos": "Apostolos Nikolaidis Stadium",
-  "AEK Athens": "Agia Sofia Stadium",
-  "PAOK": "Toumba Stadium",
-  "Zenit Saint Petersburg": "Gazprom Arena",
-  "Spartak Moscow": "Otkritie Arena",
-  "CSKA Moscow": "VEB Arena",
-  "Dynamo Kyiv": "Valeriy Lobanovskyi Stadium",
-  "Shakhtar Donetsk": "Arena Lviv",
-  "FC Basel": "St. Jakob-Park",
-  "Young Boys": "Wankdorf Stadium",
-  "FC Zürich": "Letzigrund",
-  "Red Bull Salzburg": "Red Bull Arena",
-  "Rapid Wien": "Allianz Stadion",
-  "Austria Wien": "Generali Arena",
-  "FC Copenhagen": "Parken Stadium",
-  "Brøndby IF": "Brøndby Stadium",
-  "AIK": "Friends Arena",
-  "Malmö FF": "Eleda Stadion",
-  "Rosenborg BK": "Lerkendal Stadion",
-  "LA Galaxy": "Dignity Health Sports Park",
-  "LAFC": "BMO Stadium",
-  "Inter Miami CF": "Chase Stadium",
-  "Seattle Sounders FC": "Lumen Field",
-  "Atlanta United FC": "Mercedes-Benz Stadium",
-  "New York City FC": "Yankee Stadium",
-  "New York Red Bulls": "Red Bull Arena",
-  "Portland Timbers": "Providence Park",
-  "Toronto FC": "BMO Field",
-  "Columbus Crew": "Lower.com Field",
-  "FC Cincinnati": "TQL Stadium",
-  "Austin FC": "Q2 Stadium",
-  "Nashville SC": "Geodis Park",
-  "Orlando City SC": "Inter&Co Stadium",
-  "Real Salt Lake": "America First Field",
-  "Sporting Kansas City": "Children's Mercy Park",
-  "Philadelphia Union": "Subaru Park",
-  "Colorado Rapids": "Dick's Sporting Goods Park",
-  "Chicago Fire FC": "Soldier Field",
-  "DC United": "Audi Field",
-  "Minnesota United FC": "Allianz Field",
-  "FC Dallas": "Toyota Stadium",
-  "Houston Dynamo FC": "Shell Energy Stadium",
-  "San Jose Earthquakes": "PayPal Park",
-  "Vancouver Whitecaps FC": "BC Place",
-  "CF Montréal": "Stade Saputo",
-  "Charlotte FC": "Bank of America Stadium",
-  "St. Louis City SC": "CityPark",
-  "Flamengo": "Maracanã",
-  "Corinthians": "Neo Química Arena",
-  "Palmeiras": "Allianz Parque",
-  "São Paulo": "Morumbi",
-  "Santos": "Vila Belmiro",
-  "Grêmio": "Arena do Grêmio",
-  "Internacional": "Beira-Rio",
-  "Cruzeiro": "Mineirão",
-  "Atlético Mineiro": "Arena MRV",
-  "Botafogo": "Estádio Nilton Santos",
-  "Fluminense": "Maracanã",
-  "Vasco da Gama": "São Januário",
-  "Boca Juniors": "La Bombonera",
-  "River Plate": "Estadio Monumental",
-  "Racing Club": "Estadio Presidente Perón",
-  "Independiente": "Estadio Libertadores de América",
-  "San Lorenzo": "Estadio Pedro Bidegain",
-  "Estudiantes de La Plata": "Estadio UNO",
-  "Vélez Sarsfield": "Estadio José Amalfitani",
-  "Newell's Old Boys": "Estadio Marcelo Bielsa",
-  "Club América": "Estadio Azteca",
-  "Chivas Guadalajara": "Estadio Akron",
-  "Cruz Azul": "Estadio Ciudad de los Deportes",
-  "Pumas UNAM": "Estadio Olímpico Universitario",
-  "Tigres UANL": "Estadio Universitario",
-  "Monterrey": "Estadio BBVA",
-  "Kashima Antlers": "Kashima Soccer Stadium",
-  "Urawa Red Diamonds": "Saitama Stadium 2002",
-  "Yokohama F. Marinos": "Nissan Stadium",
-  "Vissel Kobe": "Noevir Stadium Kobe",
-  "Ulsan HD": "Munsu Football Stadium",
-  "FC Seoul": "Seoul World Cup Stadium",
-  "Sydney FC": "Allianz Stadium",
-  "Melbourne Victory": "AAMI Park",
-  "Al Hilal": "Kingdom Arena",
-  "Al Nassr": "Al-Awwal Park",
-  "Al Ittihad": "King Abdullah Sports City",
-  "Al Ahli": "King Abdullah Sports City",
-  "Al Ahly": "Cairo International Stadium",
-  "Zamalek": "Cairo International Stadium",
-  "Kaizer Chiefs": "FNB Stadium",
-  "Orlando Pirates": "Orlando Stadium",
-  "Wydad AC": "Stade Mohammed V",
-  "Raja Casablanca": "Stade Mohammed V",
-  "Wigan Athletic": "DW Stadium",
-  "Reading": "Select Car Leasing Stadium",
-  "Rotherham United": "New York Stadium",
-  "Blackpool": "Bloomfield Road",
-  "Peterborough United": "Weston Homes Stadium",
-  "Wycombe Wanderers": "Adams Park",
-  "Exeter City": "St James Park",
-  "Bristol Rovers": "Memorial Stadium",
-  "Northampton Town": "Sixfields Stadium",
-  "Mansfield Town": "One Call Stadium",
-  "Stevenage": "Lamex Stadium",
-  "Leyton Orient": "Brisbane Road",
-  "Lincoln City": "LNER Stadium",
-  "Burton Albion": "Pirelli Stadium",
-  "Huddersfield Town": "John Smith's Stadium",
-  "Stockport County": "Edgeley Park",
-  "Cardiff City B": "Cardiff City Stadium",
-  "Doncaster Rovers": "Eco-Power Stadium",
-  "Rotherham Town": "New York Stadium",
-  "Walsall": "Bescot Stadium",
-  "Crawley Town": "Broadfield Stadium",
-  "Gillingham": "Priestfield Stadium",
-  "Colchester United": "Colchester Community Stadium",
-  "Cheltenham Town": "Whaddon Road",
-  "Grimsby Town": "Blundell Park",
-  "Newport County": "Rodney Parade",
-  "Tranmere Rovers": "Prenton Park",
-  "Barrow": "Holker Street",
-  "Accrington Stanley": "Wham Stadium",
-  "Bradford City": "Valley Parade",
-  "Chesterfield": "SMH Group Stadium",
-  "Fleetwood Town": "Highbury Stadium",
-  "Harrogate Town": "Wetherby Road",
-  "Salford City": "Peninsula Stadium",
-  "Swindon Town": "County Ground",
-  "Port Vale": "Vale Park",
-  "AFC Wimbledon": "Plough Lane",
-  "Morecambe": "Mazuma Stadium",
-  "Carlisle United": "Brunton Park",
-  "Wrexham AFC B": "Racecourse Ground",
-  "Southend United": "Roots Hall",
-  "Woking": "Kingfield Stadium",
-  "York City": "LNER Community Stadium",
-  "Oldham Athletic": "Boundary Park",
-  "Yeovil Town": "Huish Park",
-  "Altrincham": "J. Davidson Stadium",
-  "Rochdale": "Crown Oil Arena",
-  "Racing Santander": "El Sardinero",
-  "Deportivo La Coruña": "Riazor",
-  "Sporting Gijón": "El Molinón",
-  "Real Zaragoza": "La Romareda",
-  "Real Valladolid": "José Zorrilla",
-  "Las Palmas": "Estadio de Gran Canaria",
-  "Leganés": "Estadio Municipal de Butarque",
-  "Huesca": "El Alcoraz",
-  "Mirandés": "Anduva",
-  "Cultural Leonesa": "Estadio Reino de León",
-  "Málaga": "La Rosaleda",
-  "Almería": "Power Horse Stadium",
-  "Córdoba": "Nuevo Arcángel",
-  "Eibar": "Ipurua",
-  "Burgos CF": "El Plantío",
-  "Granada": "Nuevo Los Cármenes",
-  "Castellón": "Estadi Castalia",
-  "Sampdoria B": "Stadio Luigi Ferraris",
-  "Palermo": "Stadio Renzo Barbera",
-  "Bari": "Stadio San Nicola",
-  "Catanzaro": "Stadio Nicola Ceravolo",
-  "Brescia": "Stadio Mario Rigamonti",
-  "Salernitana": "Stadio Arechi",
-  "Frosinone": "Stadio Benito Stirpe",
-  "Modena": "Stadio Alberto Braglia",
-  "Reggiana": "Stadio Città del Tricolore",
-  "Spezia": "Stadio Alberto Picco",
-  "Sudtirol": "Stadio Druso",
-  "Cesena": "Stadio Dino Manuzzi",
-  "Venezia": "Stadio Pier Luigi Penzo",
-  "Cittadella": "Stadio Pierluigi Piccoli",
-  "Carrarese": "Stadio dei Marmi",
-  "Juve Stabia": "Stadio Romeo Menti",
-  "Hertha BSC": "Olympiastadion Berlin",
-  "Fortuna Düsseldorf": "Merkur Spiel-Arena",
-  "Schalke 04": "Veltins-Arena",
-  "Hannover 96": "Heinz von Heiden Arena",
-  "Karlsruher SC": "BBBank Wildpark",
-  "SV Darmstadt 98": "Merck-Stadion am Böllenfalltor",
-  "1. FC Nürnberg": "Max-Morlock-Stadion",
-  "Greuther Fürth": "Sportpark Ronhof",
-  "Eintracht Braunschweig": "Eintracht-Stadion",
-  "Hansa Rostock": "Ostseestadion",
-  "SC Paderborn": "Home Deluxe Arena",
-  "Jahn Regensburg": "Jahnstadion Regensburg",
-  "Paris FC": "Stade Charléty",
-  "Red Star FC": "Stade Bauer",
-  "Amiens SC": "Stade de la Licorne",
-  "Grenoble Foot 38": "Stade des Alpes",
-  "Guingamp": "Stade du Roudourou",
-  "Laval": "Stade Francis Le Basser",
-  "Pau FC": "Stade du Hameau",
-  "Rodez AF": "Stade Paul Lignon",
-  "Troyes AC": "Stade de l'Aube",
-  "Annecy FC": "Parc des Sports",
-  "Willem II": "Koning Willem II Stadion",
-  "Roda JC": "Parkstad Limburg Stadion",
-  "De Graafschap": "De Vijverberg",
-  "Jong Ajax": "De Toekomst",
-  "FC Emmen": "De Oude Meerdijk",
-  "FC Volendam": "Kras Stadion",
-  "Excelsior": "Van Donge & De Roo Stadion",
-  "Estrela da Amadora": "Estádio José Gomes",
-  "Nacional": "Estádio da Madeira",
-  "Farense": "Estádio de São Luís",
-  "Casa Pia": "Estádio Pina Manique",
-  "Ayr United": "Somerset Park",
-  "Dundee": "Dens Park",
-  "Falkirk": "Falkirk Stadium",
-  "Partick Thistle": "Firhill Stadium",
-  "Raith Rovers": "Stark's Park",
-  "Livingston": "Tony Macaroni Arena",
-  "Queen's Park": "Ochilview Park",
-  "Airdrieonians": "Excelsior Stadium",
-  "Beerschot": "Olympisch Stadion",
-  "Lommel SK": "Soevereinstadion",
-  "RWDM": "Stade Edmond Machtens",
-  "KMSK Deinze": "Stedelijk Sportstadion",
-  "Sport Recife": "Ilha do Retiro",
-  "Vitória": "Barradão",
-  "Coritiba": "Couto Pereira",
-  "Goiás": "Serrinha",
-  "Guarani": "Brinco de Ouro",
-  "CRB": "Rei Pelé",
-  "Ponte Preta": "Moisés Lucarelli",
-  "Náutico": "Aflitos",
-  "Avaí": "Ressacada",
-  "América Mineiro": "Independência",
-  "Chapecoense": "Arena Condá",
-  "Chacarita Juniors": "Estadio Chacarita Juniors",
-  "Almirante Brown": "Estadio Fragata Sarmiento",
-  "Atlanta": "Estadio Don León Kolbowski",
-  "Gimnasia y Esgrima La Plata": "Estadio Juan Carmelo Zerillo",
-  "Louisville City FC": "Lynn Family Stadium",
-  "Sacramento Republic FC": "Heart Health Park",
-  "San Antonio FC": "Toyota Field",
-  "Phoenix Rising FC": "Wild Horse Pass",
-  "Detroit City FC": "Keyworth Stadium",
-  "Indy Eleven": "Michael A. Carroll Stadium",
-  "Birmingham Legion FC": "Protective Stadium",
-  "Miami FC": "Pitbull Stadium",
-  "Las Vegas Lights FC": "Cashman Field",
-  "Oakland Roots SC": "Championship Center Stadium",
-  "Cavalry FC": "ATCO Field",
-  "Forge FC": "Tim Hortons Field",
-  "Pacific FC": "Starlight Stadium",
-  "York United FC": "York Lions Stadium",
-  "Atlético Ottawa": "TD Place Stadium",
-  "Valour FC": "IG Field",
-  "Ventforet Kofu": "JIT Recycle Ink Stadium",
-  "Omiya Ardija": "NACK5 Stadium Omiya",
-  "Shimizu S-Pulse": "IAI Stadium Nihondaira",
-  "Montedio Yamagata": "ND Soft Stadium Yamagata",
-  "Fagiano Okayama": "City Light Stadium",
-  "Roasso Kumamoto": "Egao Kenko Stadium",
-  "Busan IPark": "Busan Asiad Main Stadium",
-  "Gyeongnam FC": "Changwon Football Center",
-  "Bucheon FC 1995": "Bucheon Stadium",
-  "Ansan Greeners": "Ansan Wa~ Stadium",
-  "Legia Warsaw": "Stadion Wojska Polskiego",
-  "Lech Poznań": "Stadion Poznań",
-  "Wisła Kraków": "Stadion Miejski",
-  "Cracovia": "Stadion Cracovii",
-  "Sparta Prague": "Letná Stadium",
-  "Slavia Prague": "Sinobo Stadium",
-  "Viktoria Plzeň": "Doosan Arena",
-  "Ferencváros": "Groupama Aréna",
-  "Debrecen": "Nagyerdei Stadion",
-  "Steaua Bucharest": "Ghencea Stadium",
-  "CFR Cluj": "Dr. Constantin Rădulescu Stadium",
-  "Dinamo Zagreb": "Stadion Maksimir",
-  "Hajduk Split": "Stadion Poljud",
-  "Red Star Belgrade": "Rajko Mitić Stadium",
-  "Partizan Belgrade": "Stadion Partizana",
-  "Boston United": "York Street",
-  "Braintree Town": "Cressing Road",
-  "Brackley Town": "St James Park",
-  "Eastleigh": "Silverlake Stadium",
-  "Halifax Town": "The Shay",
-  "Hartlepool United": "Victoria Park",
-  "Maidenhead United": "York Road",
-  "Solihull Moors": "Damson Park",
-  "Southend Manor": "Roots Hall",
-  "Sutton United": "Gander Green Lane",
-  "Aldershot Town": "EBB Stadium",
-  "Dagenham & Redbridge": "Victoria Road",
-  "Wealdstone": "Grosvenor Vale",
-  "Gateshead": "International Stadium",
-  "Rushall Olympic": "Dales Lane",
-  "Scunthorpe United": "Glanford Park",
-  "Forest Green Rovers": "The New Lawn",
-  "Buxton": "Silverlands",
-  "Chorley": "Victory Park",
-  "Curzon Ashton": "Tameside Stadium",
-  "Alfreton Town": "North Street",
-  "Bishop's Stortford": "Woodside Park",
-  "Hemel Hempstead Town": "Vauxhall Road",
-  "Chelmsford City": "The Cheltingham Stadium",
-  "Dartford": "Princes Park",
-  "Dorking Wanderers": "Meadowbank Stadium",
-  "Farnborough": "Cherrywood Road",
-  "Hampton & Richmond Borough": "Beveree Stadium",
-  "Tonbridge Angels": "Longmead Stadium",
-  "Truro City": "Treyew Road",
-  "Sanse (Real Madrid Castilla)": "Estadio Alfredo Di Stéfano",
-  "Barcelona Atlètic": "Estadi Johan Cruyff",
-  "Real Murcia": "Estadio Nueva Condomina",
-  "Recreativo de Huelva": "Estadio Nuevo Colombino",
-  "Linares Deportivo": "Estadio Linarejos",
-  "Ibiza": "Estadio Municipal de Can Misses",
-  "Ponferradina": "El Toralín",
-  "Nàstic Tarragona": "Estadi Nou Estadi",
-  "Algeciras CF": "Estadio Nuevo Mirador",
-  "Sevilla Atlético": "Ciudad Deportiva José Ramón Cisneros Palacios",
-  "Triestina": "Stadio Nereo Rocco",
-  "Vicenza": "Stadio Romeo Menti",
-  "Padova": "Stadio Euganeo",
-  "Renate": "Città di Meda",
-  "Pro Vercelli": "Stadio Silvio Piola",
-  "Novara": "Stadio Silvio Piola",
-  "Legnago Salus": "Stadio Mario Rigamonti",
-  "Foggia": "Stadio Pino Zaccheria",
-  "Taranto": "Stadio Iacovone",
-  "Monopoli": "Stadio Vito Simone Veneziani",
-  "Casertana": "Stadio Alberto Pinto",
-  "Benevento": "Stadio Ciro Vigorito",
-  "Dynamo Dresden": "Rudolf-Harbig-Stadion",
-  "Energie Cottbus": "Stadion der Freundschaft",
-  "Rot-Weiss Essen": "Stadion Essen",
-  "Waldhof Mannheim": "Carl-Benz-Stadion",
-  "1860 Munich": "Grünwalder Stadion",
-  "Erzgebirge Aue": "Erzgebirgsstadion",
-  "Viktoria Köln": "Sportpark Höhenberg",
-  "Arminia Bielefeld": "SchücoArena",
-  "MSV Duisburg": "Schauinsland-Reisen-Arena",
-  "Alemannia Aachen": "Tivoli",
-  "Le Mans FC": "Stade Léon Bollée",
-  "Bourg-en-Bresse": "Stade Marcel-Verchère",
-  "Boulogne": "Stade de la Libération",
-  "Concarneau": "Stade Guy Piriou",
-  "Nancy": "Stade Marcel Picot",
-  "Sedan": "Stade Louis Dugauguez",
-  "Villefranche": "Stade Armand Chouffet",
-  "Chambly": "Stade Pierre Brisson",
-  "Katwijk": "Sportpark Nieuw Zuid",
-  "Spakenburg": "Sportpark de Westmaat",
-  "IJsselmeervogels": "Sportpark de Kuil",
-  "Rijnsburgse Boys": "Sportpark Middelmors",
-  "Alloa Athletic": "Recreation Park",
-  "Arbroath": "Gayfield Park",
-  "Cove Rangers": "Balmoral Stadium",
-  "Montrose": "Links Park",
-  "Stenhousemuir": "Ochilview Park",
-  "Stirling Albion": "Forthbank Stadium",
-  "Annan Athletic": "Galabank",
-  "Elgin City": "Borough Briggs",
-  "Peterhead": "Balmoor",
-  "The New Saints": "Park Hall",
-  "Connah's Quay Nomads": "Deeside Stadium",
-  "Newtown": "Latham Park",
-  "Bala Town": "Maes Tegid",
-  "Barry Town United": "Jenner Park",
-  "Penybont": "SDX Stadium",
-  "Shamrock Rovers": "Tallaght Stadium",
-  "Bohemian FC": "Dalymount Park",
-  "St Patrick's Athletic": "Richmond Park",
-  "Shelbourne": "Tolka Park",
-  "Derry City": "The Ryan McBride Brandywell Stadium",
-  "Sligo Rovers": "The Showgrounds",
-  "Cork City": "Turner's Cross",
-  "Drogheda United": "Head in the Game Park",
-  "Chattanooga FC": "CHI Memorial Stadium",
-  "Union Omaha": "Werner Park",
-  "Greenville Triumph SC": "Legacy Early College Stadium",
-  "Forward Madison FC": "Breese Stevens Field",
-  "Central Valley Fuego FC": "Fresno State Soccer Stadium",
-  "South Melbourne FC": "Lakeside Stadium",
-  "Sydney United 58": "Sydney United Sports Centre",
-  "Heidelberg United": "Olympic Village Stadium",
-  "Perth Glory": "HBF Park",
-  "Adelaide United": "Coopers Stadium",
-  "Newcastle Jets": "McDonald Jones Stadium",
-  "Western Sydney Wanderers": "CommBank Stadium",
-  "Wellington Phoenix": "Sky Stadium",
-  "Macarthur FC": "Campbelltown Stadium",
-  "Central Coast Mariners": "Industree Group Stadium",
-  "Brisbane Roar": "Suncorp Stadium",
-  "Sekhukhune United": "Peter Mokaba Stadium",
-  "Marumo Gallants": "Old Peter Mokaba Stadium",
-  "Chippa United": "Nelson Mandela Bay Stadium",
-  "Golden Arrows": "King Zwelithini Stadium",
-  "Stellenbosch FC": "Danie Craven Stadium",
-  "TS Galaxy": "Mbombela Stadium",
-  "Polokwane City": "Peter Mokaba Stadium",
-  "Royal AM": "Chatsworth Stadium",
-  "Mohun Bagan": "Salt Lake Stadium",
-  "East Bengal": "Salt Lake Stadium",
-  "Mohammedan SC": "Kishore Bharati Krirangan",
-  "Gokulam Kerala": "EMS Corporation Stadium",
-  "Churchill Brothers": "Fatorda Stadium",
-  "Real Kashmir": "TRC Turf Ground",
-  "Punjab FC": "Guru Nanak Stadium",
-  "Shenzhen FC": "Shenzhen Universiade Sports Centre",
-  "Dalian Pro": "Dalian Sports Center Stadium",
-  "Qingdao Hainiu": "Qingdao Youth Football Stadium",
-  "Maccabi Tel Aviv": "Bloomfield Stadium",
-  "Hapoel Tel Aviv": "Bloomfield Stadium",
-  "Maccabi Haifa": "Sammy Ofer Stadium",
-  "Beitar Jerusalem": "Teddy Stadium",
-  "Hapoel Beer Sheva": "Turner Stadium",
-  "Peñarol": "Estadio Campeón del Siglo",
-  "Colo-Colo": "Estadio Monumental David Arellano",
-  "Universidad de Chile": "Estadio Nacional Julio Martínez Prádanos",
-  "Universidad Católica": "Estadio San Carlos de Apoquindo",
-  "Millonarios": "Estadio El Campín",
-  "Atlético Nacional": "Estadio Atanasio Girardot",
-  "América de Cali": "Estadio Pascual Guerrero",
-  "Alianza Lima": "Estadio Alejandro Villanueva",
-  "Universitario de Deportes": "Estadio Monumental U",
-  "Barcelona SC": "Estadio Monumental Isidro Romero",
-  "LDU Quito": "Estadio Rodrigo Paz Delgado",
-  "The Strongest": "Estadio Hernando Siles",
-  "Bolívar": "Estadio Hernando Siles",
-  "Hearts": "Tynecastle Park",
-  "Kilmarnock": "Rugby Park",
-  "St Johnstone": "McDiarmid Park",
-  "Greenock Morton": "Cappielow",
-  "Hamilton Academical": "New Douglas Park",
-  "Dumbarton": "The Cheaper Insurance Direct Stadium",
-  "East Fife": "Bayview Stadium",
-  "Inverness Caledonian Thistle": "Caledonian Stadium",
-  "Kelty Hearts": "New Central Park",
-  "Bonnyrigg Rose": "New Dundas Park",
-  "Clyde": "Broadwood Stadium",
-  "Edinburgh City": "Meadowbank Stadium",
-  "Forfar Athletic": "Station Park",
-  "Spartans": "Ainslie Park",
-  "Stranraer": "Stair Park",
-  "Shkëndija": "Ecolog Arena",
-  "Struga Trim & Lum": "Gradska Plaža Stadium",
-  "Sileks": "Sileks Stadium",
-  "Tikveš": "Gradski Stadion Kavadarci",
-  "Rabotnički": "Toše Proeski Arena",
-  "Shkupi": "Čair Stadium",
-  "Pelister": "Todor Proeski Stadium",
-  "Makedonija G.P.": "Gjorče Petrov Stadium",
-  "Bregalnica Štip": "Gradski Stadion Štip",
-  "Bashkimi": "Gradski Stadion Kumanovo",
-  "Arsimi": "Blagoj Istatov Stadium",
-  "Ludogorets Razgrad": "Huvepharma Arena",
-  "CSKA Sofia": "Vasil Levski National Stadium",
-  "Levski Sofia": "Vivacom Arena - Georgi Asparuhov",
-  "Botev Plovdiv": "Hristo Botev Stadium",
-  "Cherno More": "Ticha Stadium",
-  "Slavia Sofia": "Slavia Stadium",
-  "Lokomotiv Plovdiv": "Lokomotiv Stadium",
-  "Arda Kardzhali": "Arena Arda",
-  "TSC Bačka Topola": "TSC Arena",
-  "Čukarički": "Stadion na Banovom brdu",
-  "Vojvodina": "Karađorđe Stadium",
-  "Radnički Niš": "Čair Stadium",
-  "Rijeka": "Stadion Rujevica",
-  "Osijek": "Opus Arena",
-  "Lokomotiva Zagreb": "Stadion Kranjčevićeva",
-  "Kryvbas Kryvyi Rih": "Hirnyk Stadium",
-  "Polissya Zhytomyr": "Central Stadium",
-  "Oleksandriya": "CSC Nika",
-  "Zorya Luhansk": "Slavutych-Arena",
-  "Vorskla Poltava": "Butovsky Vorskla Stadium",
-  "Kolos Kovalivka": "Kolos Stadium",
-  "Rukh Lviv": "Arena Lviv",
-  "Baník Ostrava": "Městský stadion",
-  "Sigma Olomouc": "Andrův stadion",
-  "Slovan Liberec": "Stadion u Nisy",
-  "Mladá Boleslav": "Lokotrans Aréna",
-  "Jablonec": "Stadion Střelnice",
-  "Bohemians 1905": "Ďolíček",
-  "Sturm Graz": "Merkur Arena",
-  "LASK": "Raiffeisen Arena",
-  "Wolfsberger AC": "Lavanttal-Arena",
-  "Austria Klagenfurt": "Wörthersee Stadion",
-  "Hartberg": "Profertil Arena",
-  "Aris": "Kleanthis Vikelidis Stadium",
-  "Asteras Tripolis": "Theodoros Kolokotronis Stadium",
-  "Atromitos": "Peristeri Stadium",
-  "OFI Crete": "Theodoros Vardinogiannis Stadium",
-  "Servette": "Stade de Genève",
-  "Lugano": "Stadio di Cornaredo",
-  "Lausanne-Sport": "Stade de la Tuilière",
-  "St. Gallen": "Kybunpark",
-  "Luzern": "Swissporarena",
-  "Jagiellonia Białystok": "Stadion Miejski",
-  "Raków Częstochowa": "Miejski Stadion Piłkarski Raków",
-  "Pogoń Szczecin": "Stadion Miejski im. Floriana Krygiera",
-  "Górnik Zabrze": "Stadion im. Ernesta Pohla",
-  "Lechia Gdańsk": "Polsat Plus Arena Gdańsk",
-  "Widzew Łódź": "Stadion Widzewa",
-  "FCSB": "Arena Națională",
-  "Rapid București": "Superbet Arena-Giulești",
-  "Universitatea Craiova": "Stadionul Ion Oblemenco",
-  "Dinamo București": "Stadionul Arcul de Triumf",
-  "Universitatea Cluj": "Cluj Arena",
-  "Farul Constanța": "Stadionul Central Academia Hagi",
-  "Bodø/Glimt": "Aspmyra Stadion",
-  "Molde": "Aker Stadion",
-  "Viking": "Lyse Arena",
-  "Brann": "Brann Stadion",
-  "Vålerenga": "Intility Arena",
-  "Lillestrøm": "Åråsen Stadion",
-  "Hammarby": "Tele2 Arena",
-  "Djurgårdens IF": "Tele2 Arena",
-  "IFK Göteborg": "Gamla Ullevi",
-  "BK Häcken": "Bravida Arena",
-  "IF Elfsborg": "Borås Arena",
-  "Midtjylland": "MCH Arena",
-  "Nordsjælland": "Right to Dream Park",
-  "AGF Aarhus": "Ceres Park",
-  "Randers": "Cepheus Park Randers",
-  "Silkeborg": "JYSK Park",
-  "Slovan Bratislava": "Tehelné pole",
-  "Spartak Trnava": "City Arena - Štadión Antona Malatinského",
-  "DAC 1904 Dunajská Streda": "MOL Aréna",
-  "Žilina": "Štadión pod Dubňom",
-  "Ružomberok": "Štadión MFK Ružomberok",
-  "Olimpija Ljubljana": "Stožice Stadium",
-  "Maribor": "Ljudski vrt",
-  "Celje": "Z'dežele Stadium",
-  "Koper": "Bonifika Stadium",
-  "Mura": "Fazanerija City Stadium",
-  "APOEL": "GSP Stadium",
-  "Pafos": "Alphamega Stadium",
-  "Omonia": "GSP Stadium",
-  "AEK Larnaca": "AEK Arena",
-  "Aris Limassol": "Alphamega Stadium",
-  "Apollon Limassol": "Alphamega Stadium",
-  "Zrinjski Mostar": "Stadion pod Bijelim Brijegom",
-  "Borac Banja Luka": "Gradski Stadion",
-  "Sarajevo": "Asim Ferhatović Hase Stadium",
-  "Željezničar": "Grbavica Stadium",
-  "Široki Brijeg": "Pecara Stadium",
-  "Egnatia": "Arena Egnatia",
-  "Partizani Tirana": "Arena Kombëtare",
-  "Tirana": "Arena Kombëtare",
-  "Vllaznia": "Loro Boriçi Stadium",
-  "Skënderbeu": "Skënderbeu Stadium",
-  "Drita": "Gjilan City Stadium",
-  "Ballkani": "Suhareka City Stadium",
-  "Prishtina": "Fadil Vokrri Stadium",
-  "Llapi": "Zahir Pajaziti Stadium",
-  "Budućnost Podgorica": "Podgorica City Stadium",
-  "Sutjeska Nikšić": "Stadion Kraj Bistrice",
-  "Dečić": "Stadion Tuško Polje",
-  "Mornar": "Topolica Sport Centre",
-  "Sheriff Tiraspol": "Sheriff Stadium",
-  "Zimbru Chișinău": "Zimbru Stadium",
-  "Petrocub Hîncești": "Stadionul Municipal Hîncești",
-  "Dinamo Tbilisi": "Boris Paichadze Dinamo Arena",
-  "Dinamo Batumi": "Adjarabet Arena",
-  "Iberia 1999": "Mikheil Meskhi Stadium",
-  "Torpedo Kutaisi": "Ramaz Shengelia Stadium",
-  "Noah": "Abovyan City Stadium",
-  "Pyunik": "Vazgen Sargsyan Republican Stadium",
-  "Ararat-Armenia": "Urartu Stadium",
-  "Urartu": "Urartu Stadium",
-  "Qarabağ": "Azersun Arena",
-  "Neftçi": "Neftçi Arena",
-  "Sabah": "Bank Respublika Arena",
-  "Zira": "Zirə Olympic Sport Complex",
-  "Kairat Almaty": "Central Stadium",
-  "Astana": "Astana Arena",
-  "Ordabasy": "Kazhimukan Munaitpasov Stadium",
-  "Tobol": "Kostanay Central Stadium",
-  "Aktobe": "Central Stadium",
-  "HJK Helsinki": "Bolt Arena",
-  "KuPS": "Väre Areena",
-  "Ilves": "Tammelan Stadion",
-  "SJK": "OmaSP Stadion",
-  "Haka": "Tehtaan kenttä",
-  "Víkingur Reykjavík": "Víkingsvollur",
-  "Valur": "Hlíðaren­di",
-  "Breiðablik": "Kópavogsvöllur",
-  "KR Reykjavík": "KR-völlur",
-  "RFS": "LNK Sporta Parks",
-  "Riga FC": "Skonto Stadium",
-  "FK Liepāja": "Daugava Stadium",
-  "Žalgiris Vilnius": "LFF Stadium",
-  "Kauno Žalgiris": "Dariaus ir Girėno Stadium",
-  "Panevėžys": "Aukštaitija Stadium",
-  "Flora Tallinn": "A. Le Coq Arena",
-  "Levadia Tallinn": "A. Le Coq Arena",
-  "Nõmme Kalju": "Hiiu Stadium",
-  "Dinamo Minsk": "Dinamo Stadium",
-  "BATE Borisov": "Borisov Arena",
-  "Neman Grodno": "Neman Stadium",
-  "Ħamrun Spartans": "Victor Tedesco Stadium",
-  "Floriana": "Independence Ground",
-  "Sliema Wanderers": "National Stadium",
-  "Hibernians": "Hibernians Ground",
-  "F91 Dudelange": "Stade Jos Nosbaum",
-  "Swift Hesperange": "Stade Alphonse Theis",
-  "Racing FC Union Luxembourg": "Stade de Luxembourg",
-  "Inter Escaldes": "Estadi Nacional",
-  "Santa Coloma": "Estadi Nacional",
-  "Atlètic Club d'Escaldes": "Estadi Nacional",
-  "KÍ Klaksvík": "Við Djúpumýrar",
-  "HB Tórshavn": "Gundadalur",
-  "Víkingur Gøta": "Sarpugerði",
-  "Linfield": "Windsor Park",
-  "Glentoran": "The BetMcLean Oval",
-  "Larne": "Inver Park",
-  "Crusaders": "Seaview",
-  "Cliftonville": "Solitude",
-  "Coleraine": "The Showgrounds",
-  "Ballymena United": "The Showgrounds",
-  "Glenavon": "Mourneview Park",
-  "Famalicão": "Estádio Municipal 22 de Junho",
-  "Gil Vicente": "Estádio Cidade de Barcelos",
-  "Rio Ave": "Estádio dos Arcos",
-  "Estoril": "Estádio António Coimbra da Mota",
-  "Arouca": "Estádio Municipal de Arouca",
-  "Moreirense": "Parque de Jogos Comendador Joaquim de Almeida Freitas",
-  "Go Ahead Eagles": "De Adelaarshorst",
-  "FC Groningen": "Euroborg",
-  "Fortuna Sittard": "Fortuna Sittard Stadion",
-  "PEC Zwolle": "MAC³PARK Stadion",
-  "RKC Waalwijk": "Mandemakers Stadion",
-  "NAC Breda": "Rat Verlegh Stadion",
-  "Gent": "Planet Group Arena",
-  "Charleroi": "Stade du Pays de Charleroi",
-  "Mechelen": "AFAS Stadion",
-  "Cercle Brugge": "Jan Breydel Stadium",
-  "OH Leuven": "King Power at Den Dreef Stadion",
-  "Sint-Truiden": "Daio Wasabi Stayen Stadium",
-  "Başakşehir": "Başakşehir Fatih Terim Stadium",
-  "Samsunspor": "Samsun 19 Mayıs Stadium",
-  "Konyaspor": "Konya Metropolitan Municipality Stadium",
-  "Göztepe": "Gürsel Aksel Stadium",
-  "Antalyaspor": "Corendon Airlines Park",
-  "Kayserispor": "RHG Enertürk Enerji Stadium",
-  "Maccabi Netanya": "Netanya Stadium",
-  "Hapoel Jerusalem": "Teddy Stadium",
-  "Maccabi Bnei Reineh": "Green Stadium",
-  "Kaiserslautern": "Fritz-Walter-Stadion",
-  "Ross County": "Victoria Park",
-  "Dunfermline": "East End Park",
-  "Queen of the South": "Palmerston Park",
-  "Brechin City": "Glebe Park",
-  "East Kilbride": "K-Park",
-  "FC Sion": "Stade de Tourbillon",
-  "FC Thun": "Stockhorn Arena",
-  "FC Vaduz": "Rheinpark Stadion",
-  "FK Vardar": "Philip II Arena",
-  "Győri ETO": "ETO Park",
-  "Tromsø": "Alfheim Stadion",
-  "Lincoln Red Imps": "Victoria Stadium",
-  "Europa": "Victoria Stadium",
-  "GKS Katowice": "Stadion GKS Katowice",
-  "FC Inter Turku": "Veritas Stadion",
-  "Marsaxlokk": "Ta' Qali National Stadium",
-  "Valletta": "Ta' Qali National Stadium",
-  "AF Elbasani": "Elbasan Arena",
-  "Alashkert": "Nairi Stadium",
-  "Aluminij": "Aluminij Sports Park",
-  "Bravo": "ZAK Stadium",
-  "Caernarfon Town": "The Oval",
-  "Dila": "Tengiz Burjanadze Stadium",
-  "Dukagjini": "18 June Stadium",
-  "FC Atert Bissen": "Terrain ZAC Klengbousbierg",
-  "FC Differdange 03": "Stade Municipal de la Ville de Differdange",
-  "FC Milsami Orhei": "CSR Orhei",
-  "GAIS": "Gamla Ullevi",
-  "Hradec Králové": "Malšovická Aréna",
-  "LNZ Cherkasy": "Cherkasy Arena",
-  "Malisheva": "Liman Gegaj Stadium",
-  "Mjällby": "Strandvallen",
-  "Mondorf-les-Bains": "Stade John Grün",
-  "NSI Runavik": "Við Løkin",
-  "Paide Linnameeskond": "Paide Linnastaadion",
-  "Paksi SE": "Fehérvári úti Stadion",
-  "Petrovac": "Stadion pod Malim Brdom",
-  "SP La Fiorita": "Igor Crescentini Stadium",
-  "SP Tre Fiori": "Stadio di Fiorentino",
-  "St Joseph's": "Victoria Stadium",
-  "Stjarnan": "Samsung völlurinn",
-  "UNA Strassen": "Complexe Sportif Jean Wirtz",
-  "Varaždin": "Stadion Anđelko Herjavec",
-  "Velez Mostar": "Rođeni Stadium",
-  "Vestri": "Ísafjarðarvöllur",
-  "Virtus": "Stadio di Acquaviva",
-  "Yelimay Semey": "Spartak Stadium",
-  "Železničar Pančevo": "SC Mladost Stadium",
-  "Dinamo City": "Selman Stërmasi Stadium",
-  "Dinamo Tirana": "Selman Stërmasi Stadium",
-  "FC Avan Academy": "Yerevan Football Academy Stadium",
-  "FC Saburtalo Tbilisi": "Mikheil Meskhi Stadium",
-  "Artsakh": "Abovyan City Stadium",
-  "Auda": "Skonto Stadium",
-  "Hegelmann Litauen": "Raudondvaris Stadium",
-  "ML Vitebsk": "Vitebsky Central Sport Complex"
+  "FK Shkendija 79": {
+    "stadium": "Ecolog Stadium",
+    "country": "North Macedonia"
+  },
+  "Arsenal": {
+    "stadium": "Emirates Stadium",
+    "country": "England"
+  },
+  "Aston Villa": {
+    "stadium": "Villa Park",
+    "country": "England"
+  },
+  "Bournemouth": {
+    "stadium": "Vitality Stadium",
+    "country": "England"
+  },
+  "Brentford": {
+    "stadium": "Gtech Community Stadium",
+    "country": "England"
+  },
+  "Brighton & Hove Albion": {
+    "stadium": "Amex Stadium",
+    "country": "England"
+  },
+  "Burnley": {
+    "stadium": "Turf Moor",
+    "country": "England"
+  },
+  "Chelsea": {
+    "stadium": "Stamford Bridge",
+    "country": "England"
+  },
+  "Crystal Palace": {
+    "stadium": "Selhurst Park",
+    "country": "England"
+  },
+  "Everton": {
+    "stadium": "Hill Dickinson Stadium",
+    "country": "England"
+  },
+  "Fulham": {
+    "stadium": "Craven Cottage",
+    "country": "England"
+  },
+  "Leeds United": {
+    "stadium": "Elland Road",
+    "country": "England"
+  },
+  "Liverpool": {
+    "stadium": "Anfield",
+    "country": "England"
+  },
+  "Manchester City": {
+    "stadium": "Etihad Stadium",
+    "country": "England"
+  },
+  "Manchester United": {
+    "stadium": "Old Trafford",
+    "country": "England"
+  },
+  "Newcastle United": {
+    "stadium": "St James' Park",
+    "country": "England"
+  },
+  "Nottingham Forest": {
+    "stadium": "The City Ground",
+    "country": "England"
+  },
+  "Sunderland": {
+    "stadium": "Stadium of Light",
+    "country": "England"
+  },
+  "Tottenham Hotspur": {
+    "stadium": "Tottenham Hotspur Stadium",
+    "country": "England"
+  },
+  "West Ham United": {
+    "stadium": "London Stadium",
+    "country": "England"
+  },
+  "Wolverhampton Wanderers": {
+    "stadium": "Molineux Stadium",
+    "country": "England"
+  },
+  "Leicester City": {
+    "stadium": "King Power Stadium",
+    "country": "England"
+  },
+  "Southampton": {
+    "stadium": "St Mary's Stadium",
+    "country": "England"
+  },
+  "Ipswich Town": {
+    "stadium": "Portman Road",
+    "country": "England"
+  },
+  "Norwich City": {
+    "stadium": "Carrow Road",
+    "country": "England"
+  },
+  "West Bromwich Albion": {
+    "stadium": "The Hawthorns",
+    "country": "England"
+  },
+  "Middlesbrough": {
+    "stadium": "Riverside Stadium",
+    "country": "England"
+  },
+  "Sheffield United": {
+    "stadium": "Bramall Lane",
+    "country": "England"
+  },
+  "Sheffield Wednesday": {
+    "stadium": "Hillsborough Stadium",
+    "country": "England"
+  },
+  "Stoke City": {
+    "stadium": "bet365 Stadium",
+    "country": "England"
+  },
+  "Coventry City": {
+    "stadium": "Coventry Building Society Arena",
+    "country": "England"
+  },
+  "Watford": {
+    "stadium": "Vicarage Road",
+    "country": "England"
+  },
+  "Millwall": {
+    "stadium": "The Den",
+    "country": "England"
+  },
+  "Preston North End": {
+    "stadium": "Deepdale",
+    "country": "England"
+  },
+  "Swansea City": {
+    "stadium": "Swansea.com Stadium",
+    "country": "Wales"
+  },
+  "Cardiff City": {
+    "stadium": "Cardiff City Stadium",
+    "country": "Wales"
+  },
+  "Hull City": {
+    "stadium": "MKM Stadium",
+    "country": "England"
+  },
+  "Bristol City": {
+    "stadium": "Ashton Gate",
+    "country": "England"
+  },
+  "Blackburn Rovers": {
+    "stadium": "Ewood Park",
+    "country": "England"
+  },
+  "Derby County": {
+    "stadium": "Pride Park Stadium",
+    "country": "England"
+  },
+  "Queens Park Rangers": {
+    "stadium": "Loftus Road",
+    "country": "England"
+  },
+  "Luton Town": {
+    "stadium": "Kenilworth Road",
+    "country": "England"
+  },
+  "Oxford United": {
+    "stadium": "Kassam Stadium",
+    "country": "England"
+  },
+  "Portsmouth": {
+    "stadium": "Fratton Park",
+    "country": "England"
+  },
+  "Charlton Athletic": {
+    "stadium": "The Valley",
+    "country": "England"
+  },
+  "Plymouth Argyle": {
+    "stadium": "Home Park",
+    "country": "England"
+  },
+  "Wrexham": {
+    "stadium": "Racecourse Ground",
+    "country": "Wales"
+  },
+  "Birmingham City": {
+    "stadium": "St Andrew's",
+    "country": "England"
+  },
+  "Bolton Wanderers": {
+    "stadium": "University of Bolton Stadium",
+    "country": "England"
+  },
+  "Barnsley": {
+    "stadium": "Oakwell",
+    "country": "England"
+  },
+  "Notts County": {
+    "stadium": "Meadow Lane",
+    "country": "England"
+  },
+  "Real Madrid": {
+    "stadium": "Santiago Bernabéu",
+    "country": "Spain"
+  },
+  "Barcelona": {
+    "stadium": "Camp Nou",
+    "country": "Spain"
+  },
+  "Atlético Madrid": {
+    "stadium": "Cívitas Metropolitano",
+    "country": "Spain"
+  },
+  "Athletic Bilbao": {
+    "stadium": "San Mamés",
+    "country": "Spain"
+  },
+  "Real Sociedad": {
+    "stadium": "Reale Arena",
+    "country": "Spain"
+  },
+  "Sevilla": {
+    "stadium": "Ramón Sánchez-Pizjuán",
+    "country": "Spain"
+  },
+  "Real Betis": {
+    "stadium": "Benito Villamarín",
+    "country": "Spain"
+  },
+  "Villarreal": {
+    "stadium": "Estadio de la Cerámica",
+    "country": "Spain"
+  },
+  "Valencia": {
+    "stadium": "Mestalla",
+    "country": "Spain"
+  },
+  "Celta Vigo": {
+    "stadium": "Balaídos",
+    "country": "Spain"
+  },
+  "Osasuna": {
+    "stadium": "El Sadar",
+    "country": "Spain"
+  },
+  "Getafe": {
+    "stadium": "Coliseum Alfonso Pérez",
+    "country": "Spain"
+  },
+  "Girona": {
+    "stadium": "Montilivi",
+    "country": "Spain"
+  },
+  "Rayo Vallecano": {
+    "stadium": "Vallecas",
+    "country": "Spain"
+  },
+  "Espanyol": {
+    "stadium": "RCDE Stadium",
+    "country": "Spain"
+  },
+  "Mallorca": {
+    "stadium": "Son Moix",
+    "country": "Spain"
+  },
+  "Alavés": {
+    "stadium": "Mendizorroza",
+    "country": "Spain"
+  },
+  "Levante": {
+    "stadium": "Ciutat de València",
+    "country": "Spain"
+  },
+  "Elche": {
+    "stadium": "Martínez Valero",
+    "country": "Spain"
+  },
+  "Real Oviedo": {
+    "stadium": "Carlos Tartiere",
+    "country": "Spain"
+  },
+  "Juventus": {
+    "stadium": "Allianz Stadium",
+    "country": "Italy"
+  },
+  "AC Milan": {
+    "stadium": "San Siro",
+    "country": "Italy"
+  },
+  "Inter Milan": {
+    "stadium": "San Siro",
+    "country": "Italy"
+  },
+  "Napoli": {
+    "stadium": "Stadio Diego Armando Maradona",
+    "country": "Italy"
+  },
+  "AS Roma": {
+    "stadium": "Stadio Olimpico",
+    "country": "Italy"
+  },
+  "Lazio": {
+    "stadium": "Stadio Olimpico",
+    "country": "Italy"
+  },
+  "Atalanta": {
+    "stadium": "Gewiss Stadium",
+    "country": "Italy"
+  },
+  "Fiorentina": {
+    "stadium": "Stadio Artemio Franchi",
+    "country": "Italy"
+  },
+  "Bologna": {
+    "stadium": "Stadio Renato Dall'Ara",
+    "country": "Italy"
+  },
+  "Torino": {
+    "stadium": "Stadio Olimpico Grande Torino",
+    "country": "Italy"
+  },
+  "Udinese": {
+    "stadium": "Bluenergy Stadium",
+    "country": "Italy"
+  },
+  "Genoa": {
+    "stadium": "Stadio Luigi Ferraris",
+    "country": "Italy"
+  },
+  "Sampdoria": {
+    "stadium": "Stadio Luigi Ferraris",
+    "country": "Italy"
+  },
+  "Cagliari": {
+    "stadium": "Unipol Domus",
+    "country": "Italy"
+  },
+  "Hellas Verona": {
+    "stadium": "Stadio Marcantonio Bentegodi",
+    "country": "Italy"
+  },
+  "Parma": {
+    "stadium": "Stadio Ennio Tardini",
+    "country": "Italy"
+  },
+  "Como": {
+    "stadium": "Stadio Giuseppe Sinigaglia",
+    "country": "Italy"
+  },
+  "Lecce": {
+    "stadium": "Stadio Via del Mare",
+    "country": "Italy"
+  },
+  "Empoli": {
+    "stadium": "Stadio Carlo Castellani",
+    "country": "Italy"
+  },
+  "Cremonese": {
+    "stadium": "Stadio Giovanni Zini",
+    "country": "Italy"
+  },
+  "Pisa": {
+    "stadium": "Arena Garibaldi",
+    "country": "Italy"
+  },
+  "Sassuolo": {
+    "stadium": "Mapei Stadium",
+    "country": "Italy"
+  },
+  "Bayern Munich": {
+    "stadium": "Allianz Arena",
+    "country": "Germany"
+  },
+  "Borussia Dortmund": {
+    "stadium": "Signal Iduna Park",
+    "country": "Germany"
+  },
+  "RB Leipzig": {
+    "stadium": "Red Bull Arena",
+    "country": "Germany"
+  },
+  "Bayer Leverkusen": {
+    "stadium": "BayArena",
+    "country": "Germany"
+  },
+  "Eintracht Frankfurt": {
+    "stadium": "Deutsche Bank Park",
+    "country": "Germany"
+  },
+  "VfB Stuttgart": {
+    "stadium": "MHPArena",
+    "country": "Germany"
+  },
+  "SC Freiburg": {
+    "stadium": "Europa-Park Stadion",
+    "country": "Germany"
+  },
+  "VfL Wolfsburg": {
+    "stadium": "Volkswagen Arena",
+    "country": "Germany"
+  },
+  "Borussia Mönchengladbach": {
+    "stadium": "Borussia-Park",
+    "country": "Germany"
+  },
+  "Werder Bremen": {
+    "stadium": "Weserstadion",
+    "country": "Germany"
+  },
+  "1. FC Union Berlin": {
+    "stadium": "Stadion An der Alten Försterei",
+    "country": "Germany"
+  },
+  "TSG Hoffenheim": {
+    "stadium": "PreZero Arena",
+    "country": "Germany"
+  },
+  "FC Augsburg": {
+    "stadium": "WWK Arena",
+    "country": "Germany"
+  },
+  "1. FSV Mainz 05": {
+    "stadium": "MEWA Arena",
+    "country": "Germany"
+  },
+  "1. FC Köln": {
+    "stadium": "RheinEnergieStadion",
+    "country": "Germany"
+  },
+  "FC St. Pauli": {
+    "stadium": "Millerntor-Stadion",
+    "country": "Germany"
+  },
+  "Hamburger SV": {
+    "stadium": "Volksparkstadion",
+    "country": "Germany"
+  },
+  "Holstein Kiel": {
+    "stadium": "Holstein-Stadion",
+    "country": "Germany"
+  },
+  "1. FC Heidenheim": {
+    "stadium": "Voith-Arena",
+    "country": "Germany"
+  },
+  "Paris Saint-Germain": {
+    "stadium": "Parc des Princes",
+    "country": "France"
+  },
+  "Marseille": {
+    "stadium": "Orange Vélodrome",
+    "country": "France"
+  },
+  "Monaco": {
+    "stadium": "Stade Louis II",
+    "country": "France"
+  },
+  "Lyon": {
+    "stadium": "Groupama Stadium",
+    "country": "France"
+  },
+  "Lille": {
+    "stadium": "Stade Pierre-Mauroy",
+    "country": "France"
+  },
+  "Nice": {
+    "stadium": "Allianz Riviera",
+    "country": "France"
+  },
+  "Rennes": {
+    "stadium": "Roazhon Park",
+    "country": "France"
+  },
+  "Lens": {
+    "stadium": "Stade Bollaert-Delelis",
+    "country": "France"
+  },
+  "Strasbourg": {
+    "stadium": "Stade de la Meinau",
+    "country": "France"
+  },
+  "Toulouse": {
+    "stadium": "Stadium de Toulouse",
+    "country": "France"
+  },
+  "Nantes": {
+    "stadium": "Stade de la Beaujoire",
+    "country": "France"
+  },
+  "Montpellier": {
+    "stadium": "Stade de la Mosson",
+    "country": "France"
+  },
+  "Brest": {
+    "stadium": "Stade Francis-Le Blé",
+    "country": "France"
+  },
+  "Reims": {
+    "stadium": "Stade Auguste-Delaune",
+    "country": "France"
+  },
+  "Auxerre": {
+    "stadium": "Stade de l'Abbé-Deschamps",
+    "country": "France"
+  },
+  "Angers": {
+    "stadium": "Stade Raymond-Kopa",
+    "country": "France"
+  },
+  "Le Havre": {
+    "stadium": "Stade Océane",
+    "country": "France"
+  },
+  "Metz": {
+    "stadium": "Stade Saint-Symphorien",
+    "country": "France"
+  },
+  "Ajax": {
+    "stadium": "Johan Cruyff Arena",
+    "country": "Netherlands"
+  },
+  "PSV Eindhoven": {
+    "stadium": "Philips Stadion",
+    "country": "Netherlands"
+  },
+  "Feyenoord": {
+    "stadium": "De Kuip",
+    "country": "Netherlands"
+  },
+  "AZ Alkmaar": {
+    "stadium": "AFAS Stadion",
+    "country": "Netherlands"
+  },
+  "FC Utrecht": {
+    "stadium": "Stadion Galgenwaard",
+    "country": "Netherlands"
+  },
+  "FC Twente": {
+    "stadium": "De Grolsch Veste",
+    "country": "Netherlands"
+  },
+  "Vitesse": {
+    "stadium": "GelreDome",
+    "country": "Netherlands"
+  },
+  "Sparta Rotterdam": {
+    "stadium": "Sparta-Stadion Het Kasteel",
+    "country": "Netherlands"
+  },
+  "NEC Nijmegen": {
+    "stadium": "Goffertstadion",
+    "country": "Netherlands"
+  },
+  "Heerenveen": {
+    "stadium": "Abe Lenstra Stadion",
+    "country": "Netherlands"
+  },
+  "Benfica": {
+    "stadium": "Estádio da Luz",
+    "country": "Portugal"
+  },
+  "Porto": {
+    "stadium": "Estádio do Dragão",
+    "country": "Portugal"
+  },
+  "Sporting CP": {
+    "stadium": "Estádio José Alvalade",
+    "country": "Portugal"
+  },
+  "Braga": {
+    "stadium": "Estádio Municipal de Braga",
+    "country": "Portugal"
+  },
+  "Vitória de Guimarães": {
+    "stadium": "Estádio D. Afonso Henriques",
+    "country": "Portugal"
+  },
+  "Boavista": {
+    "stadium": "Estádio do Bessa",
+    "country": "Portugal"
+  },
+  "Celtic": {
+    "stadium": "Celtic Park",
+    "country": "Scotland"
+  },
+  "Rangers": {
+    "stadium": "Ibrox Stadium",
+    "country": "Scotland"
+  },
+  "Aberdeen": {
+    "stadium": "Pittodrie Stadium",
+    "country": "Scotland"
+  },
+  "Hibernian": {
+    "stadium": "Easter Road",
+    "country": "Scotland"
+  },
+  "Dundee United": {
+    "stadium": "Tannadice Park",
+    "country": "Scotland"
+  },
+  "Motherwell": {
+    "stadium": "Fir Park",
+    "country": "Scotland"
+  },
+  "St Mirren": {
+    "stadium": "SMISA Stadium",
+    "country": "Scotland"
+  },
+  "Club Brugge": {
+    "stadium": "Jan Breydel Stadium",
+    "country": "Belgium"
+  },
+  "Anderlecht": {
+    "stadium": "Lotto Park",
+    "country": "Belgium"
+  },
+  "Royal Antwerp": {
+    "stadium": "Bosuilstadion",
+    "country": "Belgium"
+  },
+  "Genk": {
+    "stadium": "Cegeka Arena",
+    "country": "Belgium"
+  },
+  "Standard Liège": {
+    "stadium": "Stade Maurice Dufrasne",
+    "country": "Belgium"
+  },
+  "Union SG": {
+    "stadium": "Stade Joseph Marien",
+    "country": "Belgium"
+  },
+  "Galatasaray": {
+    "stadium": "Rams Park",
+    "country": "Turkey"
+  },
+  "Fenerbahçe": {
+    "stadium": "Şükrü Saracoğlu Stadium",
+    "country": "Turkey"
+  },
+  "Beşiktaş": {
+    "stadium": "Vodafone Park",
+    "country": "Turkey"
+  },
+  "Trabzonspor": {
+    "stadium": "Şenol Güneş Sports Complex",
+    "country": "Turkey"
+  },
+  "Olympiacos": {
+    "stadium": "Karaiskakis Stadium",
+    "country": "Greece"
+  },
+  "Panathinaikos": {
+    "stadium": "Apostolos Nikolaidis Stadium",
+    "country": "Greece"
+  },
+  "AEK Athens": {
+    "stadium": "Agia Sofia Stadium",
+    "country": "Greece"
+  },
+  "PAOK": {
+    "stadium": "Toumba Stadium",
+    "country": "Greece"
+  },
+  "Zenit Saint Petersburg": {
+    "stadium": "Gazprom Arena",
+    "country": "Russia"
+  },
+  "Spartak Moscow": {
+    "stadium": "Otkritie Arena",
+    "country": "Russia"
+  },
+  "CSKA Moscow": {
+    "stadium": "VEB Arena",
+    "country": "Russia"
+  },
+  "Dynamo Kyiv": {
+    "stadium": "Valeriy Lobanovskyi Stadium",
+    "country": "Ukraine"
+  },
+  "Shakhtar Donetsk": {
+    "stadium": "Arena Lviv",
+    "country": "Ukraine"
+  },
+  "FC Basel": {
+    "stadium": "St. Jakob-Park",
+    "country": "Switzerland"
+  },
+  "Young Boys": {
+    "stadium": "Wankdorf Stadium",
+    "country": "Switzerland"
+  },
+  "FC Zürich": {
+    "stadium": "Letzigrund",
+    "country": "Switzerland"
+  },
+  "Red Bull Salzburg": {
+    "stadium": "Red Bull Arena",
+    "country": "Austria"
+  },
+  "Rapid Wien": {
+    "stadium": "Allianz Stadion",
+    "country": "Austria"
+  },
+  "Austria Wien": {
+    "stadium": "Generali Arena",
+    "country": "Austria"
+  },
+  "FC Copenhagen": {
+    "stadium": "Parken Stadium",
+    "country": "Denmark"
+  },
+  "Brøndby IF": {
+    "stadium": "Brøndby Stadium",
+    "country": "Denmark"
+  },
+  "AIK": {
+    "stadium": "Friends Arena",
+    "country": "Sweden"
+  },
+  "Malmö FF": {
+    "stadium": "Eleda Stadion",
+    "country": "Sweden"
+  },
+  "Rosenborg BK": {
+    "stadium": "Lerkendal Stadion",
+    "country": "Norway"
+  },
+  "LA Galaxy": {
+    "stadium": "Dignity Health Sports Park",
+    "country": "United States"
+  },
+  "LAFC": {
+    "stadium": "BMO Stadium",
+    "country": "United States"
+  },
+  "Inter Miami CF": {
+    "stadium": "Chase Stadium",
+    "country": "United States"
+  },
+  "Seattle Sounders FC": {
+    "stadium": "Lumen Field",
+    "country": "United States"
+  },
+  "Atlanta United FC": {
+    "stadium": "Mercedes-Benz Stadium",
+    "country": "United States"
+  },
+  "New York City FC": {
+    "stadium": "Yankee Stadium",
+    "country": "United States"
+  },
+  "New York Red Bulls": {
+    "stadium": "Red Bull Arena",
+    "country": "United States"
+  },
+  "Portland Timbers": {
+    "stadium": "Providence Park",
+    "country": "United States"
+  },
+  "Toronto FC": {
+    "stadium": "BMO Field",
+    "country": "United States"
+  },
+  "Columbus Crew": {
+    "stadium": "Lower.com Field",
+    "country": "United States"
+  },
+  "FC Cincinnati": {
+    "stadium": "TQL Stadium",
+    "country": "United States"
+  },
+  "Austin FC": {
+    "stadium": "Q2 Stadium",
+    "country": "United States"
+  },
+  "Nashville SC": {
+    "stadium": "Geodis Park",
+    "country": "United States"
+  },
+  "Orlando City SC": {
+    "stadium": "Inter&Co Stadium",
+    "country": "United States"
+  },
+  "Real Salt Lake": {
+    "stadium": "America First Field",
+    "country": "United States"
+  },
+  "Sporting Kansas City": {
+    "stadium": "Children's Mercy Park",
+    "country": "United States"
+  },
+  "Philadelphia Union": {
+    "stadium": "Subaru Park",
+    "country": "United States"
+  },
+  "Colorado Rapids": {
+    "stadium": "Dick's Sporting Goods Park",
+    "country": "United States"
+  },
+  "Chicago Fire FC": {
+    "stadium": "Soldier Field",
+    "country": "United States"
+  },
+  "DC United": {
+    "stadium": "Audi Field",
+    "country": "United States"
+  },
+  "Minnesota United FC": {
+    "stadium": "Allianz Field",
+    "country": "United States"
+  },
+  "FC Dallas": {
+    "stadium": "Toyota Stadium",
+    "country": "United States"
+  },
+  "Houston Dynamo FC": {
+    "stadium": "Shell Energy Stadium",
+    "country": "United States"
+  },
+  "San Jose Earthquakes": {
+    "stadium": "PayPal Park",
+    "country": "United States"
+  },
+  "Vancouver Whitecaps FC": {
+    "stadium": "BC Place",
+    "country": "United States"
+  },
+  "CF Montréal": {
+    "stadium": "Stade Saputo",
+    "country": "United States"
+  },
+  "Charlotte FC": {
+    "stadium": "Bank of America Stadium",
+    "country": "United States"
+  },
+  "St. Louis City SC": {
+    "stadium": "CityPark",
+    "country": "United States"
+  },
+  "Flamengo": {
+    "stadium": "Maracanã",
+    "country": "Brazil"
+  },
+  "Corinthians": {
+    "stadium": "Neo Química Arena",
+    "country": "Brazil"
+  },
+  "Palmeiras": {
+    "stadium": "Allianz Parque",
+    "country": "Brazil"
+  },
+  "São Paulo": {
+    "stadium": "Morumbi",
+    "country": "Brazil"
+  },
+  "Santos": {
+    "stadium": "Vila Belmiro",
+    "country": "Brazil"
+  },
+  "Grêmio": {
+    "stadium": "Arena do Grêmio",
+    "country": "Brazil"
+  },
+  "Internacional": {
+    "stadium": "Beira-Rio",
+    "country": "Brazil"
+  },
+  "Cruzeiro": {
+    "stadium": "Mineirão",
+    "country": "Brazil"
+  },
+  "Atlético Mineiro": {
+    "stadium": "Arena MRV",
+    "country": "Brazil"
+  },
+  "Botafogo": {
+    "stadium": "Estádio Nilton Santos",
+    "country": "Brazil"
+  },
+  "Fluminense": {
+    "stadium": "Maracanã",
+    "country": "Brazil"
+  },
+  "Vasco da Gama": {
+    "stadium": "São Januário",
+    "country": "Brazil"
+  },
+  "Boca Juniors": {
+    "stadium": "La Bombonera",
+    "country": "Argentina"
+  },
+  "River Plate": {
+    "stadium": "Estadio Monumental",
+    "country": "Argentina"
+  },
+  "Racing Club": {
+    "stadium": "Estadio Presidente Perón",
+    "country": "Argentina"
+  },
+  "Independiente": {
+    "stadium": "Estadio Libertadores de América",
+    "country": "Argentina"
+  },
+  "San Lorenzo": {
+    "stadium": "Estadio Pedro Bidegain",
+    "country": "Argentina"
+  },
+  "Estudiantes de La Plata": {
+    "stadium": "Estadio UNO",
+    "country": "Argentina"
+  },
+  "Vélez Sarsfield": {
+    "stadium": "Estadio José Amalfitani",
+    "country": "Argentina"
+  },
+  "Newell's Old Boys": {
+    "stadium": "Estadio Marcelo Bielsa",
+    "country": "Argentina"
+  },
+  "Club América": {
+    "stadium": "Estadio Azteca",
+    "country": "Mexico"
+  },
+  "Chivas Guadalajara": {
+    "stadium": "Estadio Akron",
+    "country": "Mexico"
+  },
+  "Cruz Azul": {
+    "stadium": "Estadio Ciudad de los Deportes",
+    "country": "Mexico"
+  },
+  "Pumas UNAM": {
+    "stadium": "Estadio Olímpico Universitario",
+    "country": "Mexico"
+  },
+  "Tigres UANL": {
+    "stadium": "Estadio Universitario",
+    "country": "Mexico"
+  },
+  "Monterrey": {
+    "stadium": "Estadio BBVA",
+    "country": "Mexico"
+  },
+  "Kashima Antlers": {
+    "stadium": "Kashima Soccer Stadium",
+    "country": "Japan"
+  },
+  "Urawa Red Diamonds": {
+    "stadium": "Saitama Stadium 2002",
+    "country": "Japan"
+  },
+  "Yokohama F. Marinos": {
+    "stadium": "Nissan Stadium",
+    "country": "Japan"
+  },
+  "Vissel Kobe": {
+    "stadium": "Noevir Stadium Kobe",
+    "country": "Japan"
+  },
+  "Ulsan HD": {
+    "stadium": "Munsu Football Stadium",
+    "country": "South Korea"
+  },
+  "FC Seoul": {
+    "stadium": "Seoul World Cup Stadium",
+    "country": "South Korea"
+  },
+  "Sydney FC": {
+    "stadium": "Allianz Stadium",
+    "country": "Australia"
+  },
+  "Melbourne Victory": {
+    "stadium": "AAMI Park",
+    "country": "Australia"
+  },
+  "Al Hilal": {
+    "stadium": "Kingdom Arena",
+    "country": "Saudi Arabia"
+  },
+  "Al Nassr": {
+    "stadium": "Al-Awwal Park",
+    "country": "Saudi Arabia"
+  },
+  "Al Ittihad": {
+    "stadium": "King Abdullah Sports City",
+    "country": "Saudi Arabia"
+  },
+  "Al Ahli": {
+    "stadium": "King Abdullah Sports City",
+    "country": "Saudi Arabia"
+  },
+  "Al Ahly": {
+    "stadium": "Cairo International Stadium",
+    "country": "Egypt"
+  },
+  "Zamalek": {
+    "stadium": "Cairo International Stadium",
+    "country": "Egypt"
+  },
+  "Kaizer Chiefs": {
+    "stadium": "FNB Stadium",
+    "country": "South Africa"
+  },
+  "Orlando Pirates": {
+    "stadium": "Orlando Stadium",
+    "country": "South Africa"
+  },
+  "Wydad AC": {
+    "stadium": "Stade Mohammed V",
+    "country": "Morocco"
+  },
+  "Raja Casablanca": {
+    "stadium": "Stade Mohammed V",
+    "country": "Morocco"
+  },
+  "Wigan Athletic": {
+    "stadium": "DW Stadium",
+    "country": "England"
+  },
+  "Reading": {
+    "stadium": "Select Car Leasing Stadium",
+    "country": "England"
+  },
+  "Rotherham United": {
+    "stadium": "New York Stadium",
+    "country": "England"
+  },
+  "Blackpool": {
+    "stadium": "Bloomfield Road",
+    "country": "England"
+  },
+  "Peterborough United": {
+    "stadium": "Weston Homes Stadium",
+    "country": "England"
+  },
+  "Wycombe Wanderers": {
+    "stadium": "Adams Park",
+    "country": "England"
+  },
+  "Exeter City": {
+    "stadium": "St James Park",
+    "country": "England"
+  },
+  "Bristol Rovers": {
+    "stadium": "Memorial Stadium",
+    "country": "England"
+  },
+  "Northampton Town": {
+    "stadium": "Sixfields Stadium",
+    "country": "England"
+  },
+  "Mansfield Town": {
+    "stadium": "One Call Stadium",
+    "country": "England"
+  },
+  "Stevenage": {
+    "stadium": "Lamex Stadium",
+    "country": "England"
+  },
+  "Leyton Orient": {
+    "stadium": "Brisbane Road",
+    "country": "England"
+  },
+  "Lincoln City": {
+    "stadium": "LNER Stadium",
+    "country": "England"
+  },
+  "Burton Albion": {
+    "stadium": "Pirelli Stadium",
+    "country": "England"
+  },
+  "Huddersfield Town": {
+    "stadium": "John Smith's Stadium",
+    "country": "England"
+  },
+  "Stockport County": {
+    "stadium": "Edgeley Park",
+    "country": "England"
+  },
+  "Cardiff City B": {
+    "stadium": "Cardiff City Stadium",
+    "country": "Wales"
+  },
+  "Doncaster Rovers": {
+    "stadium": "Eco-Power Stadium",
+    "country": "England"
+  },
+  "Rotherham Town": {
+    "stadium": "New York Stadium",
+    "country": "England"
+  },
+  "Walsall": {
+    "stadium": "Bescot Stadium",
+    "country": "England"
+  },
+  "Crawley Town": {
+    "stadium": "Broadfield Stadium",
+    "country": "England"
+  },
+  "Gillingham": {
+    "stadium": "Priestfield Stadium",
+    "country": "England"
+  },
+  "Colchester United": {
+    "stadium": "Colchester Community Stadium",
+    "country": "England"
+  },
+  "Cheltenham Town": {
+    "stadium": "Whaddon Road",
+    "country": "England"
+  },
+  "Grimsby Town": {
+    "stadium": "Blundell Park",
+    "country": "England"
+  },
+  "Newport County": {
+    "stadium": "Rodney Parade",
+    "country": "Wales"
+  },
+  "Tranmere Rovers": {
+    "stadium": "Prenton Park",
+    "country": "England"
+  },
+  "Barrow": {
+    "stadium": "Holker Street",
+    "country": "England"
+  },
+  "Accrington Stanley": {
+    "stadium": "Wham Stadium",
+    "country": "England"
+  },
+  "Bradford City": {
+    "stadium": "Valley Parade",
+    "country": "England"
+  },
+  "Chesterfield": {
+    "stadium": "SMH Group Stadium",
+    "country": "England"
+  },
+  "Fleetwood Town": {
+    "stadium": "Highbury Stadium",
+    "country": "England"
+  },
+  "Harrogate Town": {
+    "stadium": "Wetherby Road",
+    "country": "England"
+  },
+  "Salford City": {
+    "stadium": "Peninsula Stadium",
+    "country": "England"
+  },
+  "Swindon Town": {
+    "stadium": "County Ground",
+    "country": "England"
+  },
+  "Port Vale": {
+    "stadium": "Vale Park",
+    "country": "England"
+  },
+  "AFC Wimbledon": {
+    "stadium": "Plough Lane",
+    "country": "England"
+  },
+  "Morecambe": {
+    "stadium": "Mazuma Stadium",
+    "country": "England"
+  },
+  "Carlisle United": {
+    "stadium": "Brunton Park",
+    "country": "England"
+  },
+  "Wrexham AFC B": {
+    "stadium": "Racecourse Ground",
+    "country": "Wales"
+  },
+  "Southend United": {
+    "stadium": "Roots Hall",
+    "country": "England"
+  },
+  "Woking": {
+    "stadium": "Kingfield Stadium",
+    "country": "England"
+  },
+  "York City": {
+    "stadium": "LNER Community Stadium",
+    "country": "England"
+  },
+  "Oldham Athletic": {
+    "stadium": "Boundary Park",
+    "country": "England"
+  },
+  "Yeovil Town": {
+    "stadium": "Huish Park",
+    "country": "England"
+  },
+  "Altrincham": {
+    "stadium": "J. Davidson Stadium",
+    "country": "England"
+  },
+  "Rochdale": {
+    "stadium": "Crown Oil Arena",
+    "country": "England"
+  },
+  "Racing Santander": {
+    "stadium": "El Sardinero",
+    "country": "Spain"
+  },
+  "Deportivo La Coruña": {
+    "stadium": "Riazor",
+    "country": "Spain"
+  },
+  "Sporting Gijón": {
+    "stadium": "El Molinón",
+    "country": "Spain"
+  },
+  "Real Zaragoza": {
+    "stadium": "La Romareda",
+    "country": "Spain"
+  },
+  "Real Valladolid": {
+    "stadium": "José Zorrilla",
+    "country": "Spain"
+  },
+  "Las Palmas": {
+    "stadium": "Estadio de Gran Canaria",
+    "country": "Spain"
+  },
+  "Leganés": {
+    "stadium": "Estadio Municipal de Butarque",
+    "country": "Spain"
+  },
+  "Huesca": {
+    "stadium": "El Alcoraz",
+    "country": "Spain"
+  },
+  "Mirandés": {
+    "stadium": "Anduva",
+    "country": "Spain"
+  },
+  "Cultural Leonesa": {
+    "stadium": "Estadio Reino de León",
+    "country": "Spain"
+  },
+  "Málaga": {
+    "stadium": "La Rosaleda",
+    "country": "Spain"
+  },
+  "Almería": {
+    "stadium": "Power Horse Stadium",
+    "country": "Spain"
+  },
+  "Córdoba": {
+    "stadium": "Nuevo Arcángel",
+    "country": "Spain"
+  },
+  "Eibar": {
+    "stadium": "Ipurua",
+    "country": "Spain"
+  },
+  "Burgos CF": {
+    "stadium": "El Plantío",
+    "country": "Spain"
+  },
+  "Granada": {
+    "stadium": "Nuevo Los Cármenes",
+    "country": "Spain"
+  },
+  "Castellón": {
+    "stadium": "Estadi Castalia",
+    "country": "Spain"
+  },
+  "Sampdoria B": {
+    "stadium": "Stadio Luigi Ferraris",
+    "country": "Italy"
+  },
+  "Palermo": {
+    "stadium": "Stadio Renzo Barbera",
+    "country": "Italy"
+  },
+  "Bari": {
+    "stadium": "Stadio San Nicola",
+    "country": "Italy"
+  },
+  "Catanzaro": {
+    "stadium": "Stadio Nicola Ceravolo",
+    "country": "Italy"
+  },
+  "Brescia": {
+    "stadium": "Stadio Mario Rigamonti",
+    "country": "Italy"
+  },
+  "Salernitana": {
+    "stadium": "Stadio Arechi",
+    "country": "Italy"
+  },
+  "Frosinone": {
+    "stadium": "Stadio Benito Stirpe",
+    "country": "Italy"
+  },
+  "Modena": {
+    "stadium": "Stadio Alberto Braglia",
+    "country": "Italy"
+  },
+  "Reggiana": {
+    "stadium": "Stadio Città del Tricolore",
+    "country": "Italy"
+  },
+  "Spezia": {
+    "stadium": "Stadio Alberto Picco",
+    "country": "Italy"
+  },
+  "Sudtirol": {
+    "stadium": "Stadio Druso",
+    "country": "Italy"
+  },
+  "Cesena": {
+    "stadium": "Stadio Dino Manuzzi",
+    "country": "Italy"
+  },
+  "Venezia": {
+    "stadium": "Stadio Pier Luigi Penzo",
+    "country": "Italy"
+  },
+  "Cittadella": {
+    "stadium": "Stadio Pierluigi Piccoli",
+    "country": "Italy"
+  },
+  "Carrarese": {
+    "stadium": "Stadio dei Marmi",
+    "country": "Italy"
+  },
+  "Juve Stabia": {
+    "stadium": "Stadio Romeo Menti",
+    "country": "Italy"
+  },
+  "Hertha BSC": {
+    "stadium": "Olympiastadion Berlin",
+    "country": "Germany"
+  },
+  "Fortuna Düsseldorf": {
+    "stadium": "Merkur Spiel-Arena",
+    "country": "Germany"
+  },
+  "Schalke 04": {
+    "stadium": "Veltins-Arena",
+    "country": "Germany"
+  },
+  "Hannover 96": {
+    "stadium": "Heinz von Heiden Arena",
+    "country": "Germany"
+  },
+  "Karlsruher SC": {
+    "stadium": "BBBank Wildpark",
+    "country": "Germany"
+  },
+  "SV Darmstadt 98": {
+    "stadium": "Merck-Stadion am Böllenfalltor",
+    "country": "Germany"
+  },
+  "1. FC Nürnberg": {
+    "stadium": "Max-Morlock-Stadion",
+    "country": "Germany"
+  },
+  "Greuther Fürth": {
+    "stadium": "Sportpark Ronhof",
+    "country": "Germany"
+  },
+  "Eintracht Braunschweig": {
+    "stadium": "Eintracht-Stadion",
+    "country": "Germany"
+  },
+  "Hansa Rostock": {
+    "stadium": "Ostseestadion",
+    "country": "Germany"
+  },
+  "SC Paderborn": {
+    "stadium": "Home Deluxe Arena",
+    "country": "Germany"
+  },
+  "Jahn Regensburg": {
+    "stadium": "Jahnstadion Regensburg",
+    "country": "Germany"
+  },
+  "Paris FC": {
+    "stadium": "Stade Charléty",
+    "country": "France"
+  },
+  "Red Star FC": {
+    "stadium": "Stade Bauer",
+    "country": "France"
+  },
+  "Amiens SC": {
+    "stadium": "Stade de la Licorne",
+    "country": "France"
+  },
+  "Grenoble Foot 38": {
+    "stadium": "Stade des Alpes",
+    "country": "France"
+  },
+  "Guingamp": {
+    "stadium": "Stade du Roudourou",
+    "country": "France"
+  },
+  "Laval": {
+    "stadium": "Stade Francis Le Basser",
+    "country": "France"
+  },
+  "Pau FC": {
+    "stadium": "Stade du Hameau",
+    "country": "France"
+  },
+  "Rodez AF": {
+    "stadium": "Stade Paul Lignon",
+    "country": "France"
+  },
+  "Troyes AC": {
+    "stadium": "Stade de l'Aube",
+    "country": "France"
+  },
+  "Annecy FC": {
+    "stadium": "Parc des Sports",
+    "country": "France"
+  },
+  "Willem II": {
+    "stadium": "Koning Willem II Stadion",
+    "country": "Netherlands"
+  },
+  "Roda JC": {
+    "stadium": "Parkstad Limburg Stadion",
+    "country": "Netherlands"
+  },
+  "De Graafschap": {
+    "stadium": "De Vijverberg",
+    "country": "Netherlands"
+  },
+  "Jong Ajax": {
+    "stadium": "De Toekomst",
+    "country": "Netherlands"
+  },
+  "FC Emmen": {
+    "stadium": "De Oude Meerdijk",
+    "country": "Netherlands"
+  },
+  "FC Volendam": {
+    "stadium": "Kras Stadion",
+    "country": "Netherlands"
+  },
+  "Excelsior": {
+    "stadium": "Van Donge & De Roo Stadion",
+    "country": "Netherlands"
+  },
+  "Estrela da Amadora": {
+    "stadium": "Estádio José Gomes",
+    "country": "Portugal"
+  },
+  "Nacional": {
+    "stadium": "Estádio da Madeira",
+    "country": "Portugal"
+  },
+  "Farense": {
+    "stadium": "Estádio de São Luís",
+    "country": "Portugal"
+  },
+  "Casa Pia": {
+    "stadium": "Estádio Pina Manique",
+    "country": "Portugal"
+  },
+  "Ayr United": {
+    "stadium": "Somerset Park",
+    "country": "Scotland"
+  },
+  "Dundee": {
+    "stadium": "Dens Park",
+    "country": "Scotland"
+  },
+  "Falkirk": {
+    "stadium": "Falkirk Stadium",
+    "country": "Scotland"
+  },
+  "Partick Thistle": {
+    "stadium": "Firhill Stadium",
+    "country": "Scotland"
+  },
+  "Raith Rovers": {
+    "stadium": "Stark's Park",
+    "country": "Scotland"
+  },
+  "Livingston": {
+    "stadium": "Tony Macaroni Arena",
+    "country": "Scotland"
+  },
+  "Queen's Park": {
+    "stadium": "Ochilview Park",
+    "country": "Scotland"
+  },
+  "Airdrieonians": {
+    "stadium": "Excelsior Stadium",
+    "country": "Scotland"
+  },
+  "Beerschot": {
+    "stadium": "Olympisch Stadion",
+    "country": "Belgium"
+  },
+  "Lommel SK": {
+    "stadium": "Soevereinstadion",
+    "country": "Belgium"
+  },
+  "RWDM": {
+    "stadium": "Stade Edmond Machtens",
+    "country": "Belgium"
+  },
+  "KMSK Deinze": {
+    "stadium": "Stedelijk Sportstadion",
+    "country": "Belgium"
+  },
+  "Sport Recife": {
+    "stadium": "Ilha do Retiro",
+    "country": "Brazil"
+  },
+  "Vitória": {
+    "stadium": "Barradão",
+    "country": "Brazil"
+  },
+  "Coritiba": {
+    "stadium": "Couto Pereira",
+    "country": "Brazil"
+  },
+  "Goiás": {
+    "stadium": "Serrinha",
+    "country": "Brazil"
+  },
+  "Guarani": {
+    "stadium": "Brinco de Ouro",
+    "country": "Brazil"
+  },
+  "CRB": {
+    "stadium": "Rei Pelé",
+    "country": "Brazil"
+  },
+  "Ponte Preta": {
+    "stadium": "Moisés Lucarelli",
+    "country": "Brazil"
+  },
+  "Náutico": {
+    "stadium": "Aflitos",
+    "country": "Brazil"
+  },
+  "Avaí": {
+    "stadium": "Ressacada",
+    "country": "Brazil"
+  },
+  "América Mineiro": {
+    "stadium": "Independência",
+    "country": "Brazil"
+  },
+  "Chapecoense": {
+    "stadium": "Arena Condá",
+    "country": "Brazil"
+  },
+  "Chacarita Juniors": {
+    "stadium": "Estadio Chacarita Juniors",
+    "country": "Argentina"
+  },
+  "Almirante Brown": {
+    "stadium": "Estadio Fragata Sarmiento",
+    "country": "Argentina"
+  },
+  "Atlanta": {
+    "stadium": "Estadio Don León Kolbowski",
+    "country": "Argentina"
+  },
+  "Gimnasia y Esgrima La Plata": {
+    "stadium": "Estadio Juan Carmelo Zerillo",
+    "country": "Argentina"
+  },
+  "Louisville City FC": {
+    "stadium": "Lynn Family Stadium",
+    "country": "United States"
+  },
+  "Sacramento Republic FC": {
+    "stadium": "Heart Health Park",
+    "country": "United States"
+  },
+  "San Antonio FC": {
+    "stadium": "Toyota Field",
+    "country": "United States"
+  },
+  "Phoenix Rising FC": {
+    "stadium": "Wild Horse Pass",
+    "country": "United States"
+  },
+  "Detroit City FC": {
+    "stadium": "Keyworth Stadium",
+    "country": "United States"
+  },
+  "Indy Eleven": {
+    "stadium": "Michael A. Carroll Stadium",
+    "country": "United States"
+  },
+  "Birmingham Legion FC": {
+    "stadium": "Protective Stadium",
+    "country": "United States"
+  },
+  "Miami FC": {
+    "stadium": "Pitbull Stadium",
+    "country": "United States"
+  },
+  "Las Vegas Lights FC": {
+    "stadium": "Cashman Field",
+    "country": "United States"
+  },
+  "Oakland Roots SC": {
+    "stadium": "Championship Center Stadium",
+    "country": "United States"
+  },
+  "Cavalry FC": {
+    "stadium": "ATCO Field",
+    "country": "Canada"
+  },
+  "Forge FC": {
+    "stadium": "Tim Hortons Field",
+    "country": "Canada"
+  },
+  "Pacific FC": {
+    "stadium": "Starlight Stadium",
+    "country": "Canada"
+  },
+  "York United FC": {
+    "stadium": "York Lions Stadium",
+    "country": "Canada"
+  },
+  "Atlético Ottawa": {
+    "stadium": "TD Place Stadium",
+    "country": "Canada"
+  },
+  "Valour FC": {
+    "stadium": "IG Field",
+    "country": "Canada"
+  },
+  "Ventforet Kofu": {
+    "stadium": "JIT Recycle Ink Stadium",
+    "country": "Japan"
+  },
+  "Omiya Ardija": {
+    "stadium": "NACK5 Stadium Omiya",
+    "country": "Japan"
+  },
+  "Shimizu S-Pulse": {
+    "stadium": "IAI Stadium Nihondaira",
+    "country": "Japan"
+  },
+  "Montedio Yamagata": {
+    "stadium": "ND Soft Stadium Yamagata",
+    "country": "Japan"
+  },
+  "Fagiano Okayama": {
+    "stadium": "City Light Stadium",
+    "country": "Japan"
+  },
+  "Roasso Kumamoto": {
+    "stadium": "Egao Kenko Stadium",
+    "country": "Japan"
+  },
+  "Busan IPark": {
+    "stadium": "Busan Asiad Main Stadium",
+    "country": "South Korea"
+  },
+  "Gyeongnam FC": {
+    "stadium": "Changwon Football Center",
+    "country": "South Korea"
+  },
+  "Bucheon FC 1995": {
+    "stadium": "Bucheon Stadium",
+    "country": "South Korea"
+  },
+  "Ansan Greeners": {
+    "stadium": "Ansan Wa~ Stadium",
+    "country": "South Korea"
+  },
+  "Legia Warsaw": {
+    "stadium": "Stadion Wojska Polskiego",
+    "country": "Poland"
+  },
+  "Lech Poznań": {
+    "stadium": "Stadion Poznań",
+    "country": "Poland"
+  },
+  "Wisła Kraków": {
+    "stadium": "Stadion Miejski",
+    "country": "Poland"
+  },
+  "Cracovia": {
+    "stadium": "Stadion Cracovii",
+    "country": "Poland"
+  },
+  "Sparta Prague": {
+    "stadium": "Letná Stadium",
+    "country": "Czech Republic"
+  },
+  "Slavia Prague": {
+    "stadium": "Sinobo Stadium",
+    "country": "Czech Republic"
+  },
+  "Viktoria Plzeň": {
+    "stadium": "Doosan Arena",
+    "country": "Czech Republic"
+  },
+  "Ferencváros": {
+    "stadium": "Groupama Aréna",
+    "country": "Hungary"
+  },
+  "Debrecen": {
+    "stadium": "Nagyerdei Stadion",
+    "country": "Hungary"
+  },
+  "Steaua Bucharest": {
+    "stadium": "Ghencea Stadium",
+    "country": "Romania"
+  },
+  "CFR Cluj": {
+    "stadium": "Dr. Constantin Rădulescu Stadium",
+    "country": "Romania"
+  },
+  "Dinamo Zagreb": {
+    "stadium": "Stadion Maksimir",
+    "country": "Croatia"
+  },
+  "Hajduk Split": {
+    "stadium": "Stadion Poljud",
+    "country": "Croatia"
+  },
+  "Red Star Belgrade": {
+    "stadium": "Rajko Mitić Stadium",
+    "country": "Serbia"
+  },
+  "Partizan Belgrade": {
+    "stadium": "Stadion Partizana",
+    "country": "Serbia"
+  },
+  "Boston United": {
+    "stadium": "York Street",
+    "country": "England"
+  },
+  "Braintree Town": {
+    "stadium": "Cressing Road",
+    "country": "England"
+  },
+  "Brackley Town": {
+    "stadium": "St James Park",
+    "country": "England"
+  },
+  "Eastleigh": {
+    "stadium": "Silverlake Stadium",
+    "country": "England"
+  },
+  "Halifax Town": {
+    "stadium": "The Shay",
+    "country": "England"
+  },
+  "Hartlepool United": {
+    "stadium": "Victoria Park",
+    "country": "England"
+  },
+  "Maidenhead United": {
+    "stadium": "York Road",
+    "country": "England"
+  },
+  "Solihull Moors": {
+    "stadium": "Damson Park",
+    "country": "England"
+  },
+  "Southend Manor": {
+    "stadium": "Roots Hall",
+    "country": "England"
+  },
+  "Sutton United": {
+    "stadium": "Gander Green Lane",
+    "country": "England"
+  },
+  "Aldershot Town": {
+    "stadium": "EBB Stadium",
+    "country": "England"
+  },
+  "Dagenham & Redbridge": {
+    "stadium": "Victoria Road",
+    "country": "England"
+  },
+  "Wealdstone": {
+    "stadium": "Grosvenor Vale",
+    "country": "England"
+  },
+  "Gateshead": {
+    "stadium": "International Stadium",
+    "country": "England"
+  },
+  "Rushall Olympic": {
+    "stadium": "Dales Lane",
+    "country": "England"
+  },
+  "Scunthorpe United": {
+    "stadium": "Glanford Park",
+    "country": "England"
+  },
+  "Forest Green Rovers": {
+    "stadium": "The New Lawn",
+    "country": "England"
+  },
+  "Buxton": {
+    "stadium": "Silverlands",
+    "country": "England"
+  },
+  "Chorley": {
+    "stadium": "Victory Park",
+    "country": "England"
+  },
+  "Curzon Ashton": {
+    "stadium": "Tameside Stadium",
+    "country": "England"
+  },
+  "Alfreton Town": {
+    "stadium": "North Street",
+    "country": "England"
+  },
+  "Bishop's Stortford": {
+    "stadium": "Woodside Park",
+    "country": "England"
+  },
+  "Hemel Hempstead Town": {
+    "stadium": "Vauxhall Road",
+    "country": "England"
+  },
+  "Chelmsford City": {
+    "stadium": "The Cheltingham Stadium",
+    "country": "England"
+  },
+  "Dartford": {
+    "stadium": "Princes Park",
+    "country": "England"
+  },
+  "Dorking Wanderers": {
+    "stadium": "Meadowbank Stadium",
+    "country": "England"
+  },
+  "Farnborough": {
+    "stadium": "Cherrywood Road",
+    "country": "England"
+  },
+  "Hampton & Richmond Borough": {
+    "stadium": "Beveree Stadium",
+    "country": "England"
+  },
+  "Tonbridge Angels": {
+    "stadium": "Longmead Stadium",
+    "country": "England"
+  },
+  "Truro City": {
+    "stadium": "Treyew Road",
+    "country": "England"
+  },
+  "Sanse (Real Madrid Castilla)": {
+    "stadium": "Estadio Alfredo Di Stéfano",
+    "country": "Spain"
+  },
+  "Barcelona Atlètic": {
+    "stadium": "Estadi Johan Cruyff",
+    "country": "Spain"
+  },
+  "Real Murcia": {
+    "stadium": "Estadio Nueva Condomina",
+    "country": "Spain"
+  },
+  "Recreativo de Huelva": {
+    "stadium": "Estadio Nuevo Colombino",
+    "country": "Spain"
+  },
+  "Linares Deportivo": {
+    "stadium": "Estadio Linarejos",
+    "country": "Spain"
+  },
+  "Ibiza": {
+    "stadium": "Estadio Municipal de Can Misses",
+    "country": "Spain"
+  },
+  "Ponferradina": {
+    "stadium": "El Toralín",
+    "country": "Spain"
+  },
+  "Nàstic Tarragona": {
+    "stadium": "Estadi Nou Estadi",
+    "country": "Spain"
+  },
+  "Algeciras CF": {
+    "stadium": "Estadio Nuevo Mirador",
+    "country": "Spain"
+  },
+  "Sevilla Atlético": {
+    "stadium": "Ciudad Deportiva José Ramón Cisneros Palacios",
+    "country": "Spain"
+  },
+  "Triestina": {
+    "stadium": "Stadio Nereo Rocco",
+    "country": "Italy"
+  },
+  "Vicenza": {
+    "stadium": "Stadio Romeo Menti",
+    "country": "Italy"
+  },
+  "Padova": {
+    "stadium": "Stadio Euganeo",
+    "country": "Italy"
+  },
+  "Renate": {
+    "stadium": "Città di Meda",
+    "country": "Italy"
+  },
+  "Pro Vercelli": {
+    "stadium": "Stadio Silvio Piola",
+    "country": "Italy"
+  },
+  "Novara": {
+    "stadium": "Stadio Silvio Piola",
+    "country": "Italy"
+  },
+  "Legnago Salus": {
+    "stadium": "Stadio Mario Rigamonti",
+    "country": "Italy"
+  },
+  "Foggia": {
+    "stadium": "Stadio Pino Zaccheria",
+    "country": "Italy"
+  },
+  "Taranto": {
+    "stadium": "Stadio Iacovone",
+    "country": "Italy"
+  },
+  "Monopoli": {
+    "stadium": "Stadio Vito Simone Veneziani",
+    "country": "Italy"
+  },
+  "Casertana": {
+    "stadium": "Stadio Alberto Pinto",
+    "country": "Italy"
+  },
+  "Benevento": {
+    "stadium": "Stadio Ciro Vigorito",
+    "country": "Italy"
+  },
+  "Dynamo Dresden": {
+    "stadium": "Rudolf-Harbig-Stadion",
+    "country": "Germany"
+  },
+  "Energie Cottbus": {
+    "stadium": "Stadion der Freundschaft",
+    "country": "Germany"
+  },
+  "Rot-Weiss Essen": {
+    "stadium": "Stadion Essen",
+    "country": "Germany"
+  },
+  "Waldhof Mannheim": {
+    "stadium": "Carl-Benz-Stadion",
+    "country": "Germany"
+  },
+  "1860 Munich": {
+    "stadium": "Grünwalder Stadion",
+    "country": "Germany"
+  },
+  "Erzgebirge Aue": {
+    "stadium": "Erzgebirgsstadion",
+    "country": "Germany"
+  },
+  "Viktoria Köln": {
+    "stadium": "Sportpark Höhenberg",
+    "country": "Germany"
+  },
+  "Arminia Bielefeld": {
+    "stadium": "SchücoArena",
+    "country": "Germany"
+  },
+  "MSV Duisburg": {
+    "stadium": "Schauinsland-Reisen-Arena",
+    "country": "Germany"
+  },
+  "Alemannia Aachen": {
+    "stadium": "Tivoli",
+    "country": "Germany"
+  },
+  "Le Mans FC": {
+    "stadium": "Stade Léon Bollée",
+    "country": "France"
+  },
+  "Bourg-en-Bresse": {
+    "stadium": "Stade Marcel-Verchère",
+    "country": "France"
+  },
+  "Boulogne": {
+    "stadium": "Stade de la Libération",
+    "country": "France"
+  },
+  "Concarneau": {
+    "stadium": "Stade Guy Piriou",
+    "country": "France"
+  },
+  "Nancy": {
+    "stadium": "Stade Marcel Picot",
+    "country": "France"
+  },
+  "Sedan": {
+    "stadium": "Stade Louis Dugauguez",
+    "country": "France"
+  },
+  "Villefranche": {
+    "stadium": "Stade Armand Chouffet",
+    "country": "France"
+  },
+  "Chambly": {
+    "stadium": "Stade Pierre Brisson",
+    "country": "France"
+  },
+  "Katwijk": {
+    "stadium": "Sportpark Nieuw Zuid",
+    "country": "Netherlands"
+  },
+  "Spakenburg": {
+    "stadium": "Sportpark de Westmaat",
+    "country": "Netherlands"
+  },
+  "IJsselmeervogels": {
+    "stadium": "Sportpark de Kuil",
+    "country": "Netherlands"
+  },
+  "Rijnsburgse Boys": {
+    "stadium": "Sportpark Middelmors",
+    "country": "Netherlands"
+  },
+  "Alloa Athletic": {
+    "stadium": "Recreation Park",
+    "country": "Scotland"
+  },
+  "Arbroath": {
+    "stadium": "Gayfield Park",
+    "country": "Scotland"
+  },
+  "Cove Rangers": {
+    "stadium": "Balmoral Stadium",
+    "country": "Scotland"
+  },
+  "Montrose": {
+    "stadium": "Links Park",
+    "country": "Scotland"
+  },
+  "Stenhousemuir": {
+    "stadium": "Ochilview Park",
+    "country": "Scotland"
+  },
+  "Stirling Albion": {
+    "stadium": "Forthbank Stadium",
+    "country": "Scotland"
+  },
+  "Annan Athletic": {
+    "stadium": "Galabank",
+    "country": "Scotland"
+  },
+  "Elgin City": {
+    "stadium": "Borough Briggs",
+    "country": "Scotland"
+  },
+  "Peterhead": {
+    "stadium": "Balmoor",
+    "country": "Scotland"
+  },
+  "The New Saints": {
+    "stadium": "Park Hall",
+    "country": "Wales"
+  },
+  "Connah's Quay Nomads": {
+    "stadium": "Deeside Stadium",
+    "country": "Wales"
+  },
+  "Newtown": {
+    "stadium": "Latham Park",
+    "country": "Wales"
+  },
+  "Bala Town": {
+    "stadium": "Maes Tegid",
+    "country": "Wales"
+  },
+  "Barry Town United": {
+    "stadium": "Jenner Park",
+    "country": "Wales"
+  },
+  "Penybont": {
+    "stadium": "SDX Stadium",
+    "country": "Wales"
+  },
+  "Shamrock Rovers": {
+    "stadium": "Tallaght Stadium",
+    "country": "Republic of Ireland"
+  },
+  "Bohemian FC": {
+    "stadium": "Dalymount Park",
+    "country": "Republic of Ireland"
+  },
+  "St Patrick's Athletic": {
+    "stadium": "Richmond Park",
+    "country": "Republic of Ireland"
+  },
+  "Shelbourne": {
+    "stadium": "Tolka Park",
+    "country": "Republic of Ireland"
+  },
+  "Derry City": {
+    "stadium": "The Ryan McBride Brandywell Stadium",
+    "country": "Republic of Ireland"
+  },
+  "Sligo Rovers": {
+    "stadium": "The Showgrounds",
+    "country": "Republic of Ireland"
+  },
+  "Cork City": {
+    "stadium": "Turner's Cross",
+    "country": "Republic of Ireland"
+  },
+  "Drogheda United": {
+    "stadium": "Head in the Game Park",
+    "country": "Republic of Ireland"
+  },
+  "Chattanooga FC": {
+    "stadium": "CHI Memorial Stadium",
+    "country": "United States"
+  },
+  "Union Omaha": {
+    "stadium": "Werner Park",
+    "country": "United States"
+  },
+  "Greenville Triumph SC": {
+    "stadium": "Legacy Early College Stadium",
+    "country": "United States"
+  },
+  "Forward Madison FC": {
+    "stadium": "Breese Stevens Field",
+    "country": "United States"
+  },
+  "Central Valley Fuego FC": {
+    "stadium": "Fresno State Soccer Stadium",
+    "country": "United States"
+  },
+  "South Melbourne FC": {
+    "stadium": "Lakeside Stadium",
+    "country": "Australia"
+  },
+  "Sydney United 58": {
+    "stadium": "Sydney United Sports Centre",
+    "country": "Australia"
+  },
+  "Heidelberg United": {
+    "stadium": "Olympic Village Stadium",
+    "country": "Australia"
+  },
+  "Perth Glory": {
+    "stadium": "HBF Park",
+    "country": "Australia"
+  },
+  "Adelaide United": {
+    "stadium": "Coopers Stadium",
+    "country": "Australia"
+  },
+  "Newcastle Jets": {
+    "stadium": "McDonald Jones Stadium",
+    "country": "Australia"
+  },
+  "Western Sydney Wanderers": {
+    "stadium": "CommBank Stadium",
+    "country": "Australia"
+  },
+  "Wellington Phoenix": {
+    "stadium": "Sky Stadium",
+    "country": "Australia"
+  },
+  "Macarthur FC": {
+    "stadium": "Campbelltown Stadium",
+    "country": "Australia"
+  },
+  "Central Coast Mariners": {
+    "stadium": "Industree Group Stadium",
+    "country": "Australia"
+  },
+  "Brisbane Roar": {
+    "stadium": "Suncorp Stadium",
+    "country": "Australia"
+  },
+  "Sekhukhune United": {
+    "stadium": "Peter Mokaba Stadium",
+    "country": "South Africa"
+  },
+  "Marumo Gallants": {
+    "stadium": "Old Peter Mokaba Stadium",
+    "country": "South Africa"
+  },
+  "Chippa United": {
+    "stadium": "Nelson Mandela Bay Stadium",
+    "country": "South Africa"
+  },
+  "Golden Arrows": {
+    "stadium": "King Zwelithini Stadium",
+    "country": "South Africa"
+  },
+  "Stellenbosch FC": {
+    "stadium": "Danie Craven Stadium",
+    "country": "South Africa"
+  },
+  "TS Galaxy": {
+    "stadium": "Mbombela Stadium",
+    "country": "South Africa"
+  },
+  "Polokwane City": {
+    "stadium": "Peter Mokaba Stadium",
+    "country": "South Africa"
+  },
+  "Royal AM": {
+    "stadium": "Chatsworth Stadium",
+    "country": "South Africa"
+  },
+  "Mohun Bagan": {
+    "stadium": "Salt Lake Stadium",
+    "country": "India"
+  },
+  "East Bengal": {
+    "stadium": "Salt Lake Stadium",
+    "country": "India"
+  },
+  "Mohammedan SC": {
+    "stadium": "Kishore Bharati Krirangan",
+    "country": "India"
+  },
+  "Gokulam Kerala": {
+    "stadium": "EMS Corporation Stadium",
+    "country": "India"
+  },
+  "Churchill Brothers": {
+    "stadium": "Fatorda Stadium",
+    "country": "India"
+  },
+  "Real Kashmir": {
+    "stadium": "TRC Turf Ground",
+    "country": "India"
+  },
+  "Punjab FC": {
+    "stadium": "Guru Nanak Stadium",
+    "country": "India"
+  },
+  "Shenzhen FC": {
+    "stadium": "Shenzhen Universiade Sports Centre",
+    "country": "China"
+  },
+  "Dalian Pro": {
+    "stadium": "Dalian Sports Center Stadium",
+    "country": "China"
+  },
+  "Qingdao Hainiu": {
+    "stadium": "Qingdao Youth Football Stadium",
+    "country": "China"
+  },
+  "Maccabi Tel Aviv": {
+    "stadium": "Bloomfield Stadium",
+    "country": "Israel"
+  },
+  "Hapoel Tel Aviv": {
+    "stadium": "Bloomfield Stadium",
+    "country": "Israel"
+  },
+  "Maccabi Haifa": {
+    "stadium": "Sammy Ofer Stadium",
+    "country": "Israel"
+  },
+  "Beitar Jerusalem": {
+    "stadium": "Teddy Stadium",
+    "country": "Israel"
+  },
+  "Hapoel Beer Sheva": {
+    "stadium": "Turner Stadium",
+    "country": "Israel"
+  },
+  "Peñarol": {
+    "stadium": "Estadio Campeón del Siglo",
+    "country": "Uruguay"
+  },
+  "Colo-Colo": {
+    "stadium": "Estadio Monumental David Arellano",
+    "country": "Chile"
+  },
+  "Universidad de Chile": {
+    "stadium": "Estadio Nacional Julio Martínez Prádanos",
+    "country": "Chile"
+  },
+  "Universidad Católica": {
+    "stadium": "Estadio San Carlos de Apoquindo",
+    "country": "Chile"
+  },
+  "Millonarios": {
+    "stadium": "Estadio El Campín",
+    "country": "Colombia"
+  },
+  "Atlético Nacional": {
+    "stadium": "Estadio Atanasio Girardot",
+    "country": "Colombia"
+  },
+  "América de Cali": {
+    "stadium": "Estadio Pascual Guerrero",
+    "country": "Colombia"
+  },
+  "Alianza Lima": {
+    "stadium": "Estadio Alejandro Villanueva",
+    "country": "Peru"
+  },
+  "Universitario de Deportes": {
+    "stadium": "Estadio Monumental U",
+    "country": "Peru"
+  },
+  "Barcelona SC": {
+    "stadium": "Estadio Monumental Isidro Romero",
+    "country": "Ecuador"
+  },
+  "LDU Quito": {
+    "stadium": "Estadio Rodrigo Paz Delgado",
+    "country": "Ecuador"
+  },
+  "The Strongest": {
+    "stadium": "Estadio Hernando Siles",
+    "country": "Bolivia"
+  },
+  "Bolívar": {
+    "stadium": "Estadio Hernando Siles",
+    "country": "Bolivia"
+  },
+  "Hearts": {
+    "stadium": "Tynecastle Park",
+    "country": "Scotland"
+  },
+  "Kilmarnock": {
+    "stadium": "Rugby Park",
+    "country": "Scotland"
+  },
+  "St Johnstone": {
+    "stadium": "McDiarmid Park",
+    "country": "Scotland"
+  },
+  "Greenock Morton": {
+    "stadium": "Cappielow",
+    "country": "Scotland"
+  },
+  "Hamilton Academical": {
+    "stadium": "New Douglas Park",
+    "country": "Scotland"
+  },
+  "Dumbarton": {
+    "stadium": "The Cheaper Insurance Direct Stadium",
+    "country": "Scotland"
+  },
+  "East Fife": {
+    "stadium": "Bayview Stadium",
+    "country": "Scotland"
+  },
+  "Inverness Caledonian Thistle": {
+    "stadium": "Caledonian Stadium",
+    "country": "Scotland"
+  },
+  "Kelty Hearts": {
+    "stadium": "New Central Park",
+    "country": "Scotland"
+  },
+  "Bonnyrigg Rose": {
+    "stadium": "New Dundas Park",
+    "country": "Scotland"
+  },
+  "Clyde": {
+    "stadium": "Broadwood Stadium",
+    "country": "Scotland"
+  },
+  "Edinburgh City": {
+    "stadium": "Meadowbank Stadium",
+    "country": "Scotland"
+  },
+  "Forfar Athletic": {
+    "stadium": "Station Park",
+    "country": "Scotland"
+  },
+  "Spartans": {
+    "stadium": "Ainslie Park",
+    "country": "Scotland"
+  },
+  "Stranraer": {
+    "stadium": "Stair Park",
+    "country": "Scotland"
+  },
+  "Shkëndija": {
+    "stadium": "Ecolog Arena",
+    "country": "North Macedonia"
+  },
+  "Struga Trim & Lum": {
+    "stadium": "Gradska Plaža Stadium",
+    "country": "North Macedonia"
+  },
+  "Sileks": {
+    "stadium": "Sileks Stadium",
+    "country": "North Macedonia"
+  },
+  "Tikveš": {
+    "stadium": "Gradski Stadion Kavadarci",
+    "country": "North Macedonia"
+  },
+  "Rabotnički": {
+    "stadium": "Toše Proeski Arena",
+    "country": "North Macedonia"
+  },
+  "Shkupi": {
+    "stadium": "Čair Stadium",
+    "country": "North Macedonia"
+  },
+  "Pelister": {
+    "stadium": "Todor Proeski Stadium",
+    "country": "North Macedonia"
+  },
+  "Makedonija G.P.": {
+    "stadium": "Gjorče Petrov Stadium",
+    "country": "North Macedonia"
+  },
+  "Bregalnica Štip": {
+    "stadium": "Gradski Stadion Štip",
+    "country": "North Macedonia"
+  },
+  "Bashkimi": {
+    "stadium": "Gradski Stadion Kumanovo",
+    "country": "North Macedonia"
+  },
+  "Arsimi": {
+    "stadium": "Blagoj Istatov Stadium",
+    "country": "North Macedonia"
+  },
+  "Ludogorets Razgrad": {
+    "stadium": "Huvepharma Arena",
+    "country": "Bulgaria"
+  },
+  "CSKA Sofia": {
+    "stadium": "Vasil Levski National Stadium",
+    "country": "Bulgaria"
+  },
+  "Levski Sofia": {
+    "stadium": "Vivacom Arena - Georgi Asparuhov",
+    "country": "Bulgaria"
+  },
+  "Botev Plovdiv": {
+    "stadium": "Hristo Botev Stadium",
+    "country": "Bulgaria"
+  },
+  "Cherno More": {
+    "stadium": "Ticha Stadium",
+    "country": "Bulgaria"
+  },
+  "Slavia Sofia": {
+    "stadium": "Slavia Stadium",
+    "country": "Bulgaria"
+  },
+  "Lokomotiv Plovdiv": {
+    "stadium": "Lokomotiv Stadium",
+    "country": "Bulgaria"
+  },
+  "Arda Kardzhali": {
+    "stadium": "Arena Arda",
+    "country": "Bulgaria"
+  },
+  "TSC Bačka Topola": {
+    "stadium": "TSC Arena",
+    "country": "Serbia"
+  },
+  "Čukarički": {
+    "stadium": "Stadion na Banovom brdu",
+    "country": "Serbia"
+  },
+  "Vojvodina": {
+    "stadium": "Karađorđe Stadium",
+    "country": "Serbia"
+  },
+  "Radnički Niš": {
+    "stadium": "Čair Stadium",
+    "country": "Serbia"
+  },
+  "Rijeka": {
+    "stadium": "Stadion Rujevica",
+    "country": "Croatia"
+  },
+  "Osijek": {
+    "stadium": "Opus Arena",
+    "country": "Croatia"
+  },
+  "Lokomotiva Zagreb": {
+    "stadium": "Stadion Kranjčevićeva",
+    "country": "Croatia"
+  },
+  "Kryvbas Kryvyi Rih": {
+    "stadium": "Hirnyk Stadium",
+    "country": "Ukraine"
+  },
+  "Polissya Zhytomyr": {
+    "stadium": "Central Stadium",
+    "country": "Ukraine"
+  },
+  "Oleksandriya": {
+    "stadium": "CSC Nika",
+    "country": "Ukraine"
+  },
+  "Zorya Luhansk": {
+    "stadium": "Slavutych-Arena",
+    "country": "Ukraine"
+  },
+  "Vorskla Poltava": {
+    "stadium": "Butovsky Vorskla Stadium",
+    "country": "Ukraine"
+  },
+  "Kolos Kovalivka": {
+    "stadium": "Kolos Stadium",
+    "country": "Ukraine"
+  },
+  "Rukh Lviv": {
+    "stadium": "Arena Lviv",
+    "country": "Ukraine"
+  },
+  "Baník Ostrava": {
+    "stadium": "Městský stadion",
+    "country": "Czech Republic"
+  },
+  "Sigma Olomouc": {
+    "stadium": "Andrův stadion",
+    "country": "Czech Republic"
+  },
+  "Slovan Liberec": {
+    "stadium": "Stadion u Nisy",
+    "country": "Czech Republic"
+  },
+  "Mladá Boleslav": {
+    "stadium": "Lokotrans Aréna",
+    "country": "Czech Republic"
+  },
+  "Jablonec": {
+    "stadium": "Stadion Střelnice",
+    "country": "Czech Republic"
+  },
+  "Bohemians 1905": {
+    "stadium": "Ďolíček",
+    "country": "Czech Republic"
+  },
+  "Sturm Graz": {
+    "stadium": "Merkur Arena",
+    "country": "Austria"
+  },
+  "LASK": {
+    "stadium": "Raiffeisen Arena",
+    "country": "Austria"
+  },
+  "Wolfsberger AC": {
+    "stadium": "Lavanttal-Arena",
+    "country": "Austria"
+  },
+  "Austria Klagenfurt": {
+    "stadium": "Wörthersee Stadion",
+    "country": "Austria"
+  },
+  "Hartberg": {
+    "stadium": "Profertil Arena",
+    "country": "Austria"
+  },
+  "Aris": {
+    "stadium": "Kleanthis Vikelidis Stadium",
+    "country": "Greece"
+  },
+  "Asteras Tripolis": {
+    "stadium": "Theodoros Kolokotronis Stadium",
+    "country": "Greece"
+  },
+  "Atromitos": {
+    "stadium": "Peristeri Stadium",
+    "country": "Greece"
+  },
+  "OFI Crete": {
+    "stadium": "Theodoros Vardinogiannis Stadium",
+    "country": "Greece"
+  },
+  "Servette": {
+    "stadium": "Stade de Genève",
+    "country": "Switzerland"
+  },
+  "Lugano": {
+    "stadium": "Stadio di Cornaredo",
+    "country": "Switzerland"
+  },
+  "Lausanne-Sport": {
+    "stadium": "Stade de la Tuilière",
+    "country": "Switzerland"
+  },
+  "St. Gallen": {
+    "stadium": "Kybunpark",
+    "country": "Switzerland"
+  },
+  "Luzern": {
+    "stadium": "Swissporarena",
+    "country": "Switzerland"
+  },
+  "Jagiellonia Białystok": {
+    "stadium": "Stadion Miejski",
+    "country": "Poland"
+  },
+  "Raków Częstochowa": {
+    "stadium": "Miejski Stadion Piłkarski Raków",
+    "country": "Poland"
+  },
+  "Pogoń Szczecin": {
+    "stadium": "Stadion Miejski im. Floriana Krygiera",
+    "country": "Poland"
+  },
+  "Górnik Zabrze": {
+    "stadium": "Stadion im. Ernesta Pohla",
+    "country": "Poland"
+  },
+  "Lechia Gdańsk": {
+    "stadium": "Polsat Plus Arena Gdańsk",
+    "country": "Poland"
+  },
+  "Widzew Łódź": {
+    "stadium": "Stadion Widzewa",
+    "country": "Poland"
+  },
+  "FCSB": {
+    "stadium": "Arena Națională",
+    "country": "Romania"
+  },
+  "Rapid București": {
+    "stadium": "Superbet Arena-Giulești",
+    "country": "Romania"
+  },
+  "Universitatea Craiova": {
+    "stadium": "Stadionul Ion Oblemenco",
+    "country": "Romania"
+  },
+  "Dinamo București": {
+    "stadium": "Stadionul Arcul de Triumf",
+    "country": "Romania"
+  },
+  "Universitatea Cluj": {
+    "stadium": "Cluj Arena",
+    "country": "Romania"
+  },
+  "Farul Constanța": {
+    "stadium": "Stadionul Central Academia Hagi",
+    "country": "Romania"
+  },
+  "Bodø/Glimt": {
+    "stadium": "Aspmyra Stadion",
+    "country": "Norway"
+  },
+  "Molde": {
+    "stadium": "Aker Stadion",
+    "country": "Norway"
+  },
+  "Viking": {
+    "stadium": "Lyse Arena",
+    "country": "Norway"
+  },
+  "Brann": {
+    "stadium": "Brann Stadion",
+    "country": "Norway"
+  },
+  "Vålerenga": {
+    "stadium": "Intility Arena",
+    "country": "Norway"
+  },
+  "Lillestrøm": {
+    "stadium": "Åråsen Stadion",
+    "country": "Norway"
+  },
+  "Hammarby": {
+    "stadium": "Tele2 Arena",
+    "country": "Sweden"
+  },
+  "Djurgårdens IF": {
+    "stadium": "Tele2 Arena",
+    "country": "Sweden"
+  },
+  "IFK Göteborg": {
+    "stadium": "Gamla Ullevi",
+    "country": "Sweden"
+  },
+  "BK Häcken": {
+    "stadium": "Bravida Arena",
+    "country": "Sweden"
+  },
+  "IF Elfsborg": {
+    "stadium": "Borås Arena",
+    "country": "Sweden"
+  },
+  "Midtjylland": {
+    "stadium": "MCH Arena",
+    "country": "Denmark"
+  },
+  "Nordsjælland": {
+    "stadium": "Right to Dream Park",
+    "country": "Denmark"
+  },
+  "AGF Aarhus": {
+    "stadium": "Ceres Park",
+    "country": "Denmark"
+  },
+  "Randers": {
+    "stadium": "Cepheus Park Randers",
+    "country": "Denmark"
+  },
+  "Silkeborg": {
+    "stadium": "JYSK Park",
+    "country": "Denmark"
+  },
+  "Slovan Bratislava": {
+    "stadium": "Tehelné pole",
+    "country": "Slovakia"
+  },
+  "Spartak Trnava": {
+    "stadium": "City Arena - Štadión Antona Malatinského",
+    "country": "Slovakia"
+  },
+  "DAC 1904 Dunajská Streda": {
+    "stadium": "MOL Aréna",
+    "country": "Slovakia"
+  },
+  "Žilina": {
+    "stadium": "Štadión pod Dubňom",
+    "country": "Slovakia"
+  },
+  "Ružomberok": {
+    "stadium": "Štadión MFK Ružomberok",
+    "country": "Slovakia"
+  },
+  "Olimpija Ljubljana": {
+    "stadium": "Stožice Stadium",
+    "country": "Slovenia"
+  },
+  "Maribor": {
+    "stadium": "Ljudski vrt",
+    "country": "Slovenia"
+  },
+  "Celje": {
+    "stadium": "Z'dežele Stadium",
+    "country": "Slovenia"
+  },
+  "Koper": {
+    "stadium": "Bonifika Stadium",
+    "country": "Slovenia"
+  },
+  "Mura": {
+    "stadium": "Fazanerija City Stadium",
+    "country": "Slovenia"
+  },
+  "APOEL": {
+    "stadium": "GSP Stadium",
+    "country": "Cyprus"
+  },
+  "Pafos": {
+    "stadium": "Alphamega Stadium",
+    "country": "Cyprus"
+  },
+  "Omonia": {
+    "stadium": "GSP Stadium",
+    "country": "Cyprus"
+  },
+  "AEK Larnaca": {
+    "stadium": "AEK Arena",
+    "country": "Cyprus"
+  },
+  "Aris Limassol": {
+    "stadium": "Alphamega Stadium",
+    "country": "Cyprus"
+  },
+  "Apollon Limassol": {
+    "stadium": "Alphamega Stadium",
+    "country": "Cyprus"
+  },
+  "Zrinjski Mostar": {
+    "stadium": "Stadion pod Bijelim Brijegom",
+    "country": "Bosnia and Herzegovina"
+  },
+  "Borac Banja Luka": {
+    "stadium": "Gradski Stadion",
+    "country": "Bosnia and Herzegovina"
+  },
+  "Sarajevo": {
+    "stadium": "Asim Ferhatović Hase Stadium",
+    "country": "Bosnia and Herzegovina"
+  },
+  "Željezničar": {
+    "stadium": "Grbavica Stadium",
+    "country": "Bosnia and Herzegovina"
+  },
+  "Široki Brijeg": {
+    "stadium": "Pecara Stadium",
+    "country": "Bosnia and Herzegovina"
+  },
+  "Egnatia": {
+    "stadium": "Arena Egnatia",
+    "country": "Albania"
+  },
+  "Partizani Tirana": {
+    "stadium": "Arena Kombëtare",
+    "country": "Albania"
+  },
+  "Tirana": {
+    "stadium": "Arena Kombëtare",
+    "country": "Albania"
+  },
+  "Vllaznia": {
+    "stadium": "Loro Boriçi Stadium",
+    "country": "Albania"
+  },
+  "Skënderbeu": {
+    "stadium": "Skënderbeu Stadium",
+    "country": "Albania"
+  },
+  "Drita": {
+    "stadium": "Gjilan City Stadium",
+    "country": "Kosovo"
+  },
+  "Ballkani": {
+    "stadium": "Suhareka City Stadium",
+    "country": "Kosovo"
+  },
+  "Prishtina": {
+    "stadium": "Fadil Vokrri Stadium",
+    "country": "Kosovo"
+  },
+  "Llapi": {
+    "stadium": "Zahir Pajaziti Stadium",
+    "country": "Kosovo"
+  },
+  "Budućnost Podgorica": {
+    "stadium": "Podgorica City Stadium",
+    "country": "Montenegro"
+  },
+  "Sutjeska Nikšić": {
+    "stadium": "Stadion Kraj Bistrice",
+    "country": "Montenegro"
+  },
+  "Dečić": {
+    "stadium": "Stadion Tuško Polje",
+    "country": "Montenegro"
+  },
+  "Mornar": {
+    "stadium": "Topolica Sport Centre",
+    "country": "Montenegro"
+  },
+  "Sheriff Tiraspol": {
+    "stadium": "Sheriff Stadium",
+    "country": "Moldova"
+  },
+  "Zimbru Chișinău": {
+    "stadium": "Zimbru Stadium",
+    "country": "Moldova"
+  },
+  "Petrocub Hîncești": {
+    "stadium": "Stadionul Municipal Hîncești",
+    "country": "Moldova"
+  },
+  "Dinamo Tbilisi": {
+    "stadium": "Boris Paichadze Dinamo Arena",
+    "country": "Georgia"
+  },
+  "Dinamo Batumi": {
+    "stadium": "Adjarabet Arena",
+    "country": "Georgia"
+  },
+  "Iberia 1999": {
+    "stadium": "Mikheil Meskhi Stadium",
+    "country": "Georgia"
+  },
+  "Torpedo Kutaisi": {
+    "stadium": "Ramaz Shengelia Stadium",
+    "country": "Georgia"
+  },
+  "Noah": {
+    "stadium": "Abovyan City Stadium",
+    "country": "Armenia"
+  },
+  "Pyunik": {
+    "stadium": "Vazgen Sargsyan Republican Stadium",
+    "country": "Armenia"
+  },
+  "Ararat-Armenia": {
+    "stadium": "Urartu Stadium",
+    "country": "Armenia"
+  },
+  "Urartu": {
+    "stadium": "Urartu Stadium",
+    "country": "Armenia"
+  },
+  "Qarabağ": {
+    "stadium": "Azersun Arena",
+    "country": "Azerbaijan"
+  },
+  "Neftçi": {
+    "stadium": "Neftçi Arena",
+    "country": "Azerbaijan"
+  },
+  "Sabah": {
+    "stadium": "Bank Respublika Arena",
+    "country": "Azerbaijan"
+  },
+  "Zira": {
+    "stadium": "Zirə Olympic Sport Complex",
+    "country": "Azerbaijan"
+  },
+  "Kairat Almaty": {
+    "stadium": "Central Stadium",
+    "country": "Kazakhstan"
+  },
+  "Astana": {
+    "stadium": "Astana Arena",
+    "country": "Kazakhstan"
+  },
+  "Ordabasy": {
+    "stadium": "Kazhimukan Munaitpasov Stadium",
+    "country": "Kazakhstan"
+  },
+  "Tobol": {
+    "stadium": "Kostanay Central Stadium",
+    "country": "Kazakhstan"
+  },
+  "Aktobe": {
+    "stadium": "Central Stadium",
+    "country": "Kazakhstan"
+  },
+  "HJK Helsinki": {
+    "stadium": "Bolt Arena",
+    "country": "Finland"
+  },
+  "KuPS": {
+    "stadium": "Väre Areena",
+    "country": "Finland"
+  },
+  "Ilves": {
+    "stadium": "Tammelan Stadion",
+    "country": "Finland"
+  },
+  "SJK": {
+    "stadium": "OmaSP Stadion",
+    "country": "Finland"
+  },
+  "Haka": {
+    "stadium": "Tehtaan kenttä",
+    "country": "Finland"
+  },
+  "Víkingur Reykjavík": {
+    "stadium": "Víkingsvollur",
+    "country": "Iceland"
+  },
+  "Valur": {
+    "stadium": "Hlíðaren­di",
+    "country": "Iceland"
+  },
+  "Breiðablik": {
+    "stadium": "Kópavogsvöllur",
+    "country": "Iceland"
+  },
+  "KR Reykjavík": {
+    "stadium": "KR-völlur",
+    "country": "Iceland"
+  },
+  "RFS": {
+    "stadium": "LNK Sporta Parks",
+    "country": "Latvia"
+  },
+  "Riga FC": {
+    "stadium": "Skonto Stadium",
+    "country": "Latvia"
+  },
+  "FK Liepāja": {
+    "stadium": "Daugava Stadium",
+    "country": "Latvia"
+  },
+  "Žalgiris Vilnius": {
+    "stadium": "LFF Stadium",
+    "country": "Lithuania"
+  },
+  "Kauno Žalgiris": {
+    "stadium": "Dariaus ir Girėno Stadium",
+    "country": "Lithuania"
+  },
+  "Panevėžys": {
+    "stadium": "Aukštaitija Stadium",
+    "country": "Lithuania"
+  },
+  "Flora Tallinn": {
+    "stadium": "A. Le Coq Arena",
+    "country": "Estonia"
+  },
+  "Levadia Tallinn": {
+    "stadium": "A. Le Coq Arena",
+    "country": "Estonia"
+  },
+  "Nõmme Kalju": {
+    "stadium": "Hiiu Stadium",
+    "country": "Estonia"
+  },
+  "Dinamo Minsk": {
+    "stadium": "Dinamo Stadium",
+    "country": "Belarus"
+  },
+  "BATE Borisov": {
+    "stadium": "Borisov Arena",
+    "country": "Belarus"
+  },
+  "Neman Grodno": {
+    "stadium": "Neman Stadium",
+    "country": "Belarus"
+  },
+  "Ħamrun Spartans": {
+    "stadium": "Victor Tedesco Stadium",
+    "country": "Malta"
+  },
+  "Floriana": {
+    "stadium": "Independence Ground",
+    "country": "Malta"
+  },
+  "Sliema Wanderers": {
+    "stadium": "National Stadium",
+    "country": "Malta"
+  },
+  "Hibernians": {
+    "stadium": "Hibernians Ground",
+    "country": "Malta"
+  },
+  "F91 Dudelange": {
+    "stadium": "Stade Jos Nosbaum",
+    "country": "Luxembourg"
+  },
+  "Swift Hesperange": {
+    "stadium": "Stade Alphonse Theis",
+    "country": "Luxembourg"
+  },
+  "Racing FC Union Luxembourg": {
+    "stadium": "Stade de Luxembourg",
+    "country": "Luxembourg"
+  },
+  "Inter Escaldes": {
+    "stadium": "Estadi Nacional",
+    "country": "Andorra"
+  },
+  "Santa Coloma": {
+    "stadium": "Estadi Nacional",
+    "country": "Andorra"
+  },
+  "Atlètic Club d'Escaldes": {
+    "stadium": "Estadi Nacional",
+    "country": "Andorra"
+  },
+  "KÍ Klaksvík": {
+    "stadium": "Við Djúpumýrar",
+    "country": "Faroe Islands"
+  },
+  "HB Tórshavn": {
+    "stadium": "Gundadalur",
+    "country": "Faroe Islands"
+  },
+  "Víkingur Gøta": {
+    "stadium": "Sarpugerði",
+    "country": "Faroe Islands"
+  },
+  "Linfield": {
+    "stadium": "Windsor Park",
+    "country": "Northern Ireland"
+  },
+  "Glentoran": {
+    "stadium": "The BetMcLean Oval",
+    "country": "Northern Ireland"
+  },
+  "Larne": {
+    "stadium": "Inver Park",
+    "country": "Northern Ireland"
+  },
+  "Crusaders": {
+    "stadium": "Seaview",
+    "country": "Northern Ireland"
+  },
+  "Cliftonville": {
+    "stadium": "Solitude",
+    "country": "Northern Ireland"
+  },
+  "Coleraine": {
+    "stadium": "The Showgrounds",
+    "country": "Northern Ireland"
+  },
+  "Ballymena United": {
+    "stadium": "The Showgrounds",
+    "country": "Northern Ireland"
+  },
+  "Glenavon": {
+    "stadium": "Mourneview Park",
+    "country": "Northern Ireland"
+  },
+  "Famalicão": {
+    "stadium": "Estádio Municipal 22 de Junho",
+    "country": "Portugal"
+  },
+  "Gil Vicente": {
+    "stadium": "Estádio Cidade de Barcelos",
+    "country": "Portugal"
+  },
+  "Rio Ave": {
+    "stadium": "Estádio dos Arcos",
+    "country": "Portugal"
+  },
+  "Estoril": {
+    "stadium": "Estádio António Coimbra da Mota",
+    "country": "Portugal"
+  },
+  "Arouca": {
+    "stadium": "Estádio Municipal de Arouca",
+    "country": "Portugal"
+  },
+  "Moreirense": {
+    "stadium": "Parque de Jogos Comendador Joaquim de Almeida Freitas",
+    "country": "Portugal"
+  },
+  "Go Ahead Eagles": {
+    "stadium": "De Adelaarshorst",
+    "country": "Netherlands"
+  },
+  "FC Groningen": {
+    "stadium": "Euroborg",
+    "country": "Netherlands"
+  },
+  "Fortuna Sittard": {
+    "stadium": "Fortuna Sittard Stadion",
+    "country": "Netherlands"
+  },
+  "PEC Zwolle": {
+    "stadium": "MAC³PARK Stadion",
+    "country": "Netherlands"
+  },
+  "RKC Waalwijk": {
+    "stadium": "Mandemakers Stadion",
+    "country": "Netherlands"
+  },
+  "NAC Breda": {
+    "stadium": "Rat Verlegh Stadion",
+    "country": "Netherlands"
+  },
+  "Gent": {
+    "stadium": "Planet Group Arena",
+    "country": "Belgium"
+  },
+  "Charleroi": {
+    "stadium": "Stade du Pays de Charleroi",
+    "country": "Belgium"
+  },
+  "Mechelen": {
+    "stadium": "AFAS Stadion",
+    "country": "Belgium"
+  },
+  "Cercle Brugge": {
+    "stadium": "Jan Breydel Stadium",
+    "country": "Belgium"
+  },
+  "OH Leuven": {
+    "stadium": "King Power at Den Dreef Stadion",
+    "country": "Belgium"
+  },
+  "Sint-Truiden": {
+    "stadium": "Daio Wasabi Stayen Stadium",
+    "country": "Belgium"
+  },
+  "Başakşehir": {
+    "stadium": "Başakşehir Fatih Terim Stadium",
+    "country": "Turkey"
+  },
+  "Samsunspor": {
+    "stadium": "Samsun 19 Mayıs Stadium",
+    "country": "Turkey"
+  },
+  "Konyaspor": {
+    "stadium": "Konya Metropolitan Municipality Stadium",
+    "country": "Turkey"
+  },
+  "Göztepe": {
+    "stadium": "Gürsel Aksel Stadium",
+    "country": "Turkey"
+  },
+  "Antalyaspor": {
+    "stadium": "Corendon Airlines Park",
+    "country": "Turkey"
+  },
+  "Kayserispor": {
+    "stadium": "RHG Enertürk Enerji Stadium",
+    "country": "Turkey"
+  },
+  "Maccabi Netanya": {
+    "stadium": "Netanya Stadium",
+    "country": "Israel"
+  },
+  "Hapoel Jerusalem": {
+    "stadium": "Teddy Stadium",
+    "country": "Israel"
+  },
+  "Maccabi Bnei Reineh": {
+    "stadium": "Green Stadium",
+    "country": "Israel"
+  },
+  "Kaiserslautern": {
+    "stadium": "Fritz-Walter-Stadion",
+    "country": "Germany"
+  },
+  "Ross County": {
+    "stadium": "Victoria Park",
+    "country": "Scotland"
+  },
+  "Dunfermline": {
+    "stadium": "East End Park",
+    "country": "Scotland"
+  },
+  "Queen of the South": {
+    "stadium": "Palmerston Park",
+    "country": "Scotland"
+  },
+  "Brechin City": {
+    "stadium": "Glebe Park",
+    "country": "Scotland"
+  },
+  "East Kilbride": {
+    "stadium": "K-Park",
+    "country": "Scotland"
+  },
+  "FC Sion": {
+    "stadium": "Stade de Tourbillon",
+    "country": "Switzerland"
+  },
+  "FC Thun": {
+    "stadium": "Stockhorn Arena",
+    "country": "Switzerland"
+  },
+  "FC Vaduz": {
+    "stadium": "Rheinpark Stadion",
+    "country": "Liechtenstein"
+  },
+  "FK Vardar": {
+    "stadium": "Philip II Arena",
+    "country": "North Macedonia"
+  },
+  "Győri ETO": {
+    "stadium": "ETO Park",
+    "country": "Hungary"
+  },
+  "Tromsø": {
+    "stadium": "Alfheim Stadion",
+    "country": "Norway"
+  },
+  "Lincoln Red Imps": {
+    "stadium": "Victoria Stadium",
+    "country": "Gibraltar"
+  },
+  "Europa": {
+    "stadium": "Victoria Stadium",
+    "country": "Gibraltar"
+  },
+  "GKS Katowice": {
+    "stadium": "Stadion GKS Katowice",
+    "country": "Poland"
+  },
+  "FC Inter Turku": {
+    "stadium": "Veritas Stadion",
+    "country": "Finland"
+  },
+  "Marsaxlokk": {
+    "stadium": "Ta' Qali National Stadium",
+    "country": "Malta"
+  },
+  "Valletta": {
+    "stadium": "Ta' Qali National Stadium",
+    "country": "Malta"
+  },
+  "AF Elbasani": {
+    "stadium": "Elbasan Arena",
+    "country": "Albania"
+  },
+  "Alashkert": {
+    "stadium": "Nairi Stadium",
+    "country": "Armenia"
+  },
+  "Aluminij": {
+    "stadium": "Aluminij Sports Park",
+    "country": "Slovenia"
+  },
+  "Bravo": {
+    "stadium": "ZAK Stadium",
+    "country": "Slovenia"
+  },
+  "Caernarfon Town": {
+    "stadium": "The Oval",
+    "country": "Wales"
+  },
+  "Dila": {
+    "stadium": "Tengiz Burjanadze Stadium",
+    "country": "Georgia"
+  },
+  "Dukagjini": {
+    "stadium": "18 June Stadium",
+    "country": "Kosovo"
+  },
+  "FC Atert Bissen": {
+    "stadium": "Terrain ZAC Klengbousbierg",
+    "country": "Luxembourg"
+  },
+  "FC Differdange 03": {
+    "stadium": "Stade Municipal de la Ville de Differdange",
+    "country": "Luxembourg"
+  },
+  "FC Milsami Orhei": {
+    "stadium": "CSR Orhei",
+    "country": "Moldova"
+  },
+  "GAIS": {
+    "stadium": "Gamla Ullevi",
+    "country": "Sweden"
+  },
+  "Hradec Králové": {
+    "stadium": "Malšovická Aréna",
+    "country": "Czech Republic"
+  },
+  "LNZ Cherkasy": {
+    "stadium": "Cherkasy Arena",
+    "country": "Ukraine"
+  },
+  "Malisheva": {
+    "stadium": "Liman Gegaj Stadium",
+    "country": "Kosovo"
+  },
+  "Mjällby": {
+    "stadium": "Strandvallen",
+    "country": "Sweden"
+  },
+  "Mondorf-les-Bains": {
+    "stadium": "Stade John Grün",
+    "country": "Luxembourg"
+  },
+  "NSI Runavik": {
+    "stadium": "Við Løkin",
+    "country": "Faroe Islands"
+  },
+  "Paide Linnameeskond": {
+    "stadium": "Paide Linnastaadion",
+    "country": "Estonia"
+  },
+  "Paksi SE": {
+    "stadium": "Fehérvári úti Stadion",
+    "country": "Hungary"
+  },
+  "Petrovac": {
+    "stadium": "Stadion pod Malim Brdom",
+    "country": "Montenegro"
+  },
+  "SP La Fiorita": {
+    "stadium": "Igor Crescentini Stadium",
+    "country": "San Marino"
+  },
+  "SP Tre Fiori": {
+    "stadium": "Stadio di Fiorentino",
+    "country": "San Marino"
+  },
+  "St Joseph's": {
+    "stadium": "Victoria Stadium",
+    "country": "Gibraltar"
+  },
+  "Stjarnan": {
+    "stadium": "Samsung völlurinn",
+    "country": "Iceland"
+  },
+  "UNA Strassen": {
+    "stadium": "Complexe Sportif Jean Wirtz",
+    "country": "Luxembourg"
+  },
+  "Varaždin": {
+    "stadium": "Stadion Anđelko Herjavec",
+    "country": "Croatia"
+  },
+  "Velez Mostar": {
+    "stadium": "Rođeni Stadium",
+    "country": "Bosnia and Herzegovina"
+  },
+  "Vestri": {
+    "stadium": "Ísafjarðarvöllur",
+    "country": "Iceland"
+  },
+  "Virtus": {
+    "stadium": "Stadio di Acquaviva",
+    "country": "San Marino"
+  },
+  "Yelimay Semey": {
+    "stadium": "Spartak Stadium",
+    "country": "Kazakhstan"
+  },
+  "Železničar Pančevo": {
+    "stadium": "SC Mladost Stadium",
+    "country": "Serbia"
+  },
+  "Dinamo City": {
+    "stadium": "Selman Stërmasi Stadium",
+    "country": "Albania"
+  },
+  "Dinamo Tirana": {
+    "stadium": "Selman Stërmasi Stadium",
+    "country": "Albania"
+  },
+  "FC Avan Academy": {
+    "stadium": "Yerevan Football Academy Stadium",
+    "country": "Armenia"
+  },
+  "FC Saburtalo Tbilisi": {
+    "stadium": "Mikheil Meskhi Stadium",
+    "country": "Georgia"
+  },
+  "Artsakh": {
+    "stadium": "Abovyan City Stadium",
+    "country": "Armenia"
+  },
+  "Auda": {
+    "stadium": "Skonto Stadium",
+    "country": "Latvia"
+  },
+  "Hegelmann Litauen": {
+    "stadium": "Raudondvaris Stadium",
+    "country": "Lithuania"
+  },
+  "ML Vitebsk": {
+    "stadium": "Vitebsky Central Sport Complex",
+    "country": "Belarus"
+  },
+  "FC Edinburgh": {
+    "stadium": "Meadowbank Stadium",
+    "country": "Scotland"
+  },
+  "Bohemians": {
+    "stadium": "Dalymount Park",
+    "country": "Republic of Ireland"
+  }
 }
