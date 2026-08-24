@@ -21,6 +21,7 @@ import re
 import time
 from datetime import datetime
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
@@ -43,6 +44,29 @@ DEFAULT_RETRY_DELAY_SECONDS = 2
 # DOWNLOAD
 # ============================================================
 
+def _cache_busted(url: str) -> str:
+    """
+    Append a timestamp query parameter to force a cache miss.
+
+    Confirmed necessary: two independent automated fetches of the
+    same URL, 29 minutes apart, both well after Fixtur.es's own data
+    had been updated, returned byte-for-byte identical content --
+    while a fresh browser download of the same URL at a similar time
+    had the update. That's the signature of a CDN/edge cache sitting
+    in front of Fixtur.es serving stale responses to our fetches
+    specifically. A query-param cache-buster is used rather than
+    relying solely on Cache-Control/Pragma headers, since some CDNs
+    key their cache purely on the URL and ignore client-supplied
+    cache-control headers entirely.
+    """
+
+    parts = urlsplit(url)
+    cache_bust_param = urlencode({"_cb": int(time.time())})
+    new_query = f"{parts.query}&{cache_bust_param}" if parts.query else cache_bust_param
+
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, new_query, parts.fragment))
+
+
 def download_ics(
     url: str,
     user_agent: str = DEFAULT_USER_AGENT,
@@ -57,10 +81,12 @@ def download_ics(
         logger.debug("Request attempt %d/%d for %s", attempt, max_attempts, url)
 
         request = Request(
-            url,
+            _cache_busted(url),
             headers={
                 "User-Agent": user_agent,
                 "Accept": "text/calendar,*/*",
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
             },
         )
 
