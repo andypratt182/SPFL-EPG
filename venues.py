@@ -18,6 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent
 DATA_FILE = BASE_DIR / "data" / "venues.json"
 
 UNKNOWN_VENUE = "Venue TBC"
+UNKNOWN_COUNTRY = "Unknown"
 
 
 def _load_venues() -> dict:
@@ -48,17 +49,27 @@ VENUES = _load_venues()
 # re-normalising every key on every call to get_venue().
 _NORMALISED_VENUES = {normalise_team_name(name): venue for name, venue in VENUES.items()}
 
-# Deliberately NOT aliased: "Vikingur" as it appears in fixture data
-# is ambiguous between two different real clubs -- Víkingur
+# Names permanently exempt from the WARNING-level miss log below --
+# either because no single stadium answer could ever be correct
+# ("Vikingur"), or because the name isn't a real team at all
+# ("Winnaar Groep D"). Both are settled, not new gaps, so warning
+# about them every run would just bury genuinely new misses.
+#
+# "Vikingur": ambiguous between two different real clubs -- Víkingur
 # Reykjavík (Iceland) and Víkingur Gøta (Faroe Islands) -- both
 # entered in UEFA qualifying most seasons. Confirmed by real fixture
 # data: "Vikingur" appears simultaneously alive in Champions League
 # qualifying (7/21 Jul) AND playing a separate Conference League
 # qualifier sandwiched between those dates (16 Jul) -- two different
 # qualifying paths that can't belong to the same club at once. Any
-# single alias here would be wrong for roughly half its fixtures, so
-# this one stays unresolved ("Venue TBC") rather than guessed.
-_KNOWN_UNRESOLVABLE_AMBIGUOUS_NAMES = {"Vikingur"}
+# single alias here would be wrong for roughly half its fixtures.
+#
+# "Winnaar Groep D": Dutch for "Winner of Group D" -- a UEFA
+# qualifying-round placeholder for a group draw that hasn't happened
+# yet, not an actual club. Confirmed seen playing itself (home ==
+# away == "Winnaar Groep D") in a real feed. Will keep recurring
+# every run until the real draw replaces it -- nothing to fix here.
+_KNOWN_UNRESOLVABLE_NAMES = {"Vikingur", "Winnaar Groep D"}
 
 # Known cases where the team name as it appears in fixture data
 # (Fixtur.es SUMMARY parsing) doesn't match the venues.json key --
@@ -182,6 +193,37 @@ def _stadium_from(venue) -> str | None:
     return None
 
 
+def _country_from(venue) -> str | None:
+    if isinstance(venue, dict):
+        country = venue.get("country")
+        if country:
+            return str(country).strip()
+
+    return None
+
+
+def _resolve_entry(team_name: str):
+    """
+    Shared lookup chain for both get_venue() and get_venue_country():
+    exact key match, then normalised-name match, then the known
+    fixture-name alias table. Returns the raw venues.json value (a
+    {stadium, country} dict, or a legacy plain string for any entry
+    not yet migrated) or None if nothing matched.
+    """
+
+    if team_name in VENUES:
+        return VENUES[team_name]
+
+    venue = _NORMALISED_VENUES.get(normalise_team_name(team_name))
+
+    if venue is None:
+        alias = _FIXTURE_NAME_ALIASES.get(team_name)
+        if alias:
+            venue = VENUES.get(alias)
+
+    return venue
+
+
 def get_venue(team_name: str | None, *, context: str | None = None) -> str:
     """
     Return the stadium for a team, or "Venue TBC" if unknown.
@@ -195,19 +237,7 @@ def get_venue(team_name: str | None, *, context: str | None = None) -> str:
     if not team_name:
         return UNKNOWN_VENUE
 
-    if team_name in VENUES:
-        stadium = _stadium_from(VENUES[team_name])
-        if stadium:
-            return stadium
-
-    venue = _NORMALISED_VENUES.get(normalise_team_name(team_name))
-
-    if venue is None:
-        alias = _FIXTURE_NAME_ALIASES.get(team_name)
-        if alias:
-            venue = VENUES.get(alias)
-
-    stadium = _stadium_from(venue)
+    stadium = _stadium_from(_resolve_entry(team_name))
 
     if stadium:
         return stadium
@@ -218,17 +248,36 @@ def get_venue(team_name: str | None, *, context: str | None = None) -> str:
     # venues.json has it) are visible in run logs instead of
     # silently producing "Venue TBC" forever.
     #
-    # Exception: names in _KNOWN_UNRESOLVABLE_AMBIGUOUS_NAMES are a
-    # settled case, not a new gap -- warning about them every run
-    # would just bury genuinely new misses in repeat noise.
-    if team_name in _KNOWN_UNRESOLVABLE_AMBIGUOUS_NAMES:
-        logger.debug("No venue found for %r (known ambiguous name)", team_name)
+    # Exception: names in _KNOWN_UNRESOLVABLE_NAMES are a settled
+    # case, not a new gap -- warning about them every run would just
+    # bury genuinely new misses in repeat noise.
+    if team_name in _KNOWN_UNRESOLVABLE_NAMES:
+        logger.debug("No venue found for %r (known unresolvable name)", team_name)
         return UNKNOWN_VENUE
 
     suffix = f" ({context})" if context else ""
     logger.warning("No venue found for %r%s", team_name, suffix)
 
     return UNKNOWN_VENUE
+
+
+def get_venue_country(team_name: str | None) -> str:
+    """
+    Return the country a team's venue is in, or "Unknown" if
+    unavailable (either the team isn't in venues.json under any name
+    we tried, or its entry predates the {stadium, country} migration
+    and is still a bare stadium string).
+
+    Doesn't log a miss warning -- get_venue() already does for the
+    same lookup chain, and both are typically called for the same
+    fixture, so a second warning here would just double up on the
+    same underlying gap.
+    """
+
+    if not team_name:
+        return UNKNOWN_COUNTRY
+
+    return _country_from(_resolve_entry(team_name)) or UNKNOWN_COUNTRY
 
 
 def has_venue(team_name: str | None) -> bool:
