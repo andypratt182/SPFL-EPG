@@ -194,11 +194,24 @@ def parse_event(
     if end is not None:
         end = localise(end, UK_TZ)
 
-    # Prefer the feed's own LOCATION; fall back to our venue database.
-    if location:
+    context = f"vs {away}, {competition or source_name}, {kickoff.strftime('%Y-%m-%d %H:%M')}"
+
+    if is_spfl_team(home):
+        # One of our own 12 tracked clubs -- prefer our canonical
+        # venue name for consistency, regardless of what LOCATION
+        # (if any) a given competition feed happens to supply for
+        # the same physical ground. Without this, the same stadium
+        # could show as "Ibrox Stadium" from the team calendar but
+        # "Ibrox" from a competition feed that formats LOCATION
+        # differently -- confirmed happening for a real fixture.
+        venue = get_venue(home, context=context)
+    elif location:
+        # An opponent's venue: prefer the feed's own LOCATION when
+        # present, since it may be more accurate/specific than our
+        # best-effort venues.json entry (foreign grounds, neutral
+        # cup venues, etc, where our own data is less certain).
         venue = location.strip()
     else:
-        context = f"vs {away}, {competition or source_name}, {kickoff.strftime('%Y-%m-%d %H:%M')}"
         venue = get_venue(home, context=context)
 
     return {
