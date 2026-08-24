@@ -125,22 +125,32 @@ def _venue_for(match: dict) -> str:
 _UNKNOWN_COMPETITION_VALUES = {"Unclassified", "Unknown", "Competition TBC", None, ""}
 
 
-def _competition_clause(competition: str | None) -> str:
+def _competition_clause(competition: str | None, round_label: str | None = None) -> str:
     """
     A natural-language clause describing the competition, including
     its own leading space -- e.g. " in the Scottish Premiership",
     " in a friendly match", or "" if there's nothing sensible to say
     (competition unknown). Designed to be embedded directly after
     "{home} take on {away}" / "{home} taking on {away}".
+
+    round_label, if present, is appended -- e.g. " in the Scottish
+    Cup Quarter Final". Comes from the fixture feed's own SUMMARY
+    text (see ics.py's parse_match_summary), so it's shown exactly
+    as the feed wrote it rather than reformatted.
     """
 
     if competition in _UNKNOWN_COMPETITION_VALUES:
         return ""
 
     if competition == "Friendly":
-        return " in a friendly match"
+        base = " in a friendly match"
+    else:
+        base = f" in the {competition}"
 
-    return f" in the {competition}"
+    if round_label:
+        base += f" {round_label}"
+
+    return base
 
 
 def _channel_team_name(channel_id: str) -> str:
@@ -278,7 +288,9 @@ def _opponent_label(parts: dict) -> str:
     return opponent
 
 
-def _narrative_sentence(parts: dict, venue: str, competition: str, *, gerund: bool) -> str:
+def _narrative_sentence(
+    parts: dict, venue: str, competition: str, *, gerund: bool, round_label: str | None = None
+) -> str:
     """
     The core "Team host/travel..." sentence (no "Live coverage of"
     prefix or trailing "Kick-off is..." -- callers add those).
@@ -326,7 +338,7 @@ def _narrative_sentence(parts: dict, venue: str, competition: str, *, gerund: bo
     competition of the CURRENT fixture.
     """
 
-    clause = _competition_clause(competition)
+    clause = _competition_clause(competition, round_label)
     our_team = parts["our_team"]
     opponent = _opponent_label(parts)
 
@@ -377,6 +389,25 @@ def get_next_match(fixtures: list[dict], channel_id: str, after_time: datetime) 
     return candidates[0][1]
 
 
+def _derby_title_suffix(parts: dict) -> str:
+    """
+    A short, title-friendly derby marker with its own leading space,
+    e.g. " (Old Firm)", " (Tayside derby)" -- or "" if this fixture
+    isn't a known rivalry. Derived from the same derby label used in
+    the description ("Old Firm rivals" -> "Old Firm") rather than a
+    separately maintained short form, so the two can't drift apart.
+    """
+
+    derby = parts.get("derby")
+
+    if not derby:
+        return ""
+
+    short = derby.removesuffix(" rivals").strip()
+
+    return f" ({short})"
+
+
 def create_next_game_programme(tv, channel_id: str, start: datetime, stop: datetime, fixtures: list[dict]) -> None:
     next_match = get_next_match(fixtures, channel_id, start)
 
@@ -392,13 +423,15 @@ def create_next_game_programme(tv, channel_id: str, start: datetime, stop: datet
         home = next_match["home"]
         away = next_match["away"]
         competition = next_match.get("competition", "Competition TBC")
+        round_label = next_match.get("round")
         venue = _venue_for(next_match)
         kickoff_time = local_kickoff.strftime("%-I:%M %p")
 
-        title = f"Next Game: {home} vs {away} | {day_text}"
-
         parts = _match_parts(channel_id, next_match)
-        sentence = _narrative_sentence(parts, venue, competition, gerund=False)
+
+        title = f"Next Game: {home} vs {away}{_derby_title_suffix(parts)} | {day_text}"
+
+        sentence = _narrative_sentence(parts, venue, competition, gerund=False, round_label=round_label)
 
         description = f"{sentence}. Kick-off is scheduled for {kickoff_time}."
 
@@ -433,15 +466,17 @@ def create_channel_entries(tv) -> None:
 
 def create_live_programme(tv, channel_id: str, match: dict, start: datetime, stop: datetime) -> None:
     competition = match.get("competition", "Competition TBC")
+    round_label = match.get("round")
     venue = _venue_for(match)
 
     kickoff = parse_kickoff(match.get("kickoff"))
     kickoff_time = kickoff.astimezone(UK_TZ).strftime("%-I:%M %p") if kickoff else "TBC"
 
-    title = f"⚽ {match['home']} vs {match['away']} ˡⁱᵛᵉ 🔴"
-
     parts = _match_parts(channel_id, match)
-    sentence = _narrative_sentence(parts, venue, competition, gerund=True)
+
+    title = f"⚽ {match['home']} vs {match['away']}{_derby_title_suffix(parts)} ˡⁱᵛᵉ 🔴"
+
+    sentence = _narrative_sentence(parts, venue, competition, gerund=True, round_label=round_label)
 
     description = f"Live coverage of {sentence}. Kick-off is at {kickoff_time}."
 

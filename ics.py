@@ -306,30 +306,41 @@ def remove_score_from_summary(summary: str | None) -> str:
 
 def parse_match_summary(
     summary: str | None,
-) -> tuple[str | None, str | None, int | None, int | None]:
+) -> tuple[str | None, str | None, int | None, int | None, str | None]:
     """
     Parse a SUMMARY field like "Rangers - Celtic (2-1)" into
-    (home, away, home_score, away_score), with team names normalised
-    via normalisation.normalise_team_name.
+    (home, away, home_score, away_score, round_label), with team
+    names normalised via normalisation.normalise_team_name.
 
     Tolerates a leading round/leg label ("Round 4: ...", "Replay:
     ..."), " - "/" v "/" vs " as the team separator, and trailing
     non-score parenthetical annotations ("(Replay)", "(AET)") --
     variations seen on cup fixtures but not on league or European
-    ones.
+    ones. The round/leg label itself is captured as round_label
+    (e.g. "Round 4", "Replay", "Quarter Final") rather than just
+    discarded, so callers can use it (e.g. in a programme
+    description) -- None if the summary had no such prefix. Real
+    Fixtur.es data inspected so far (a full Scottish Cup season)
+    never actually included one, so this may rarely populate in
+    practice; captured defensively in case other competition feeds
+    do include it.
     """
 
     if not summary:
-        return None, None, None, None
+        return None, None, None, None, None
 
     home_score, away_score = parse_score_from_summary(summary)
     clean_summary = remove_score_from_summary(summary)
+
+    round_match = _ROUND_PREFIX_RE.match(clean_summary)
+    round_label = round_match.group(0).strip().rstrip(":").strip() if round_match else None
+
     clean_summary = _ROUND_PREFIX_RE.sub("", clean_summary).strip()
 
     match = _SEPARATOR_RE.search(clean_summary)
 
     if not match:
-        return None, None, home_score, away_score
+        return None, None, home_score, away_score, None
 
     home = clean_summary[: match.start()]
     away = clean_summary[match.end() :]
@@ -339,4 +350,5 @@ def parse_match_summary(
         normalise_team_name(away),
         home_score,
         away_score,
+        round_label,
     )

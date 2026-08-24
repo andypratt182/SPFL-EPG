@@ -116,6 +116,7 @@ def get_fixtures(team: dict) -> list[dict]:
                 "competition_type": fixture.get("competition_type", "UNKNOWN"),
                 "classification_status": fixture.get("classification_status", "UNKNOWN"),
                 "venue": fixture.get("venue", "Venue TBC"),
+                "round": fixture.get("round"),
             }
         )
 
