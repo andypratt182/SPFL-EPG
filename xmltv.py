@@ -368,9 +368,16 @@ def _narrative_sentence(
         host(ing) {demonym} opposition {opponent} at {venue}
         {competition}." -- e.g. "Rangers hosting Czech opposition FK
         Jablonec 97...".
-      - Away, in Scotland, no derby: "{team} travel(ling) to {venue}
-        to take on {opponent}{competition}." -- naming the country
-        here would be redundant/odd for a routine domestic away trip.
+      - Away, in Scotland, "Next Game" form (gerund=False): "{team}
+        travel to {venue} to take on {opponent}{competition}." --
+        naming the country here would be redundant/odd for a routine
+        domestic away trip; describes something still upcoming, so
+        "travel to" is accurate.
+      - Away, in Scotland, live form (gerund=True): "{team} at
+        {venue}, taking on {opponent}{competition}." -- same
+        reasoning as the European live case below: "travelling to
+        Pittodrie Stadium" reads like still in transit, awkward for
+        something already live.
       - Away, known derby: "...to take on {derby label} {opponent}
         {competition}." -- derby applies to away fixtures too, e.g.
         "Rangers travel to Celtic Park to take on Old Firm rivals
@@ -417,8 +424,14 @@ def _narrative_sentence(
             sentence = f"{our_team} travel to {country} to take on {opponent} at {venue}{clause}"
 
     else:
-        verb = "travelling" if gerund else "travel"
-        sentence = f"{our_team} {verb} to {venue} to take on {opponent}{clause}"
+        if gerund:
+            # "travelling to Pittodrie Stadium" reads like still in
+            # transit -- awkward for something already live. "at
+            # {venue}" reads naturally for coverage happening now,
+            # same reasoning as the European in-country case above.
+            sentence = f"{our_team} at {venue}, taking on {opponent}{clause}"
+        else:
+            sentence = f"{our_team} travel to {venue} to take on {opponent}{clause}"
 
     return sentence + _form_clause(parts)
 
