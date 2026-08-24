@@ -16,7 +16,7 @@ from zoneinfo import ZoneInfo
 
 from fixtures import get_last_result
 from normalisation import normalise_team_name
-from teams import SPFL_TEAMS
+from teams import SPFL_TEAMS, get_derby_label
 from venues import UNKNOWN_COUNTRY, get_demonym, get_venue_country
 
 logger = logging.getLogger(__name__)
@@ -158,8 +158,10 @@ def _match_parts(channel_id: str, match: dict) -> dict:
     whether they're home or away, who the opponent is, the country
     they're travelling to (away fixtures only, and only when it's
     genuinely new information -- see _narrative_sentence), a demonym
-    for the opponent (home fixtures only -- see below), and their
-    most recent result if recent enough to be worth mentioning.
+    for the opponent (home fixtures only -- see below), a derby
+    label if this pairing is a known rivalry (either home or away),
+    and their most recent result if recent enough to be worth
+    mentioning.
     """
 
     our_team = _channel_team_name(channel_id)
@@ -195,8 +197,10 @@ def _match_parts(channel_id: str, match: dict) -> dict:
         "is_home": is_home,
         "country": country,
         "demonym": demonym,
+        "derby": get_derby_label(our_team, opponent),
         "last_result": get_last_result(our_team),
     }
+
 
 
 # Country names that conventionally take a definite article in
@@ -253,6 +257,27 @@ def _last_result_clause(last_result: dict | None) -> str:
     return f", after their {our_score}-{their_score} draw with {opponent}"
 
 
+def _opponent_label(parts: dict) -> str:
+    """
+    The opponent's name, prefixed with whichever is relevant: a
+    derby label ("Old Firm rivals Celtic") or a non-Scottish demonym
+    ("Czech opposition FK Jablonec 97"). Derby takes priority, though
+    in practice the two never overlap -- a derby only fires between
+    two Scottish clubs, a demonym only fires for a non-Scottish
+    opponent.
+    """
+
+    opponent = parts["opponent"]
+
+    if parts["derby"]:
+        return f"{parts['derby']} {opponent}"
+
+    if parts["demonym"]:
+        return f"{parts['demonym']} opposition {opponent}"
+
+    return opponent
+
+
 def _narrative_sentence(parts: dict, venue: str, competition: str, *, gerund: bool) -> str:
     """
     The core "Team host/travel..." sentence (no "Live coverage of"
@@ -260,16 +285,22 @@ def _narrative_sentence(parts: dict, venue: str, competition: str, *, gerund: bo
     Reframed around the channel's own club rather than generic
     home/away, since that's who the channel exists for:
 
-      - Home, domestic opponent: "{team} host(ing) {opponent} at
+      - Home, no derby/demonym: "{team} host(ing) {opponent} at
         {venue}{competition}."
-      - Home, non-Scottish opponent: "{team} host(ing) {demonym}
-        opposition {opponent} at {venue}{competition}." -- e.g.
-        "Rangers hosting Czech opposition FK Jablonec 97...". Only
-        when a demonym is actually known; falls back to the plain
-        form above otherwise rather than guessing one.
-      - Away, in Scotland: "{team} travel(ling) to {venue} to take
-        on {opponent}{competition}." -- naming the country here
-        would be redundant/odd for a routine domestic away trip.
+      - Home, known derby: "{team} host(ing) {derby label} {opponent}
+        at {venue}{competition}." -- e.g. "Rangers hosting Old Firm
+        rivals Celtic...".
+      - Home, non-Scottish opponent (no derby possible): "{team}
+        host(ing) {demonym} opposition {opponent} at {venue}
+        {competition}." -- e.g. "Rangers hosting Czech opposition FK
+        Jablonec 97...".
+      - Away, in Scotland, no derby: "{team} travel(ling) to {venue}
+        to take on {opponent}{competition}." -- naming the country
+        here would be redundant/odd for a routine domestic away trip.
+      - Away, known derby: "...to take on {derby label} {opponent}
+        {competition}." -- derby applies to away fixtures too, e.g.
+        "Rangers travel to Celtic Park to take on Old Firm rivals
+        Celtic...".
       - Away, abroad, "Next Game" form (gerund=False): "{team}
         travel to {country} to take on {opponent} at {venue}
         {competition}." -- describes something still upcoming, so
@@ -278,6 +309,11 @@ def _narrative_sentence(parts: dict, venue: str, competition: str, *, gerund: bo
         taking on {opponent} at {venue}{competition}." -- "travelling
         to Germany" reads oddly for something already live; "in
         Germany" reads naturally for coverage that's happening now.
+
+    Derby and demonym never actually collide: a derby only fires
+    between two Scottish clubs, a demonym only fires for a
+    non-Scottish opponent -- but derby takes priority in
+    _opponent_label() regardless, since it's the more specific fact.
 
     In both away-abroad cases, {country} is run through
     _country_phrase() first, so a handful of country names get a
@@ -292,12 +328,11 @@ def _narrative_sentence(parts: dict, venue: str, competition: str, *, gerund: bo
 
     clause = _competition_clause(competition)
     our_team = parts["our_team"]
-    opponent = parts["opponent"]
+    opponent = _opponent_label(parts)
 
     if parts["is_home"]:
         verb = "hosting" if gerund else "host"
-        opponent_label = f"{parts['demonym']} opposition {opponent}" if parts["demonym"] else opponent
-        sentence = f"{our_team} {verb} {opponent_label} at {venue}{clause}"
+        sentence = f"{our_team} {verb} {opponent} at {venue}{clause}"
 
     elif parts["country"]:
         country = _country_phrase(parts["country"])

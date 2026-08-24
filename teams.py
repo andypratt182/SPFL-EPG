@@ -69,3 +69,27 @@ SPFL_TEAMS: dict[str, Team] = {
         "stadium": "The SMiSA Stadium",
     },
 }
+
+# Known Scottish football derbies, keyed by an unordered pair of team
+# names so a lookup works regardless of which side is home. Only
+# genuinely well-known, widely-recognised rivalries -- not guessed
+# or exhaustive. Ayr United and Hamilton Academical aren't in the
+# current top-flight 12 but can still meet an SPFL_TEAMS club in a
+# cup tie.
+DERBIES: dict[frozenset[str], str] = {
+    frozenset({"Rangers", "Celtic"}): "Old Firm rivals",
+    frozenset({"Hearts", "Hibernian"}): "Edinburgh derby rivals",
+    frozenset({"Dundee", "Dundee United"}): "Dundee derby rivals",
+    frozenset({"Kilmarnock", "Ayr United"}): "Ayrshire derby rivals",
+    frozenset({"Motherwell", "Hamilton Academical"}): "Lanarkshire derby rivals",
+    frozenset({"St Mirren", "Greenock Morton"}): "Renfrewshire derby rivals",
+    frozenset({"St Johnstone", "Dundee"}): "Tayside derby rivals",
+    frozenset({"St Johnstone", "Dundee United"}): "Tayside derby rivals",
+}
+
+
+def get_derby_label(team_a: str, team_b: str) -> str | None:
+    """Return the derby label for this pairing (either order), or
+    None if it isn't a known rivalry."""
+
+    return DERBIES.get(frozenset({team_a, team_b}))
