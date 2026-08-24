@@ -131,6 +131,14 @@ def get_fixtures(team: dict) -> list[dict]:
 RECENT_RESULT_WITHIN_DAYS = 14
 
 
+def _outcome(our_score: int, their_score: int) -> str:
+    if our_score > their_score:
+        return "win"
+    if our_score < their_score:
+        return "loss"
+    return "draw"
+
+
 def get_last_result(team_name: str, *, within_days: int = RECENT_RESULT_WITHIN_DAYS) -> dict | None:
     """
     Return the team's most recent COMPLETED fixture -- kickoff
@@ -185,17 +193,75 @@ def get_last_result(team_name: str, *, within_days: int = RECENT_RESULT_WITHIN_D
     their_score = away_score if is_home else home_score
     opponent = away if is_home else home
 
-    if our_score > their_score:
-        outcome = "win"
-    elif our_score < their_score:
-        outcome = "loss"
-    else:
-        outcome = "draw"
-
     return {
         "opponent": opponent,
         "our_score": our_score,
         "their_score": their_score,
-        "outcome": outcome,
+        "outcome": _outcome(our_score, their_score),
+        "kickoff": kickoff,
+    }
+
+
+def get_head_to_head_result(team_name: str, opponent_name: str) -> dict | None:
+    """
+    Return the most recent COMPLETED fixture this season between
+    team_name and opponent_name specifically (either order), or None
+    if they haven't met yet this season.
+
+    Unlike get_last_result(), this isn't bounded by a recency window
+    -- the point is capturing the last meeting between these two
+    specific teams, which could reasonably be weeks or months ago (a
+    domestic reverse fixture) and still be exactly the context worth
+    surfacing, whereas generic "recent form" going that stale would
+    be misleading. No explicit season-boundary check is needed here
+    either: the underlying fixture data is already scoped to the
+    current season by sources/fixtur_es.py's own filtering, so this
+    can never reach back into a prior season.
+    """
+
+    target = normalise_team_name(team_name)
+    opponent_target = normalise_team_name(opponent_name)
+
+    now = datetime.now(UK_TZ)
+
+    candidates = []
+
+    for fixture in _load_fixtures():
+        home = fixture.get("home", "")
+        away = fixture.get("away", "")
+
+        pair = {normalise_team_name(home), normalise_team_name(away)}
+
+        if pair != {target, opponent_target}:
+            continue
+
+        if fixture.get("home_score") is None or fixture.get("away_score") is None:
+            continue
+
+        kickoff = _parse_kickoff(fixture.get("kickoff"))
+
+        if kickoff is None or kickoff >= now:
+            continue
+
+        candidates.append((kickoff, fixture))
+
+    if not candidates:
+        return None
+
+    candidates.sort(key=lambda item: item[0], reverse=True)
+    kickoff, fixture = candidates[0]
+
+    home = fixture["home"]
+    home_score = fixture["home_score"]
+    away_score = fixture["away_score"]
+
+    is_home = normalise_team_name(home) == target
+    our_score = home_score if is_home else away_score
+    their_score = away_score if is_home else home_score
+
+    return {
+        "our_score": our_score,
+        "their_score": their_score,
+        "outcome": _outcome(our_score, their_score),
         "kickoff": kickoff,
     }

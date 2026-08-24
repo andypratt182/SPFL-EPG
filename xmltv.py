@@ -14,7 +14,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from fixtures import get_last_result
+from fixtures import get_head_to_head_result, get_last_result
 from normalisation import normalise_team_name
 from teams import SPFL_TEAMS, get_derby_label
 from venues import UNKNOWN_COUNTRY, get_demonym, get_venue_country
@@ -170,8 +170,10 @@ def _match_parts(channel_id: str, match: dict) -> dict:
     genuinely new information -- see _narrative_sentence), a demonym
     for the opponent (home fixtures only -- see below), a derby
     label if this pairing is a known rivalry (either home or away),
-    and their most recent result if recent enough to be worth
-    mentioning.
+    their most recent result if recent enough to be worth mentioning,
+    and the result of their last meeting THIS season against this
+    specific opponent if they've already played (takes priority over
+    the generic last result -- see _narrative_sentence).
     """
 
     our_team = _channel_team_name(channel_id)
@@ -209,6 +211,8 @@ def _match_parts(channel_id: str, match: dict) -> dict:
         "demonym": demonym,
         "derby": get_derby_label(our_team, opponent),
         "last_result": get_last_result(our_team),
+        "head_to_head": get_head_to_head_result(our_team, opponent),
+        "is_european": match.get("competition_type") == "EUROPEAN",
     }
 
 
@@ -265,6 +269,64 @@ def _last_result_clause(last_result: dict | None) -> str:
         return f", after their {our_score}-{their_score} defeat to {opponent}"
 
     return f", after their {our_score}-{their_score} draw with {opponent}"
+
+
+def _head_to_head_clause(head_to_head: dict | None, is_european: bool) -> str:
+    """
+    Trailing clause for a repeat meeting against the SAME opponent
+    this season -- more specific and more useful than generic recent
+    form, so this takes priority over _last_result_clause when both
+    are available (see _form_clause). Two phrasings:
+
+      - European fixtures ("{team} in {country}, taking on..." or
+        "{team} travel to {country}..." elsewhere in the sentence --
+        i.e. this pairing already involves a non-Scottish opponent):
+        "...after winning the first leg 1-0". UEFA qualifying rounds
+        are two-legged, so a repeat meeting against the same
+        European opponent within the same season is overwhelmingly
+        likely to be the second leg of the same tie -- there's no
+        structural way to be 100% certain (no explicit "leg" data
+        from the feed), but this is a safe, well-founded assumption.
+      - Domestic fixtures: "...after winning 2-1 the last time these
+        sides met" -- deliberately doesn't restate the opponent's
+        name, since it's the same opponent as the current fixture.
+
+    Empty string if these two teams haven't met yet this season (see
+    fixtures.get_head_to_head_result).
+    """
+
+    if head_to_head is None:
+        return ""
+
+    our_score = head_to_head["our_score"]
+    their_score = head_to_head["their_score"]
+    outcome = head_to_head["outcome"]
+
+    if is_european:
+        if outcome == "win":
+            return f", after winning the first leg {our_score}-{their_score}"
+        if outcome == "loss":
+            return f", after losing the first leg {our_score}-{their_score}"
+        return f", after a {our_score}-{their_score} draw in the first leg"
+
+    if outcome == "win":
+        return f", after winning {our_score}-{their_score} the last time these sides met"
+    if outcome == "loss":
+        return f", after losing {our_score}-{their_score} the last time these sides met"
+    return f", after a {our_score}-{their_score} draw the last time these sides met"
+
+
+def _form_clause(parts: dict) -> str:
+    """
+    The trailing "recent form" clause -- head-to-head against this
+    specific opponent if they've already met this season, otherwise
+    generic recent form, otherwise nothing. Showing both would be
+    redundant/cluttered, so only one ever appears.
+    """
+
+    return _head_to_head_clause(parts["head_to_head"], parts["is_european"]) or _last_result_clause(
+        parts["last_result"]
+    )
 
 
 def _opponent_label(parts: dict) -> str:
@@ -332,10 +394,11 @@ def _narrative_sentence(
     leading "the" where English grammar requires it ("the Czech
     Republic") without affecting the rest ("Germany").
 
-    Whichever of the above applies, a recent-result clause (see
-    _last_result_clause) is always appended last, after the
-    competition -- so it never gets grammatically confused with the
-    competition of the CURRENT fixture.
+    Whichever of the above applies, a form clause (see _form_clause
+    -- head-to-head against this opponent if they've met already
+    this season, otherwise generic recent form) is always appended
+    last, after the competition -- so it never gets grammatically
+    confused with the competition of the CURRENT fixture.
     """
 
     clause = _competition_clause(competition, round_label)
@@ -357,7 +420,7 @@ def _narrative_sentence(
         verb = "travelling" if gerund else "travel"
         sentence = f"{our_team} {verb} to {venue} to take on {opponent}{clause}"
 
-    return sentence + _last_result_clause(parts["last_result"])
+    return sentence + _form_clause(parts)
 
 
 # ============================================================
