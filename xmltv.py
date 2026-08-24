@@ -196,6 +196,30 @@ def _match_parts(channel_id: str, match: dict) -> dict:
     }
 
 
+# Country names that conventionally take a definite article in
+# English -- "the Czech Republic", "the Netherlands", "the United
+# States", "the Faroe Islands", "the Republic of Ireland". Most
+# country names don't ("Germany", "Poland", "Brazil"). Checked
+# against every country actually used in venues.json (75 total) --
+# this is the complete, verified list, not a guessed subset.
+# Deliberately excludes Ukraine: "the Ukraine" was once common but is
+# now considered outdated/incorrect since independence.
+_COUNTRIES_WITH_DEFINITE_ARTICLE = {
+    "Czech Republic", "Faroe Islands", "Netherlands", "Republic of Ireland",
+    "United States",
+}
+
+
+def _country_phrase(country: str) -> str:
+    """Country name with a leading "the " when grammatically
+    required, e.g. "the Czech Republic" -- otherwise unchanged."""
+
+    if country in _COUNTRIES_WITH_DEFINITE_ARTICLE:
+        return f"the {country}"
+
+    return country
+
+
 def _narrative_sentence(parts: dict, venue: str, competition: str, *, gerund: bool) -> str:
     """
     The core "Team host/travel..." sentence (no "Live coverage of"
@@ -213,12 +237,19 @@ def _narrative_sentence(parts: dict, venue: str, competition: str, *, gerund: bo
       - Away, in Scotland: "{team} travel(ling) to {venue} to take
         on {opponent}{competition}." -- naming the country here
         would be redundant/odd for a routine domestic away trip.
-      - Away, abroad: "{team} travel(ling) to {country} to take on
-        {opponent} at {venue}{competition}." -- country is genuinely
-        new information here, so it leads, with the venue mentioned
-        separately since the country alone doesn't place it. No
-        demonym here too -- "travel to Czech Republic to take on
-        Czech opposition..." would repeat the same fact twice.
+      - Away, abroad, "Next Game" form (gerund=False): "{team}
+        travel to {country} to take on {opponent} at {venue}
+        {competition}." -- describes something still upcoming, so
+        "travel to" is accurate.
+      - Away, abroad, live form (gerund=True): "{team} in {country},
+        taking on {opponent} at {venue}{competition}." -- "travelling
+        to Germany" reads oddly for something already live; "in
+        Germany" reads naturally for coverage that's happening now.
+
+    In both away-abroad cases, {country} is run through
+    _country_phrase() first, so a handful of country names get a
+    leading "the" where English grammar requires it ("the Czech
+    Republic") without affecting the rest ("Germany").
     """
 
     clause = _competition_clause(competition)
@@ -230,11 +261,13 @@ def _narrative_sentence(parts: dict, venue: str, competition: str, *, gerund: bo
         opponent_label = f"{parts['demonym']} opposition {opponent}" if parts["demonym"] else opponent
         return f"{our_team} {verb} {opponent_label} at {venue}{clause}"
 
-    verb = "travelling" if gerund else "travel"
-
     if parts["country"]:
-        return f"{our_team} {verb} to {parts['country']} to take on {opponent} at {venue}{clause}"
+        country = _country_phrase(parts["country"])
+        if gerund:
+            return f"{our_team} in {country}, taking on {opponent} at {venue}{clause}"
+        return f"{our_team} travel to {country} to take on {opponent} at {venue}{clause}"
 
+    verb = "travelling" if gerund else "travel"
     return f"{our_team} {verb} to {venue} to take on {opponent}{clause}"
 
 
