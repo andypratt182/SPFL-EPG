@@ -168,6 +168,14 @@ def parse_event(
     description = property_value(lines, "DESCRIPTION")
     location = property_value(lines, "LOCATION")
 
+    # TEMPORARY diagnostic: log the raw SUMMARY for this one specific
+    # fixture unconditionally, before any filtering below, so we can
+    # see exactly what the live pipeline receives regardless of
+    # whether the fixture would otherwise be dropped (season filter,
+    # placeholder detection, etc). To be removed once resolved.
+    if summary and "jablonec" in summary.lower():
+        logger.info("DIAGNOSTIC raw SUMMARY for Jablonec fixture: %r (source=%s)", summary, source_name)
+
     if not summary or not dtstart:
         return None
 
