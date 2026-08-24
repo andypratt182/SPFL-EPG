@@ -171,7 +171,7 @@ def parse_event(
     if not summary or not dtstart:
         return None
 
-    home, away, home_score, away_score = parse_match_summary(summary)
+    home, away, home_score, away_score, round_label = parse_match_summary(summary)
 
     if not home or not away:
         return None
@@ -217,6 +217,7 @@ def parse_event(
         "description": description,
         "home_score": home_score,
         "away_score": away_score,
+        "round": round_label,
     }
 
 
@@ -254,7 +255,7 @@ def _log_if_unparseable_summary(event: list[str], competition: str) -> None:
     """
 
     summary = property_value(event, "SUMMARY")
-    home, away, _, _ = parse_match_summary(summary)
+    home, away, _, _, _ = parse_match_summary(summary)
 
     if not home or not away:
         logger.warning(
@@ -408,6 +409,14 @@ def _apply_competition_match(fixture: dict, matches: list[dict], status: str) ->
         item.get("source_name") for item in matches if item.get("source_name")
     ]
 
+    # The team calendar's own entry usually won't carry a round/leg
+    # label, but the competition-specific feed might -- prefer
+    # whichever one actually has it.
+    if not fixture.get("round"):
+        round_label = next((item.get("round") for item in matches if item.get("round")), None)
+        if round_label:
+            fixture["round"] = round_label
+
     return fixture
 
 
@@ -491,6 +500,9 @@ def merge_fixture_sources(team_fixtures: list[dict], competition_fixtures: list[
         if existing.get("home_score") is None and fixture.get("home_score") is not None:
             existing["home_score"] = fixture["home_score"]
             existing["away_score"] = fixture["away_score"]
+
+        if not existing.get("round") and fixture.get("round"):
+            existing["round"] = fixture["round"]
 
     classified = [
         classify_fixture(fixture, competition_index, competition_date_index)
