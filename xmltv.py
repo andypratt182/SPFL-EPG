@@ -14,7 +14,9 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from normalisation import normalise_team_name
 from teams import SPFL_TEAMS
+from venues import UNKNOWN_COUNTRY, get_venue_country
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +86,17 @@ def ordinal_day(day: int) -> str:
     return f"{day}{suffix}"
 
 
+def day_and_month(dt: datetime) -> str:
+    """
+    e.g. "Thursday 1st Oct". Includes the month -- with the EPG now
+    covering a 60-day window, "Thursday 1st" alone is ambiguous
+    whenever two different months both have a matching weekday/date
+    inside that window, which is common at this length.
+    """
+
+    return f"{dt.strftime('%A')} {ordinal_day(dt.day)} {dt.strftime('%b')}"
+
+
 # ============================================================
 # XMLTV PROGRAMME
 # ============================================================
@@ -102,6 +115,98 @@ def _venue_for(match: dict) -> str:
     "stadium" or "location". Fall back through all three."""
 
     return match.get("venue") or match.get("stadium") or match.get("location") or "Venue TBC"
+
+
+# Statuses that mean "we don't actually know the competition" -- see
+# sources/fixtur_es.py's classify_fixture(). Showing these verbatim
+# in a sentence ("in the Unclassified") reads as broken English, so
+# they get a dedicated clause instead of the generic "in the X" one.
+_UNKNOWN_COMPETITION_VALUES = {"Unclassified", "Unknown", "Competition TBC", None, ""}
+
+
+def _competition_clause(competition: str | None) -> str:
+    """
+    A natural-language clause describing the competition, including
+    its own leading space -- e.g. " in the Scottish Premiership",
+    " in a friendly match", or "" if there's nothing sensible to say
+    (competition unknown). Designed to be embedded directly after
+    "{home} take on {away}" / "{home} taking on {away}".
+    """
+
+    if competition in _UNKNOWN_COMPETITION_VALUES:
+        return ""
+
+    if competition == "Friendly":
+        return " in a friendly match"
+
+    return f" in the {competition}"
+
+
+def _channel_team_name(channel_id: str) -> str:
+    """The channel's own club name, e.g. "Rangers" for "rangerstv"
+    (SPFL_TEAMS stores the channel's display name including the
+    " TV" suffix, which normalise_team_name() strips)."""
+
+    team = SPFL_TEAMS.get(channel_id, {})
+    return normalise_team_name(team.get("name", ""))
+
+
+def _match_parts(channel_id: str, match: dict) -> dict:
+    """
+    Resolve a fixture from the channel's own club's point of view --
+    whether they're home or away, who the opponent is, and (only for
+    an away fixture where it's genuinely new information) the
+    country they're travelling to.
+    """
+
+    our_team = _channel_team_name(channel_id)
+    home = match.get("home", "")
+    away = match.get("away", "")
+
+    is_home = normalise_team_name(home) == our_team
+    opponent = away if is_home else home
+
+    country = None
+
+    if not is_home:
+        venue_country = get_venue_country(home)
+        if venue_country not in (UNKNOWN_COUNTRY, "Scotland"):
+            country = venue_country
+
+    return {"our_team": our_team, "opponent": opponent, "is_home": is_home, "country": country}
+
+
+def _narrative_sentence(parts: dict, venue: str, competition: str, *, gerund: bool) -> str:
+    """
+    The core "Team host/travel..." sentence (no "Live coverage of"
+    prefix or trailing "Kick-off is..." -- callers add those).
+    Reframed around the channel's own club rather than generic
+    home/away, since that's who the channel exists for:
+
+      - Home: "{team} host(ing) {opponent} at {venue}{competition}."
+      - Away, in Scotland: "{team} travel(ling) to {venue} to take
+        on {opponent}{competition}." -- naming the country here
+        would be redundant/odd for a routine domestic away trip.
+      - Away, abroad: "{team} travel(ling) to {country} to take on
+        {opponent} at {venue}{competition}." -- country is genuinely
+        new information here, so it leads, with the venue mentioned
+        separately since the country alone doesn't place it.
+    """
+
+    clause = _competition_clause(competition)
+    our_team = parts["our_team"]
+    opponent = parts["opponent"]
+
+    if parts["is_home"]:
+        verb = "hosting" if gerund else "host"
+        return f"{our_team} {verb} {opponent} at {venue}{clause}"
+
+    verb = "travelling" if gerund else "travel"
+
+    if parts["country"]:
+        return f"{our_team} {verb} to {parts['country']} to take on {opponent} at {venue}{clause}"
+
+    return f"{our_team} {verb} to {venue} to take on {opponent}{clause}"
 
 
 # ============================================================
@@ -143,7 +248,7 @@ def create_next_game_programme(tv, channel_id: str, start: datetime, stop: datet
             return
 
         local_kickoff = kickoff.astimezone(UK_TZ)
-        day_text = f"{local_kickoff.strftime('%A')} {ordinal_day(local_kickoff.day)}"
+        day_text = day_and_month(local_kickoff)
 
         home = next_match["home"]
         away = next_match["away"]
@@ -153,10 +258,10 @@ def create_next_game_programme(tv, channel_id: str, start: datetime, stop: datet
 
         title = f"Next Game: {home} vs {away} | {day_text}"
 
-        description = (
-            f"{home} take on {away} in the {competition} "
-            f"at {venue}. Kick-off is scheduled for {kickoff_time}."
-        )
+        parts = _match_parts(channel_id, next_match)
+        sentence = _narrative_sentence(parts, venue, competition, gerund=False)
+
+        description = f"{sentence}. Kick-off is scheduled for {kickoff_time}."
 
     else:
         title = "Next Game"
@@ -196,10 +301,10 @@ def create_live_programme(tv, channel_id: str, match: dict, start: datetime, sto
 
     title = f"⚽ {match['home']} vs {match['away']} ˡⁱᵛᵉ 🔴"
 
-    description = (
-        f"Live coverage of {match['home']} taking on {match['away']} "
-        f"in the {competition} at {venue}. Kick-off is at {kickoff_time}."
-    )
+    parts = _match_parts(channel_id, match)
+    sentence = _narrative_sentence(parts, venue, competition, gerund=True)
+
+    description = f"Live coverage of {sentence}. Kick-off is at {kickoff_time}."
 
     add_programme(tv, channel_id, xml_time(start), xml_time(stop), title, description)
 
