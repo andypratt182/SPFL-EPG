@@ -122,3 +122,79 @@ def get_fixtures(team: dict) -> list[dict]:
     fixtures.sort(key=lambda fixture: fixture["kickoff"])
 
     return fixtures
+
+
+# How many days back to look for a completed result before treating
+# it as too stale to reference (off-season, international break,
+# long injury-enforced gap, etc).
+RECENT_RESULT_WITHIN_DAYS = 14
+
+
+def get_last_result(team_name: str, *, within_days: int = RECENT_RESULT_WITHIN_DAYS) -> dict | None:
+    """
+    Return the team's most recent COMPLETED fixture -- kickoff
+    already passed, both scores present -- within the last
+    `within_days` days, or None if there isn't one.
+
+    The Fixtur.es feeds contain a full season's fixtures including
+    past results with scores embedded in the SUMMARY field (already
+    parsed into home_score/away_score by sources/fixtur_es.py), but
+    get_fixtures() above only ever returns UPCOMING fixtures -- this
+    is a separate lookup over the same underlying (cached) data for
+    the opposite direction.
+    """
+
+    target = normalise_team_name(team_name)
+
+    now = datetime.now(UK_TZ)
+    cutoff = now - timedelta(days=within_days)
+
+    candidates = []
+
+    for fixture in _load_fixtures():
+        home = fixture.get("home", "")
+        away = fixture.get("away", "")
+
+        if normalise_team_name(home) != target and normalise_team_name(away) != target:
+            continue
+
+        if fixture.get("home_score") is None or fixture.get("away_score") is None:
+            continue
+
+        kickoff = _parse_kickoff(fixture.get("kickoff"))
+
+        if kickoff is None or kickoff >= now or kickoff < cutoff:
+            continue
+
+        candidates.append((kickoff, fixture))
+
+    if not candidates:
+        return None
+
+    candidates.sort(key=lambda item: item[0], reverse=True)
+    kickoff, fixture = candidates[0]
+
+    home = fixture["home"]
+    away = fixture["away"]
+    home_score = fixture["home_score"]
+    away_score = fixture["away_score"]
+
+    is_home = normalise_team_name(home) == target
+    our_score = home_score if is_home else away_score
+    their_score = away_score if is_home else home_score
+    opponent = away if is_home else home
+
+    if our_score > their_score:
+        outcome = "win"
+    elif our_score < their_score:
+        outcome = "loss"
+    else:
+        outcome = "draw"
+
+    return {
+        "opponent": opponent,
+        "our_score": our_score,
+        "their_score": their_score,
+        "outcome": outcome,
+        "kickoff": kickoff,
+    }

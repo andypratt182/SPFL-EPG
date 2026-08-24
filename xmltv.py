@@ -14,6 +14,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from fixtures import get_last_result
 from normalisation import normalise_team_name
 from teams import SPFL_TEAMS
 from venues import UNKNOWN_COUNTRY, get_demonym, get_venue_country
@@ -156,8 +157,9 @@ def _match_parts(channel_id: str, match: dict) -> dict:
     Resolve a fixture from the channel's own club's point of view --
     whether they're home or away, who the opponent is, the country
     they're travelling to (away fixtures only, and only when it's
-    genuinely new information -- see _narrative_sentence), and a
-    demonym for the opponent (home fixtures only -- see below).
+    genuinely new information -- see _narrative_sentence), a demonym
+    for the opponent (home fixtures only -- see below), and their
+    most recent result if recent enough to be worth mentioning.
     """
 
     our_team = _channel_team_name(channel_id)
@@ -193,6 +195,7 @@ def _match_parts(channel_id: str, match: dict) -> dict:
         "is_home": is_home,
         "country": country,
         "demonym": demonym,
+        "last_result": get_last_result(our_team),
     }
 
 
@@ -218,6 +221,36 @@ def _country_phrase(country: str) -> str:
         return f"the {country}"
 
     return country
+
+
+def _last_result_clause(last_result: dict | None) -> str:
+    """
+    Trailing clause referencing the team's most recent result, e.g.
+    ", after their 2-1 win over Hearts" -- including its own leading
+    comma and space. Deliberately placed at the very END of the full
+    sentence by the caller (after the competition clause), not
+    inserted in the middle: "...at Ibrox Stadium, after their 2-1
+    win over Hearts, in the Scottish Premiership" reads as if the
+    competition belongs to the Hearts result, not the fixture being
+    described. Empty string if there's no result recent enough to
+    reference (see fixtures.get_last_result).
+    """
+
+    if last_result is None:
+        return ""
+
+    opponent = last_result["opponent"]
+    our_score = last_result["our_score"]
+    their_score = last_result["their_score"]
+    outcome = last_result["outcome"]
+
+    if outcome == "win":
+        return f", after their {our_score}-{their_score} win over {opponent}"
+
+    if outcome == "loss":
+        return f", after their {our_score}-{their_score} defeat to {opponent}"
+
+    return f", after their {our_score}-{their_score} draw with {opponent}"
 
 
 def _narrative_sentence(parts: dict, venue: str, competition: str, *, gerund: bool) -> str:
@@ -250,6 +283,11 @@ def _narrative_sentence(parts: dict, venue: str, competition: str, *, gerund: bo
     _country_phrase() first, so a handful of country names get a
     leading "the" where English grammar requires it ("the Czech
     Republic") without affecting the rest ("Germany").
+
+    Whichever of the above applies, a recent-result clause (see
+    _last_result_clause) is always appended last, after the
+    competition -- so it never gets grammatically confused with the
+    competition of the CURRENT fixture.
     """
 
     clause = _competition_clause(competition)
@@ -259,16 +297,20 @@ def _narrative_sentence(parts: dict, venue: str, competition: str, *, gerund: bo
     if parts["is_home"]:
         verb = "hosting" if gerund else "host"
         opponent_label = f"{parts['demonym']} opposition {opponent}" if parts["demonym"] else opponent
-        return f"{our_team} {verb} {opponent_label} at {venue}{clause}"
+        sentence = f"{our_team} {verb} {opponent_label} at {venue}{clause}"
 
-    if parts["country"]:
+    elif parts["country"]:
         country = _country_phrase(parts["country"])
         if gerund:
-            return f"{our_team} in {country}, taking on {opponent} at {venue}{clause}"
-        return f"{our_team} travel to {country} to take on {opponent} at {venue}{clause}"
+            sentence = f"{our_team} in {country}, taking on {opponent} at {venue}{clause}"
+        else:
+            sentence = f"{our_team} travel to {country} to take on {opponent} at {venue}{clause}"
 
-    verb = "travelling" if gerund else "travel"
-    return f"{our_team} {verb} to {venue} to take on {opponent}{clause}"
+    else:
+        verb = "travelling" if gerund else "travel"
+        sentence = f"{our_team} {verb} to {venue} to take on {opponent}{clause}"
+
+    return sentence + _last_result_clause(parts["last_result"])
 
 
 # ============================================================
