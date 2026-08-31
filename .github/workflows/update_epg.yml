@@ -11,6 +11,16 @@ permissions:
   pages: write
   id-token: write
 
+# Prevents two runs of this workflow from deploying to Pages at the
+# same time -- a later run waits for an in-progress one to finish
+# rather than racing it. cancel-in-progress is deliberately false: a
+# scheduled run every 6 hours arriving mid-deployment should queue,
+# not abort a deployment partway through and leave Pages in a
+# half-updated state.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
   generate:
 
