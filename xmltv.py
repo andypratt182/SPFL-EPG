@@ -563,6 +563,52 @@ def create_live_programme(tv, channel_id: str, match: dict, start: datetime, sto
 # CREATE XMLTV
 # ============================================================
 
+def _split_at_local_midnight(start: datetime, end: datetime) -> list[tuple[datetime, datetime]]:
+    """
+    Split [start, end) into chunks at local (UK) midnight boundaries.
+
+    A gap between matches used to become a single "Next Game"
+    programme block spanning the whole gap -- which could be up to
+    several weeks for a team with a long run between fixtures. That's
+    unusual for an EPG (most players expect entries that don't span
+    multiple days) and was a plausible factor in a display issue
+    where some channels appeared blank in TiviMate after a match.
+
+    e.g. a gap from Thursday 17:00 to the following Saturday 15:00
+    becomes three chunks: Thu 17:00->midnight, Fri 00:00->midnight,
+    Sat 00:00->15:00 -- each becomes its own "Next Game" programme
+    with the same title/description (there's still only one actual
+    next match), just bounded to at most a day each.
+    """
+
+    chunks = []
+    current = start
+
+    while current < end:
+        local_current = current.astimezone(UK_TZ)
+        next_local_midnight = (local_current + timedelta(days=1)).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+        chunk_end = min(next_local_midnight.astimezone(timezone.utc), end)
+
+        chunks.append((current, chunk_end))
+        current = chunk_end
+
+    return chunks
+
+
+def _create_next_game_programmes(
+    tv, channel_id: str, start: datetime, stop: datetime, fixtures: list[dict]
+) -> None:
+    """Create one "Next Game" programme per day-chunk of [start, stop)
+    rather than a single entry spanning the whole gap -- see
+    _split_at_local_midnight()."""
+
+    for chunk_start, chunk_end in _split_at_local_midnight(start, stop):
+        if chunk_start < chunk_end:
+            create_next_game_programme(tv, channel_id, chunk_start, chunk_end, fixtures)
+
+
 def create_xmltv(fixtures: list[dict], filename: str) -> None:
     tv = ET.Element("tv", {"generator-info-name": "SPFL IPTV EPG"})
 
@@ -612,7 +658,7 @@ def create_xmltv(fixtures: list[dict], filename: str) -> None:
                 next_game_stop = min(kickoff, epg_end)
 
                 if next_game_start < next_game_stop:
-                    create_next_game_programme(
+                    _create_next_game_programmes(
                         tv, channel_id, next_game_start, next_game_stop, normalised_fixtures
                     )
 
@@ -629,7 +675,7 @@ def create_xmltv(fixtures: list[dict], filename: str) -> None:
                 break
 
         if current < epg_end:
-            create_next_game_programme(tv, channel_id, current, epg_end, normalised_fixtures)
+            _create_next_game_programmes(tv, channel_id, current, epg_end, normalised_fixtures)
 
     Path(filename).parent.mkdir(parents=True, exist_ok=True)
     ET.ElementTree(tv).write(filename, encoding="utf-8", xml_declaration=True)
