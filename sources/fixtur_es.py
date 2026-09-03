@@ -149,6 +149,17 @@ def is_in_season(kickoff: datetime | None, season_start: datetime, season_end: d
 # EVENT CONVERSION
 # ============================================================
 
+# Opponents (not among our own 12 tracked clubs) where our own
+# venues.json name should still win over whatever LOCATION the feed
+# supplies -- e.g. Ross County's ground is commonly sponsor-named
+# "Global Energy Stadium" in feeds, but the preferred display name
+# here is "Victoria Park". Kept deliberately small and explicit
+# rather than changing the general policy of trusting the feed for
+# opponents, since that's still the right default for grounds we're
+# less certain about (foreign clubs, neutral cup venues, etc).
+_PREFER_CANONICAL_VENUE_FOR = {"Ross County"}
+
+
 def parse_event(
     lines: list[str],
     source_type: str,
@@ -196,7 +207,7 @@ def parse_event(
 
     context = f"vs {away}, {competition or source_name}, {kickoff.strftime('%Y-%m-%d %H:%M')}"
 
-    if is_spfl_team(home):
+    if is_spfl_team(home) or home in _PREFER_CANONICAL_VENUE_FOR:
         # One of our own 12 tracked clubs -- prefer our canonical
         # venue name for consistency, regardless of what LOCATION
         # (if any) a given competition feed happens to supply for
@@ -204,11 +215,18 @@ def parse_event(
         # could show as "Ibrox Stadium" from the team calendar but
         # "Ibrox" from a competition feed that formats LOCATION
         # differently -- confirmed happening for a real fixture.
+        #
+        # Also applies to any team explicitly listed in
+        # _PREFER_CANONICAL_VENUE_FOR below -- a deliberately small,
+        # explicit exception list for opponents where the feed's
+        # LOCATION is a current sponsor name (e.g. Ross County's
+        # "Global Energy Stadium") but the preferred display name is
+        # the traditional one instead.
         venue = get_venue(home, context=context)
     elif location:
-        # An opponent's venue: prefer the feed's own LOCATION when
-        # present, since it may be more accurate/specific than our
-        # best-effort venues.json entry (foreign grounds, neutral
+        # Any other opponent's venue: prefer the feed's own LOCATION
+        # when present, since it may be more accurate/specific than
+        # our best-effort venues.json entry (foreign grounds, neutral
         # cup venues, etc, where our own data is less certain).
         venue = location.strip()
     else:
