@@ -550,7 +550,7 @@ def create_live_programme(tv, channel_id: str, match: dict, start: datetime, sto
 
     parts = _match_parts(channel_id, match)
 
-    title = f"⚽ {match['home']} vs {match['away']}{_derby_title_suffix(parts)} ˡⁱᵛᵉ 🔴"
+    title = f"🔴 {match['home']} vs {match['away']}{_derby_title_suffix(parts)} ᴸᶦᵛᵉ"
 
     sentence = _narrative_sentence(parts, venue, competition, gerund=True, round_label=round_label)
 
